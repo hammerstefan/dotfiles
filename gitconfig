@@ -1,0 +1,8 @@
+[user]
+	email = stefan.hammer@adtran.com
+[eser]
+	name = Stefan Hammer
+[hub]
+	host = github.adtran.com
+[alias]
+    p4 = !~/bin/git-p4.py
