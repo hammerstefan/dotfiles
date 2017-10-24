@@ -104,6 +104,7 @@ Plugin 'JessicaKMcIntosh/TagmaBufMgr'
 Plugin 'vim-scripts/AnsiEsc.vim'
 Plugin 'itchyny/lightline.vim'
 Plugin 'w0rp/ale'
+Plugin 'airblade/vim-gitgutter'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -166,6 +167,7 @@ command -nargs=1 Ctitle set title titlestring=<args>\ -\ %{expand('%:p:h')}/%t
 " ALE
 let g:ale_sign_warning = '▲'
 let g:ale_sign_error = '✗'
+let g:ale_set_quickfix = 1
 highlight link ALEWarningSign String
 highlight link ALEErrorSign Title
 
