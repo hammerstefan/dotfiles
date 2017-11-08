@@ -36,6 +36,7 @@ set list                    " Show whitespace as special chars - see listchars
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " Unicode characters for various things
 set matchtime=2             " Tenths of second to hilight matching paren
 set modelines=5             " How many lines of head & tail to look for ml's
+set mouse=a
 set scroll=4                " Number of lines to scroll with ^U/^D
 set scrolloff=15            " Keep cursor away from this many chars top/bot
 set sessionoptions-=options " Don't save runtimepath in Vim session (see tpope/vim-pathogen docs)
@@ -66,6 +67,7 @@ set guifont=DejaVu\ Sans\ Mono\ 8
 set undodir=~/.vim/undodir
 set undofile
 
+" CUSTOM KEY MAPS
 
 " Toggle between files
 nmap <C-e> :e#<CR>
@@ -80,6 +82,11 @@ nmap <A-W> :q<CR>
 " Move between open buffers.
 map <C-n> :bnext<CR>
 map <C-p> :bprev<CR>
+
+" Convenience
+map <C-s> :w<CR>
+map <C-c> "+y
+map <C-v> "+p
 
 
 set nocompatible              " be iMproved, required
@@ -167,7 +174,7 @@ command -nargs=1 Ctitle set title titlestring=<args>\ -\ %{expand('%:p:h')}/%t
 " ALE
 let g:ale_sign_warning = '▲'
 let g:ale_sign_error = '✗'
-let g:ale_set_quickfix = 1
+let g:ale_set_quickfix = 0
 highlight link ALEWarningSign String
 highlight link ALEErrorSign Title
 
