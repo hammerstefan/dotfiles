@@ -112,6 +112,8 @@ Plugin 'vim-scripts/AnsiEsc.vim'
 Plugin 'itchyny/lightline.vim'
 Plugin 'w0rp/ale'
 Plugin 'airblade/vim-gitgutter'
+Plugin 'xolox/vim-easytags'
+Plugin 'xolox/vim-misc'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -235,3 +237,6 @@ endfunction
 
 " Load local vim file
 silent! so .vimlocal 
+
+"This unsets the "last search pattern" register by hitting return
+nnoremap <CR> :noh<CR><CR>
