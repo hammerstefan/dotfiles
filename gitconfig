@@ -6,3 +6,5 @@
 	host = github.adtran.com
 [alias]
     p4 = !~/bin/git-p4.py
+[push]
+	default = simple

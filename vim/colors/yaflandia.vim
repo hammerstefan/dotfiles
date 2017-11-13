@@ -37,7 +37,7 @@ hi Macro                        guifg=#ba763a   guibg=NONE      guisp=NONE      
 hi Function                     guifg=#72aaca   guibg=NONE      guisp=NONE      gui=NONE        ctermfg=110     ctermbg=NONE    cterm=NONE
 hi Normal                       guifg=#e0e0e0   guibg=#26292c   guisp=#26292c   gui=NONE        ctermfg=255     ctermbg=236     cterm=NONE
 hi NonText                      guifg=#2d3033   guibg=#2d3033   guisp=#2d3033   gui=NONE        ctermfg=237     ctermbg=237     cterm=NONE
-hi Comment                      guifg=#60666b   guibg=NONE      guisp=NONE      gui=NONE        ctermfg=242     ctermbg=NONE    cterm=NONE
+hi Comment                      guifg=#93999f   guibg=NONE      guisp=NONE      gui=italic      ctermfg=242     ctermbg=NONE    cterm=NONE
 hi Constant                     guifg=#ffd659   guibg=NONE      guisp=NONE      gui=NONE        ctermfg=150     ctermbg=NONE    cterm=NONE
 hi Character                    guifg=#ffd659   guibg=NONE      guisp=NONE      gui=NONE        ctermfg=150     ctermbg=NONE    cterm=NONE
 "hi Error
