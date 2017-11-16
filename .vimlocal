@@ -1,0 +1,52 @@
+Ctitle ipfixd
+let g:ale_linters = {
+\    'cpp': ['cppcheck', 'cpplint', 'gcc', 'clang', 'clangcheck'],
+\}
+
+let include_dirs = [
+            \"-Iresources/build",
+            \"-Iinstall/include",
+            \"-Iinstall/include/ba_common",
+            \"-I/usr/include/c++/5",
+            \"-I/usr/include/x86_64-linux-gnu/c++/5",
+            \"-I/usr/include/glib-2.0",
+            \"-I/usr/lib/x86_64-linux-gnu/glib-2.0/include",
+            \"-Iinstall/resources/tracelib/build/include",
+            \"-Iinstall/resources/rtf2/build/include",
+            \"-Iinstall/resources/bcl2/build/include",
+            \"-Iinstall/resources/boost",
+            \"-Iresources/build/GSL",
+            \]
+let common_flags= [
+            \"-std=c++11",
+            \"-Wall",
+            \"-Wno-deprecated",
+            \]
+
+
+let includes=" " . join(include_dirs)
+let clangcheck_includes=" -extra-arg " . join(include_dirs, ' -extra-arg ')
+
+let flags=" " . join(common_flags, " ")
+let clangcheck_flags=" -extra-arg " . join(common_flags, ' -extra-arg ')
+
+let g:ale_cpp_gcc_options=expand(flags) . expand(includes)
+let g:ale_cpp_clang_options=expand(flags) . expand(includes)
+let g:ale_cpp_clangcheck_options=expand(clangcheck_flags) . expand(clangcheck_includes)
+let g:ale_cpp_cppcheck_options="--enable=all --language=c++ --suppress=missingIncludeSystem " . expand(includes)
+
+
+let g:easytags_file = './tags'
+let g:easytags_syntax_keyword = 'always'
+let g:easytags_async = 1
+let g:easytags_python_enabled = 1
+let g:easytags_auto_highlight = 0
+
+set foldenable
+set foldmethod=syntax
+
+" Add error parsing for unit test failures
+set errorformat-=%f\|%l\|\ %m
+set errorformat+=%f\|%l\|\ Failure
+set errorformat^=%-GEZ\ SubMake\ Builder:\ %m
+set errorformat^=%-G[Timestamp\ ]%m

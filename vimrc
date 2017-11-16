@@ -50,7 +50,7 @@ set smartcase               " Lets you search for ALL CAPS
 set softtabstop=4           " Spaces 'feel' like tabs
 set suffixes+=.pyc          " Ignore these files when tab-completing
 set tabstop=4               " The One True Tab
-set textwidth=100           " 100 is the new 80
+"set textwidth=100           " 100 is the new 80
 set title
 set thesaurus+=~/.vim/mthes10/mthesaur.txt
 set notitle                 " Don't set the title of the Vim window
@@ -114,6 +114,10 @@ Plugin 'w0rp/ale'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'xolox/vim-easytags'
 Plugin 'xolox/vim-misc'
+Plugin 'tpope/vim-dispatch'
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-repeat'
+Plugin 'tpope/vim-fugitive'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -235,8 +239,10 @@ function! s:MaybeUpdateLightline()
 endfunction
 
 
-" Load local vim file
-silent! so .vimlocal 
-
 "This unsets the "last search pattern" register by hitting return
 nnoremap <CR> :noh<CR><CR>
+nnoremap <F7> :Make<CR>
+nnoremap <F8> :make<CR>
+
+" Load local vim file
+silent! so .vimlocal 
