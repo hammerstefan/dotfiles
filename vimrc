@@ -1,7 +1,13 @@
 syntax on
 set expandtab
-set guioptions -=m
-set guioptions -=T
+set guioptions -=m          " Remove menu
+set guioptions -=T          " Remove toolbar
+" Remove scroll bars
+set guioptions -=r
+set guioptions -=R
+set guioptions -=l
+set guioptions -=L
+
 set autoindent              " Carry over indenting from previous line
 set backspace=indent,eol,start
                             " Allow backspace beyond insertion point
@@ -60,7 +66,7 @@ set wildignore=*.class,*.o,*~,*.pyc,.git,node_modules  " Ignore certain files in
 if has("gui_running")
     colorscheme yaflandia
 else
-    colorscheme industry
+    colorscheme monokai
 endif
 
 set guifont=DejaVu\ Sans\ Mono\ 8
@@ -88,6 +94,9 @@ map <C-s> :w<CR>
 map <C-c> "+y
 map <C-v> "+p
 
+" CtrlP plugin
+let g:ctrlp_map = '<c-s-p>'
+nnoremap <C-S-P> :CtrlP<CR>
 
 set nocompatible              " be iMproved, required
 filetype off                  " required
@@ -241,6 +250,8 @@ endfunction
 
 "This unsets the "last search pattern" register by hitting return
 nnoremap <CR> :noh<CR><CR>
+
+" Make hotkeys
 nnoremap <F7> :Make<CR>
 nnoremap <F8> :make<CR>
 

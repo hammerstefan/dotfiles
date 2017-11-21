@@ -14,7 +14,8 @@ let include_dirs = [
             \"-Iinstall/resources/tracelib/build/include",
             \"-Iinstall/resources/rtf2/build/include",
             \"-Iinstall/resources/bcl2/build/include",
-            \"-Iinstall/resources/boost",
+            \"-Iout/x86_64/build/target/boost",
+            \"-Iout/x86_64/sysroot/target/include",
             \"-Iresources/build/GSL",
             \]
 let common_flags= [
@@ -37,10 +38,12 @@ let g:ale_cpp_cppcheck_options="--enable=all --language=c++ --suppress=missingIn
 
 
 let g:easytags_file = './tags'
+let g:easytags_opts = ['--exclude=out/x86_64/sysroot/target/include/boost', '--exclude=out/x86_64/build/target/boost']
 let g:easytags_syntax_keyword = 'always'
 let g:easytags_async = 1
 let g:easytags_python_enabled = 1
 let g:easytags_auto_highlight = 0
+let g:easytags_auto_update = 1
 
 set foldenable
 set foldmethod=syntax
@@ -50,3 +53,6 @@ set errorformat-=%f\|%l\|\ %m
 set errorformat+=%f\|%l\|\ Failure
 set errorformat^=%-GEZ\ SubMake\ Builder:\ %m
 set errorformat^=%-G[Timestamp\ ]%m
+
+set sessionoptions+=globals,localoptions,resize
+
