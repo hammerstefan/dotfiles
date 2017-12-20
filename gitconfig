@@ -6,5 +6,7 @@
 	host = github.adtran.com
 [alias]
     p4 = !~/bin/git-p4.py
+	master = checkout master
+	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
 [push]
 	default = simple
