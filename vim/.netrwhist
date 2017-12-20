@@ -1,5 +1,8 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =3
+let g:netrw_dirhist_cnt =6
 let g:netrw_dirhist_1='/home/shammer/p4/shammer_shammer-linux_cn/package/ethernet_pm_notifier/main/test/unit-test'
 let g:netrw_dirhist_2='/home/shammer/git/p4/cn/ipfix_daemon/main'
 let g:netrw_dirhist_3='/home/shammer'
+let g:netrw_dirhist_4='/home/shammer/Downloads/libfixbuf-1.7.1'
+let g:netrw_dirhist_5='/home/shammer/Downloads/libfixbuf-1.7.1/include'
+let g:netrw_dirhist_6='/home/shammer/Downloads/libfixbuf-1.7.1/include/fixbuf'

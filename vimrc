@@ -127,6 +127,8 @@ Plugin 'tpope/vim-dispatch'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-fugitive'
+Plugin 'FredKSchott/CoVim'
+
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
