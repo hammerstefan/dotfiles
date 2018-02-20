@@ -95,8 +95,8 @@ map <C-c> "+y
 map <C-v> "+p
 
 " CtrlP plugin
-let g:ctrlp_map = '<c-s-p>'
-nnoremap <C-S-P> :CtrlP<CR>
+let g:ctrlp_map = '<leader>p'
+nnoremap <leader>p :CtrlP<CR>
 
 set nocompatible              " be iMproved, required
 filetype off                  " required
@@ -128,6 +128,8 @@ Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-fugitive'
 Plugin 'FredKSchott/CoVim'
+Bundle 'Valloric/YouCompleteMe'
+Plugin 'lyuts/vim-rtags'
 
 
 " All of your Plugins must be added before the following line
@@ -170,6 +172,13 @@ map <F1> :NERDTreeToggle<CR>
 " Use NERDTree if vim is opening directory
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
+if !exists("NERDTreeIgnore")
+    let NERDTreeIgnore = []
+endif
+" Ignore python object files
+let NERDTreeIgnore += ['\.pyc$[[file]]']
+" Ignore c object files
+let NERDTreeIgnore += ['\.o$[[file]]']
 
 " Put plugins and dictionaries in this dir (also on Windows)
 let vimDir = '$HOME/.vim'

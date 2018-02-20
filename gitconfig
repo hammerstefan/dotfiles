@@ -8,5 +8,9 @@
     p4 = !~/bin/git-p4.py
 	master = checkout master
 	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+    newbranch = !sh -c \"git checkout -b $1 upstream/master && git push --set-upstream origin $1\"
+    curb = symbolic-ref --short HEAD
 [push]
 	default = simple
+[merge]
+	tool = vimdiff
