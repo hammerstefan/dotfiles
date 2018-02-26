@@ -130,6 +130,9 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'FredKSchott/CoVim'
 Bundle 'Valloric/YouCompleteMe'
 Plugin 'lyuts/vim-rtags'
+Plugin 'sjl/gundo.vim'
+Plugin 'Shougo/denite.nvim'
+Plugin 'jiangmiao/auto-pairs'
 
 
 " All of your Plugins must be added before the following line
@@ -265,6 +268,14 @@ nnoremap <CR> :noh<CR><CR>
 " Make hotkeys
 nnoremap <F7> :Make<CR>
 nnoremap <F8> :make<CR>
+
+" Perforce hotkeys
+nnoremap <F5> :write!<CR> :!p4 edit %<CR> :edit<CR>
+
+" Alternate bindings for auto-pair
+noremap <leader>ap :call AutoPairsToggle()<CR>
+inoremap <leader>ae :call AutoPairsFastWrap()<CR>
+inoremap <leader>ab :call AutoPairsBackInsert()<CR>
 
 " Load local vim file
 silent! so .vimlocal 
