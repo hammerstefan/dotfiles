@@ -10,6 +10,8 @@
     ~/.vimrc: vimrc
     ~/.gitconfig: gitconfig
     ~/.bash_aliases: bash_aliases
+    ~/.Xmodmap: Xmodmap
+    ~/.xinitrc: xinitrc
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
