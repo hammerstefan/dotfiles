@@ -5,4 +5,4 @@ function! BufCloseOthers()
     execute "edit " . l:curfile
 endfunction
 
-command BCloseOthers :call BufCloseOthers()
+command! BCloseOthers :call BufCloseOthers()

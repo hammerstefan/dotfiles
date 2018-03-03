@@ -1,0 +1,1 @@
+/home/shammer/git/generate-compile-commands/generate_compile_commands.sh
