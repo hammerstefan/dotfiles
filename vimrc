@@ -42,6 +42,7 @@ set list                    " Show whitespace as special chars - see listchars
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:· " Unicode characters for various things
 set matchtime=2             " Tenths of second to hilight matching paren
 set modelines=5             " How many lines of head & tail to look for ml's
+set ttymouse=xterm2
 set mouse=a
 set scroll=4                " Number of lines to scroll with ^U/^D
 set scrolloff=15            " Keep cursor away from this many chars top/bot
@@ -63,13 +64,8 @@ set notitle                 " Don't set the title of the Vim window
 set wildmenu                " Show possible completions on command line
 set wildmode=list:longest,full " List all options and complete
 set wildignore=*.class,*.o,*~,*.pyc,.git,node_modules  " Ignore certain files in tab-completion
-if has("gui_running")
-    colorscheme yaflandia
-else
-    colorscheme monokai
-endif
 
-set guifont=DejaVu\ Sans\ Mono\ 8
+set guifont=Noto\ Sans\ Mono\ 10
 set undodir=~/.vim/undodir
 set undofile
 
@@ -91,8 +87,8 @@ map <C-p> :bprev<CR>
 
 " Convenience
 map <C-s> :w<CR>
-map <C-c> "+y
-map <C-v> "+p
+map <C-A-C> "+y
+map <C-A-V> "+p
 
 " CtrlP plugin
 let g:ctrlp_map = '<leader>p'
@@ -116,7 +112,7 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'majutsushi/tagbar'
 Bundle 'ctrlpvim/ctrlp.vim'
-Plugin 'JessicaKMcIntosh/TagmaBufMgr'
+"Plugin 'JessicaKMcIntosh/TagmaBufMgr'
 Plugin 'vim-scripts/AnsiEsc.vim'
 Plugin 'itchyny/lightline.vim'
 Plugin 'w0rp/ale'
@@ -130,9 +126,18 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'FredKSchott/CoVim'
 Bundle 'Valloric/YouCompleteMe'
 Plugin 'lyuts/vim-rtags'
-Plugin 'sjl/gundo.vim'
+Plugin 'simnalamburt/vim-mundo'
 Plugin 'Shougo/denite.nvim'
 Plugin 'jiangmiao/auto-pairs'
+Plugin 'JBakamovic/yaflandia'
+Plugin 'sickill/vim-monokai'
+Plugin 'junegunn/fzf'
+Plugin 'junegunn/fzf.vim'
+Plugin 'glench/vim-jinja2-syntax'
+Bundle 'moll/vim-bbye'
+Plugin 'itspriddle/vim-shellcheck'
+Plugin 'rakr/vim-one'
+Plugin 'rking/ag.vim'
 
 
 " All of your Plugins must be added before the following line
@@ -149,6 +154,15 @@ filetype plugin indent on    " required
 "
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
+"
+
+if has("gui_running")
+    colorscheme yaflandia
+else
+    colorscheme monokai
+    let g:TagmaBufMgrAutoDisplay = 0
+endif
+let g:TagmaBufMgrLastWindow = 1
 
 " i always, ALWAYS hit ":W" instead of ":w"
 command! Q q
@@ -277,5 +291,44 @@ noremap <leader>ap :call AutoPairsToggle()<CR>
 inoremap <leader>ae :call AutoPairsFastWrap()<CR>
 inoremap <leader>ab :call AutoPairsBackInsert()<CR>
 
+if has("unix")
+    function! FontSizePlus ()
+      let l:gf_size_whole = matchstr(&guifont, '\( \)\@<=\d\+$')
+      let l:gf_size_whole = l:gf_size_whole + 1
+      let l:new_font_size = ' '.l:gf_size_whole
+      let &guifont = substitute(&guifont, ' \d\+$', l:new_font_size, '')
+    endfunction
+
+    function! FontSizeMinus ()
+      let l:gf_size_whole = matchstr(&guifont, '\( \)\@<=\d\+$')
+      let l:gf_size_whole = l:gf_size_whole - 1
+      let l:new_font_size = ' '.l:gf_size_whole
+      let &guifont = substitute(&guifont, ' \d\+$', l:new_font_size, '')
+    endfunction
+else
+    function! FontSizePlus ()
+      let l:gf_size_whole = matchstr(&guifont, '\(:h\)\@<=\d\+$')
+      let l:gf_size_whole = l:gf_size_whole + 1
+      let l:new_font_size = ':h'.l:gf_size_whole
+      let &guifont = substitute(&guifont, ':h\d\+$', l:new_font_size, '')
+    endfunction
+
+    function! FontSizeMinus ()
+      let l:gf_size_whole = matchstr(&guifont, '\(:h\)\@<=\d\+$')
+      let l:gf_size_whole = l:gf_size_whole - 1
+      let l:new_font_size = ':h'.l:gf_size_whole
+      let &guifont = substitute(&guifont, ':h\d\+$', l:new_font_size, '')
+    endfunction
+endif
+
+
+if has("gui_running")
+    nmap <leader>- :call FontSizeMinus()<CR>
+    nmap <leader>= :call FontSizePlus()<CR>
+endif
+
+noremap <leader>gn :GitGutterNextHunk<CR>
+noremap <leader>gp :GitGutterPrevHunk<CR>
+noremap <leader>gu :GitGutterUndoHunk<CR>
 " Load local vim file
 silent! so .vimlocal 
