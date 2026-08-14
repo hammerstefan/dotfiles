@@ -1,0 +1,224 @@
+#!/usr/bin/env bash
+#
+# get_pr - create an ephemeral git worktree + subshell for reviewing a
+# GitHub pull request, and tear it down on exit.
+#
+# See openspec/changes/add-get-pr (proposal.md, design.md,
+# specs/github-pr-worktree/spec.md) for the full rationale.
+#
+# Follow-ups (not implemented here, recorded per design.md / tasks.md 8.x):
+#   - Migrate to `gh pr checkout --worktree` once it ships in a released
+#     `gh`, replacing the cd-into-worktree workaround used below (D1).
+#   - `~/.gitconfig` sets `remote.pushdefault = hammerstefan`, which breaks
+#     pushes in repositories lacking that remote. This script neutralises
+#     that within its own subshell (see build_init_file), but the global
+#     setting should be fixed independently of this change.
+
+set -euo pipefail
+
+usage() {
+	cat <<'EOF'
+Usage: get_pr <pull-request-number-or-url>
+
+Create a disposable git worktree for a GitHub pull request, drop into a
+review subshell inside it, and tear the worktree down when the subshell
+exits.
+
+Arguments:
+  <pull-request-number-or-url>   e.g. "42" or
+                                  "https://github.com/owner/repo/pull/42"
+
+Exit status is non-zero if the pull request cannot be resolved, if
+preflight checks fail, or if teardown is refused because the worktree
+contains work not yet reflected in the pull request head.
+EOF
+}
+
+die() {
+	echo "get_pr: $*" >&2
+	exit 1
+}
+
+# --- 1.2 argument handling ---------------------------------------------
+if [[ $# -eq 0 ]]; then
+	usage >&2
+	die "expected exactly one argument, got none"
+fi
+if [[ $# -gt 1 ]]; then
+	usage >&2
+	die "expected exactly one argument, got $#"
+fi
+
+case "$1" in
+-h | --help)
+	usage
+	exit 0
+	;;
+esac
+
+pr_arg="$1"
+
+# --- 1.3 preflight: required tools --------------------------------------
+for bin in git gh; do
+	command -v "$bin" >/dev/null 2>&1 || die "required command '$bin' not found on PATH"
+done
+
+# --- 1.4 preflight: gh auth ---------------------------------------------
+if ! gh auth status >/dev/null 2>&1; then
+	die "gh is not authenticated; run 'gh auth login' yourself (this tool will not do it for you)"
+fi
+
+# --- 2.1 must be inside a git repository --------------------------------
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+	die "must be run inside a git repository"
+fi
+
+# --- 2.2 must be in the main worktree, not a linked worktree ------------
+# `git worktree list --porcelain` lists the main worktree first.
+main_worktree_root="$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')"
+[[ -n "$main_worktree_root" ]] || die "could not determine the main worktree root"
+
+current_toplevel="$(git rev-parse --show-toplevel)"
+if [[ "$current_toplevel" != "$main_worktree_root" ]]; then
+	die "refusing to nest review environments: run get_pr from the main worktree ($main_worktree_root), not from $current_toplevel"
+fi
+
+# --- 2.3 URL vs number, and repo match guard -----------------------------
+# Recognise "https://github.com/<owner>/<repo>/pull/<number>" (and the
+# git@ / .git suffix variants) as a URL; otherwise treat the argument as
+# an opaque token to hand to `gh pr view` (a bare number, "owner/repo#N",
+# etc. per gh's own argument grammar). We never parse the PR number out
+# of it ourselves.
+url_owner_repo=""
+if [[ "$pr_arg" =~ ^https?://github\.com/([^/]+/[^/]+)/pull/[0-9]+/?$ ]]; then
+	url_owner_repo="${BASH_REMATCH[1]%.git}"
+fi
+
+if [[ -n "$url_owner_repo" ]]; then
+	repo_view_json="$(gh repo view --json nameWithOwner,parent)"
+	current_name_with_owner="$(jq -r '.nameWithOwner' <<<"$repo_view_json")"
+	parent_name_with_owner="$(jq -r '.parent.nameWithOwner // empty' <<<"$repo_view_json")"
+
+	# 2.4: when the current repo is a fork of the pull request's
+	# upstream, gh resolves the base repo to upstream, so a URL naming
+	# the upstream (the fork's parent) is also a match.
+	if [[ "$url_owner_repo" != "$current_name_with_owner" && "$url_owner_repo" != "$parent_name_with_owner" ]]; then
+		die "pull request URL names '$url_owner_repo' but the current repository is '$current_name_with_owner'"
+	fi
+fi
+
+# --- 3.1 / 3.2 resolve the pull request ---------------------------------
+pr_json="$(gh pr view "$pr_arg" --json number,headRefOid,state)"
+pr_number="$(jq -r '.number' <<<"$pr_json")"
+pr_head_oid="$(jq -r '.headRefOid' <<<"$pr_json")"
+pr_state="$(jq -r '.state' <<<"$pr_json")"
+
+[[ -n "$pr_number" && "$pr_number" != "null" ]] || die "could not resolve pull request from '$pr_arg'"
+
+# --- 3.3 warn (not refuse) on closed/merged -----------------------------
+if [[ "$pr_state" == "CLOSED" || "$pr_state" == "MERGED" ]]; then
+	echo "get_pr: warning: pull request #$pr_number is $pr_state" >&2
+fi
+
+branch_name="pr-${pr_number}"
+worktree_path="${main_worktree_root}/${branch_name}"
+
+cleanup_partial_setup() {
+	# 4.5: remove any partially-created worktree/branch on setup failure.
+	git worktree remove --force "$worktree_path" >/dev/null 2>&1 || true
+	git branch -D "$branch_name" >/dev/null 2>&1 || true
+}
+
+setup_failed() {
+	echo "get_pr: setup failed, cleaning up" >&2
+	cleanup_partial_setup
+	exit 1
+}
+
+# --- 4.1 ensure .git/info/exclude has /pr-*/ ----------------------------
+exclude_file="$(git rev-parse --git-common-dir)/info/exclude"
+mkdir -p "$(dirname "$exclude_file")"
+touch "$exclude_file"
+if ! grep -qxF '/pr-*/' "$exclude_file"; then
+	echo '/pr-*/' >>"$exclude_file"
+fi
+
+# --- 4.2 create the worktree, detached, at the main worktree root -------
+if ! git worktree add --detach "$worktree_path" HEAD; then
+	die "failed to create worktree at $worktree_path"
+fi
+
+# --- 4.3 gh pr checkout, run with the worktree as cwd -------------------
+if ! (cd "$worktree_path" && gh pr checkout "$pr_number" -b "$branch_name"); then
+	setup_failed
+fi
+
+# --- 4.4 assert the checked-out HEAD matches headRefOid -----------------
+checked_out_head="$(git -C "$worktree_path" rev-parse HEAD)"
+if [[ "$checked_out_head" != "$pr_head_oid" ]]; then
+	echo "get_pr: worktree HEAD ($checked_out_head) does not match pull request head ($pr_head_oid)" >&2
+	setup_failed
+fi
+
+# --- 5.1 determine push destination -------------------------------------
+push_remote="$(git -C "$worktree_path" config --get "branch.${branch_name}.remote" || true)"
+if [[ -z "$push_remote" ]]; then
+	echo "get_pr: warning: could not determine branch.${branch_name}.remote; push may not work in the subshell" >&2
+fi
+
+# --- 5.2 build the subshell init-file -----------------------------------
+build_init_file() {
+	local worktree="$1"
+	local remote="$2"
+	cat <<EOF
+. "\$HOME/.bashrc"
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0=push.default
+export GIT_CONFIG_VALUE_0=upstream
+export GIT_CONFIG_KEY_1=remote.pushdefault
+export GIT_CONFIG_VALUE_1="${remote}"
+cd "${worktree}"
+EOF
+}
+
+# --- 5.3 launch the subshell and block until it exits -------------------
+# -i forces bash to treat this as an interactive shell so --init-file is
+# honoured even when stdin is not a tty (e.g. piped input).
+echo "get_pr: entering review subshell in $worktree_path (exit to tear down)"
+bash --init-file <(build_init_file "$worktree_path" "$push_remote") -i
+subshell_status=$?
+echo "get_pr: review subshell exited (status $subshell_status)"
+
+# --- 6.1 re-query the pull request head at teardown ---------------------
+teardown_head_oid="$pr_head_oid"
+if ! current_head_json="$(gh pr view "$pr_number" --json headRefOid 2>/dev/null)"; then
+	echo "get_pr: warning: could not re-query pull request head; comparing against the possibly stale setup-time value ($pr_head_oid)" >&2
+else
+	requeried="$(jq -r '.headRefOid' <<<"$current_head_json")"
+	if [[ -n "$requeried" && "$requeried" != "null" ]]; then
+		teardown_head_oid="$requeried"
+	else
+		echo "get_pr: warning: re-query returned no head; comparing against the possibly stale setup-time value ($pr_head_oid)" >&2
+	fi
+fi
+
+# --- 6.2 compare worktree HEAD against the pull request head ------------
+worktree_head_oid="$(git -C "$worktree_path" rev-parse HEAD)"
+if [[ "$worktree_head_oid" != "$teardown_head_oid" ]]; then
+	echo "get_pr: refusing teardown: worktree HEAD ($worktree_head_oid) differs from pull request head ($teardown_head_oid)" >&2
+	echo "get_pr: commits not reflected in the pull request:" >&2
+	git -C "$worktree_path" log "${teardown_head_oid}..${worktree_head_oid}" --oneline >&2 || true
+	echo "get_pr: leaving worktree and branch '$branch_name' intact" >&2
+	exit 1
+fi
+
+# --- 6.3 remove the worktree (no --force; surface git's own refusal) ----
+if ! git worktree remove "$worktree_path"; then
+	echo "get_pr: teardown refused: git declined to remove the worktree (see message above)" >&2
+	exit 1
+fi
+
+# --- 6.4 delete the local branch on successful worktree removal ---------
+git branch -D "$branch_name"
+
+exit "$subshell_status"
