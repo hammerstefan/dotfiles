@@ -1,0 +1,4600 @@
+[
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakuqkemxudwl63krk6iq4ecrycnjis6rxzygvb2wt5gdki3b3vk4q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.10-stonking-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T11:47:11.261000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamljd3zkbg4csupctgocvdtdlwkzwu6pwe4wuzbl7co4lfxoi7pkq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.10-stonking-v20260813-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T12:25:09.401000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahlpaqi66y7dwkgoavlzniqkngjb3lohkjnuw5cmpvxdyzn7j2yra",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.10-stonking-v20260808-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-08T12:06:33.310000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4w5aq5uaofxwmz66hc77n5kozqjr5p42myopjic2m363hk7lwrpq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.10-stonking-v20260807-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T11:58:07.958000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3pvmtdllcsev2g2zglosyy7dcoa5ad3nfo7kwahxthifqcvftv4q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.10-stonking-v20260803-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-03T12:05:43.940000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2dhojnkkgl65glzdjrryy4riuwhqivx7ljslrswxn2menxp6bgaa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.10-stonking-v20260626",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-26T16:33:33.637000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaasrwkbixo7gmgdoj4c2jsvojgtwvk4fjjxk2bwabflszatn3kzvpq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.10-stonking-v20260624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-24T16:30:42.781000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatpdjg6lwkfddrdbmqbtvcu7ud7lauih63qw45u7oepybx4icifaq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.10-stonking-v20260623",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-23T15:46:31.308000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaazqia3i74an7lskrppjycvm4d7phk7r4xuhjthh6nxs5gynvaakqq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.10-stonking-v20260622",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-22T15:48:39.172000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxmxjfm4udhwthexyx7jonyh5ehw6tizifgacdum7ea3rls5kqopa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.10-stonking-v20260621",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-21T15:33:18.513000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaased2xkwnz7d4x6pryn6ozxkbqt67o3exb6alkbay7ngpyvui7p4q",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.10-stonking-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T11:47:06.163000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxwfugvd4vsixhwd4s4zlsuopy55bxlywsaa6o4qdc3tskpipwayq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.10-stonking-v20260813-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T12:25:01.375000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaa4hx34ehajjp2nrdgz6qdqx3rbt45dtug3hjvmgc5rqwtfdqstda",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.10-stonking-v20260808-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-08T12:06:33.716000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaawylnpkgzwgclg4ihq2rldazhfdcf4h42ahxczlecyy5g2jdy2mcq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.10-stonking-v20260807-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T11:58:02.171000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6zsebidiblfrwromzcehcp6dohblfgeg2plmeyi3rq3jbbrjjycq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.10-stonking-v20260803-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-03T12:05:52.132000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6tmhx2632d63rf57ua56fg43pktvpvgtnhrjjkkpvtt762x3cfoa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.10-stonking-v20260626",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-26T16:33:47.388000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaasdgyq5gz3373xbuq5q7ia2mdg3mp2wb67n3jxgckwey7aqcr7mrq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.10-stonking-v20260624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-24T16:30:50.388000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaacpbjztuolihgxfgu2yb3npsxzi7rbqlxfp5y62l7bbl7d5h4dwaq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.10-stonking-v20260623",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-23T15:46:35.180000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaazqgangejvn2ih3qhhb4nfgn36wolqprsiaixxw7zfm5cqplltfaa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.10-stonking-v20260622",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-22T15:48:38.530000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaelzwt5x2yyalaj7p7cmxh3q2mfywrqyzofuqqd5z2hw7vcsmqpja",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.10-stonking-v20260621",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-21T15:33:09.149000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajl5hjgegt6ubtj7tci3h5estim5woobhj7frbpxjge5xgltor3pa",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260722-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:17:47.440000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaauzj5mvqcyzkgbp6tbmlyxlpag6sbs2jbw6nsfcx3wyotkqbu2y6q",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260722-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:17:26.445000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaai7drpyvi33vecfrtpk7mtehprasnwbu6g6ahtwblksbkh3ebl3ya",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260722-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:17:57.211000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaa6ibmtfkadozuprh5ho5ifyqnsrgips5fkdmrhj3cijmvibrvmsa",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260722-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:17:33.353000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavetyue3avnrp5rceuuf5ywynqov3uymfbqazwkbazxd2qfrufsiq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.04-resolute-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T03:38:03.712000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7aqzbqquyxoot6umy5t45l3ux6s523osvdltusdnwrwke6m6staa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.04-resolute-v20260812-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T03:31:04.839000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajksmtfn5huyk3gsn4ejnapsyuvxqpbrag76mv5tms2lxyn7kfyva",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.04-resolute-v20260811-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-11T03:16:43.704000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaayfgp45pucfv6lalned7svc7rukp5pulq3dhni5f4gv5sdhzmwccq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.04-resolute-v20260806-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-06T03:28:16.272000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaqxarhzwgjctrzra2vk4ndmjtsck6txnzssn4iulaxdxs5goeyjiq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-26.04-resolute-v20260805-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-05T03:23:28.712000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4nnqdispqtdcftz4ucq4gr7u3dtpropu57nenumqzf6b5vfiilca",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260814-OKE-1.36.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T13:43:07.046000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaawrylqc3abtzlse64vkgign5nenfowzlh254k3ormxvhrq7jdc6yq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260813-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:36:09.690000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaotsdmzxkoqqkp3qqegf262mx3y63yi6y53xyoyei3z2meogu7wea",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260812-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T01:52:11.472000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa52creynzqlpc5etxtf7t3dc6dyzv3syixut27svmh4htixc5si5a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260812-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T01:52:08.090000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaqerb5pca4pbxin2zpgc4662tfcz7lbqlagxfpnr5zeximsujgkja",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260812-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T01:52:10.064000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaan3ot3s63kd4xuqyzkbft52blvjoeqjmvxsyu754y662wqrfnyqlq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260811-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-11T01:46:34.324000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa43h7bosfa5ar54o2jq7xyno57w5k2s7547n6gz5etwuetwu3blgq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260811-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-11T01:46:55.951000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaak3mslopksh6p6zyajglvtaet353jz6rgr3pjp3gjpcidoh4rp3ba",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260811-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-11T01:46:36.394000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaay5lz4swxzzxqevdjui42djjxupxpiuxs7m4wtzo7hsacrhtyxmda",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-26.04-resolute-v20260810-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T15:17:16.895000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa75gqz57d7idkxv7sx5cn4axd5ddy62mk5ccdhjp3ageagm2fx3iq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.04-resolute-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T03:38:09.163000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaawv36cgjck74rjnt6vzbkgx2e4gr23jqlbldyfsieroeytnu5ve4q",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.04-resolute-v20260812-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T03:31:19.529000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaqute2j47nwipqoideumvpyiz2g3iszg5uhuia34z3qnd5iziibaq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.04-resolute-v20260811-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-11T03:16:42.003000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaawy7fq47eo4wx5a2vqtiylsyil7ttnoa4hsllyjkzxpceiyabjgaq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.04-resolute-v20260806-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-06T03:28:20.213000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaapeuho3ctwtuglxh7b2el5ccsdemez7xuhvqeekh6aofkrnu4eg7a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-26.04-resolute-v20260805-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-05T03:23:24.583000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadj4mxhnr4mjw3okzjehd4njhr7q2mjhhzdn7zj332nr3kks3lcpa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260814-OKE-1.36.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T13:43:04.313000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaasdfs22cuyvuokh5ulkgxly27fbduagq2gpptoyiipumgmz4t3k6a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260813-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:36:19.640000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2x5zimna7c2mn3362j3ifi4kguobhp2qo6pbelqtozaofgkjksza",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260812-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T01:52:21.342000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatx2hxiod23qzjoworrwr3qujor73etbb3oq2a4eg56aym767zsjq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260812-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T01:52:06.837000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahasnwicx36ojzrmhuouprohppcd7j64gnmnjbk5q7nifpfyi3kbq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260812-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T01:52:15.804000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatms6j7jtu2emumsgdlccpmhjyivm7ogc6fjo6afq7vknrcz7nmeq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260811-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-11T01:46:35.937000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaae7nftwbdei5ymckalwzwpow2y3rw3g3bgiim2rf6dd4mipb4y4jq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260811-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-11T01:46:43.770000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabpqhrqpi7vevufdqzk436rdny3vab727uegfvfmo7ek3mtqu5tcq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260811-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-11T01:46:35.522000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6vdnyumvx3k55oupijilyoedrxhprycn3lbk3nh2lqkzllcigm3a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-26.04-resolute-v20260810-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T15:17:14.399000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4k3yh44iszd4je5dtja4yvpav7ihnsueskzlvdjeyskzrfql7pwa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-25.10-questing-v20260708-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-08T06:44:47.369000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaz4w3ji36aj5oskvhml2y4huo6sdftoj5rnmh3xywhr23sn4zcxva",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-25.10-questing-v20260705-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-05T06:20:38.776000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2bvtgd6v7aqfivbiltqebb4cr4vi3ddbsesoz5ct7dchjgmqvnga",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-25.10-questing-v20260702",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-02T05:59:29.739000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaai4ofv4lumutd6unkuehjdk3rgibmq7aac4fh2332zxs7ik7cc7a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-25.10-questing-v20260701",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-01T06:05:01.972000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3c6draqwzepyzdchh3k5barbe5jgpk37dqv26exr3t7ft5cesc3q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-25.10-questing-v20260630",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-30T06:32:53.323000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaafk6ah6qwziju3bu3n5ik525t54mw4qxmoze2m4lv2wacohm4x7q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-25.10-questing-v20260708-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-08T04:47:19.757000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaay5kkczx2ypr4vxg52qkeu5mzq6532ne467gwp6yuxgirkjj5mp3a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-25.10-questing-v20260705-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-05T04:45:24.835000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5qx6xppyvomhg5gvsrk4q2mtcesw5bfh5r3y4gcj6wqvrmclw7wa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-25.10-questing-v20260702",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-02T04:39:29.242000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahsy7p6k4bsgga6ly32t6dg3gikislb2u2q2nikqmx5igc7iudi6q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-25.10-questing-v20260701",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-01T04:41:39.881000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakps4tbjre7jgwwyjd6gp6hjyshdrn4i6yqwzrs5nyhkrcelz2dsq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-25.10-questing-v20260630",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-30T04:59:46.790000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaal4q7iylhu5ar4zv7qvbk476nhikyv7q75c6lznhipuxr3ainkiaa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-25.10-questing-v20260708-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-08T06:44:55.390000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaambajk7mlncbv3bdexk6phntviyagcwnvmek5t2mpx6qjawo6374a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-25.10-questing-v20260705-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-05T06:20:43.212000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamtmlcdpm7idbuwtaudtccs2yfzrcrlrqs2xu6il5574sb7fhsnia",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-25.10-questing-v20260702",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-02T05:59:26.972000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaam2qs5fqglfd3svm6ri76prhldxeyrralh7n6iosq4f5nckd2i2vq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-25.10-questing-v20260701",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-01T06:05:07.495000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4p7bce3f5yk74cjexkw5ceropylzolwveysoataka5jwqjwvh2bq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-25.10-questing-v20260630",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-30T06:33:35.862000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaapikpeqymxfne57j7p3piaz67l4c4pxg3ux4ayr4r45njl5gezt4a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-25.10-questing-v20260708-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-08T04:47:10.157000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5ofoi7u2mgyj3j2kurop77jzjwhpbdrn7nq2dthbxwc7de7pca7q",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-25.10-questing-v20260705-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-05T04:45:25.290000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaasfiot2c72s4bftc7ub526ib74u7rk4iod6i72ub5lodbsmhfz5ra",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-25.10-questing-v20260702",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-02T04:39:40.854000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaasnnrbv6nwsqo7qaursmttmrhwj2wqdzvwrsvp3ab72crdgcpcrua",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-25.10-questing-v20260701",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-01T04:41:44.016000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaazquitq4hoqhpqpoefhitbqzoobtrsxia3pq5ze7bfxh27cxxf5da",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-25.10-questing-v20260630",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-06-30T04:59:46.420000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaotduw2xycegpxmhkopcbyxl72grs77tb4lftfrqbowdlz5iyox5q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-25.04-plucky-v20260114",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-14T14:05:21.245000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaiu7rancthq2ehybzzttvazjmbiq4pcri34lvqoezwyvmwoeqgmxq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-25.04-plucky-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T14:12:43.961000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7vn2g2umdlbtvbl6cs4ffvus7ppu24hq36we445wxjy5mgnvgkoa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-25.04-plucky-v20260109",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-09T14:09:26.740000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6fgear5s37thqv7vuyh2uf7bszxci7zvwaiqnfbbglmauqkds5vq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-25.04-plucky-v20260108",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-08T14:12:00.264000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaapg45lfaddiwo3by4ttkyyorknloj35ahkmpftgcfdifixfmluhpq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-25.04-plucky-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T16:44:37.339000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5xmwplknaubeore7chtzvfvexch2oechtruffez4cfya7plysn7a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-25.04-plucky-v20260108",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-08T16:41:21.286000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahcoyxtnd7hfhtjfugd57eghynriyu3zrnfavbi5oaxbm5assj2vq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-25.04-plucky-v20260107",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-07T16:44:00.104000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaalsxdmyzxtnnn6fgbrlh2pewyscgo3ewuo6hbtmgkc2y5bl3xqptq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-25.04-plucky-v20260114",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-14T14:07:30.770000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavdq4oirvhkf2izsgsssnxj5cbnbc6xho466u7mrrnrcoyzpzmsmq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-25.04-plucky-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T14:16:07.347000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaapyfqkhhnyas6hw4z7idbirnytvfyyqw33yphryetetsob2rooguq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-25.04-plucky-v20260109",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-09T14:10:52.978000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaablrh32vaaosc7qexn63unnr6rlhmezht2v2ao3dguzhoxrqzbzaa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-25.04-plucky-v20260108",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-08T14:13:14.874000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaainy4f5eo74vvf45s67fda3td7wvau35tqdtg2g4owsjdiaijyfvq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-25.04-plucky-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T16:48:00.420000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaayqjrkwglilza3mmglbxga6x5ncwkxhmzv6m73eawqyenmmoltz3a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-25.04-plucky-v20260108",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-08T16:45:04.646000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajetwra46yvlhx5yffta3vfu2yyf3znnlsrqsxuq457j3nwaxj5gq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-25.04-plucky-v20260107",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-07T16:46:43.403000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaai675g6e3of4db6aa2vfnxlu3w5x5qcxnqnctlsvixxbeey7ef4sq",
+    "display-name": "daily-ubuntu-native-arm64-server-25.04-plucky-v20260114",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-14T13:46:50.782000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa64gciyz2xzdeopmaissqtwzuwf6uuby77vqhdfwag6x5bvwgyhva",
+    "display-name": "daily-ubuntu-native-arm64-server-25.04-plucky-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T13:51:40.554000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaam3d4co2xpqcap5x7sky5373oc5kuoewta2sd6me5iqdz7t4gp2fa",
+    "display-name": "daily-ubuntu-native-arm64-server-25.04-plucky-v20260109",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-09T13:50:48.402000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5u7ccacrd7wva7wscqfz6jnu7t62typifcvuxbp2kxkkr2q3esla",
+    "display-name": "daily-ubuntu-native-arm64-server-25.04-plucky-v20260108",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-08T13:51:33.910000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaurbh3d3wcuee55ve6xtq5r5hfbvcb53nxczpnp22fuo4livbynka",
+    "display-name": "daily-ubuntu-native-arm64-minimal-25.04-plucky-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T16:27:29.379000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaax5cecoh7ojztpwvgebb5dztywejqwdnygukgkq2sxpe6qgpjhniq",
+    "display-name": "daily-ubuntu-native-arm64-minimal-25.04-plucky-v20260108",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-08T16:22:19.963000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahynq64euvylhihk6ls76dmtczbooex5enqwnilbhk6sujh7bs5xa",
+    "display-name": "daily-ubuntu-native-arm64-minimal-25.04-plucky-v20260107",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-07T16:25:28.575000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5twknhaccrmzjgbkoa7mwtq3yxbpp5ktclxmpfrluxkctt5m2cea",
+    "display-name": "daily-ubuntu-native-amd64-server-25.04-plucky-v20260114",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-14T13:46:51.547000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatdwigexito3wefkimq5ijm4ohysnvt3in62kvbha5ydhrerpzaeq",
+    "display-name": "daily-ubuntu-native-amd64-server-25.04-plucky-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T13:51:41.433000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaank4oqeqtjjyinrbqpa32brvpqmfrx5gxiihiomegbj34cknl57bq",
+    "display-name": "daily-ubuntu-native-amd64-server-25.04-plucky-v20260109",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-09T13:50:40.776000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaboip7icowjahcci2gph2shtrnvm5koholz7rzvcdo5uu3h34bvjq",
+    "display-name": "daily-ubuntu-native-amd64-server-25.04-plucky-v20260108",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-08T13:51:37.652000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaopj6a3qici25jev2r4a56z3554iu3xcq6647ranb4akoee52gwha",
+    "display-name": "daily-ubuntu-native-amd64-minimal-25.04-plucky-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T16:27:31.813000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaz35mfrg4vo6hwq4gtr3ng4jkgk6q66sjs6n7p7h5hv7b2v2ag3tq",
+    "display-name": "daily-ubuntu-native-amd64-minimal-25.04-plucky-v20260108",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-08T16:22:22.199000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaepaaad65uyvzcqlniv3sws4hrzjn3ngj4a5dbrkvk4ur77tye2ba",
+    "display-name": "daily-ubuntu-native-amd64-minimal-25.04-plucky-v20260107",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-07T16:25:35.179000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaari3oui2oiofs53yf3y7p6fwlvafgc4mawuimsha7e466g72xsebq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-24.10-oracular-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-25T22:55:41.105000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaya3efxpac37yq44dktnapmx2o7pwjjebpifreyutt4doo7wquylq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-24.10-oracular-v20250620",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-20T22:58:24.861000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2iwd47wgesksyykaw6atp5mj2p2reqy5nad4tvp234h56urvcdfq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-24.10-oracular-v20250619",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-19T23:03:37.638000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaanhmpizpcdvwiu77lznulnz5k5m5jze7j5no2mrybpzlmnfcm4dia",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-24.10-oracular-v20250618",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-18T22:51:17.876000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3wtrsntx6cio66ghsarfsggo6ndidlpikk3mgcc66h2tzinr2xaq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-24.10-oracular-v20250617",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-17T22:54:37.404000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaarkxggusmbm3tjilz5qy6d7na7mlcpf2rrtuju57tp3e5kn7lyh6q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.10-oracular-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-25T21:53:55.114000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7mtczauha75jk5kroeqwhz4fqaz7hxldh5mfmktulz3kgjkcrhuq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.10-oracular-v20250620",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-20T21:57:41.458000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5lkhyupbombootmhfmdzslf7odr7ovu7z3aotxyqbsfq7nexo7na",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.10-oracular-v20250619",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-19T21:59:02.809000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaae2ctrvpbtcru5efs5jvrwh2rradzelxxwsfwyz33yzhrxarbjhiq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.10-oracular-v20250617",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-17T21:57:10.524000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaawimnlcxg4lnlsy2clh7yqkj7cowj4ewol36knbffi32n7kh2i3da",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.10-oracular-v20250610",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-10T22:28:38.498000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7gim4744s6nlmjelfpwpzm7jbso4dj6i3oj4bawkqthtkjoqke3q",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-24.10-oracular-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-25T22:56:31.891000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavaitj5ykmyf3xv6e7wjlckqzgrpljzywyxomukjun3zhfqsdrybq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-24.10-oracular-v20250620",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-20T22:59:15.301000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaagd6uix4be7j27u2manlxoctaaihsnqxyhg7iowfsngvfok2upvvq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-24.10-oracular-v20250619",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-19T23:04:28.260000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaardv7ewlkthpisem3w7hezvwmqpprzkzzybrhklfffw4lsfmhmbhq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-24.10-oracular-v20250618",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-18T22:52:12.125000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2mrcmeiegyua4fsrxflewdqycm5xuh5lzfr7aicuduyxrs56lnkq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-24.10-oracular-v20250617",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-17T22:55:55.976000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaplsmxgkdmwosg7olozxg2aoldruiz4b4tr5mllwh6wbkqqndvfwa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.10-oracular-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-25T21:54:41.180000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamfgdqyv3xjdcr5hwniyjqmjqrbt7niykrzq5row5t5fhlh474ifa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.10-oracular-v20250620",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-20T21:58:32.650000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaas6xv4odrt73jrvk6nm72lna6j6iz6jtdod46q6zkqclcoplvsnmq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.10-oracular-v20250619",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-19T21:59:53.650000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaad4swg2xlqeihzp6lbp552hdb26psjkyktgxmoshiay2v67a2dm5q",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.10-oracular-v20250617",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-17T21:58:35.191000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7mn2ssfrtrwjf2oe4jfte3m7kq23gikutmg3niayyxldhnp4u4mq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.10-oracular-v20250610",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-10T22:31:29.043000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabqmelz5xhc6hqpxnef3n3zokvmpl5lr2q5rluoip7oo3rb4m2fja",
+    "display-name": "daily-ubuntu-native-arm64-server-24.10-oracular-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-25T22:42:58.502000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaanjh76afguh7qodpnpfddmi77s3v7ffjs2v43agbobob5tog4sala",
+    "display-name": "daily-ubuntu-native-arm64-server-24.10-oracular-v20250620",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-20T22:45:12.090000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaair24eodk4irt3uysq5puljymwgltu5kglnl5uvhvhpfpqsrsrcnq",
+    "display-name": "daily-ubuntu-native-arm64-server-24.10-oracular-v20250619",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-19T22:49:52.391000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaac7qui5ny7s37pr5axfoudhccluraekcqadgnkgzsbe2for3gfica",
+    "display-name": "daily-ubuntu-native-arm64-server-24.10-oracular-v20250618",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-18T22:37:35.272000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaax7so7o2f2hppzrdlzjoyuywsiqirw7ttf2k2g2r72o6yljm3ikwa",
+    "display-name": "daily-ubuntu-native-arm64-server-24.10-oracular-v20250617",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-17T22:40:25.411000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaapwhwwnmv7wazqtuj5famifse6welpgqpelp6qsgfsj3iu2i23mpq",
+    "display-name": "daily-ubuntu-native-arm64-minimal-24.10-oracular-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-25T21:41:07.847000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaq7rxwgovvw5efq7t4b36243nu45b35seczdjz5picmwiexpn5bga",
+    "display-name": "daily-ubuntu-native-arm64-minimal-24.10-oracular-v20250620",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-20T21:43:25.406000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamjjetbkzeifkoultfflgkgxhkqxhrq6citsnymi2ozknotgsptlq",
+    "display-name": "daily-ubuntu-native-arm64-minimal-24.10-oracular-v20250619",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-19T21:46:19.133000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaviagvkylijnf46lxabtf3lh4nprnjpqcuwcsvh4a5e264dzcf2qq",
+    "display-name": "daily-ubuntu-native-arm64-minimal-24.10-oracular-v20250617",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-17T21:44:26.505000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaayzbzh42jcqx3s5ql4byriasak4sqb2uoydwrbyehadgchdtkjgqa",
+    "display-name": "daily-ubuntu-native-arm64-minimal-24.10-oracular-v20250610",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-10T22:15:57.038000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaagdfi5i2iwom5ttytqhjx4vsvoiay7uyab6r7erg3bp75r2x2d2ta",
+    "display-name": "daily-ubuntu-native-amd64-server-24.10-oracular-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-25T22:43:07.144000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaak3g7trtkkknitl6tdn55kyokwya344b3sikufh35krcerdkqugya",
+    "display-name": "daily-ubuntu-native-amd64-server-24.10-oracular-v20250620",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-20T22:45:15.293000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaagiati7sv52ygiozlfvvxnpxzza6cavqfy5qrxpw6wo7j6ckkozia",
+    "display-name": "daily-ubuntu-native-amd64-server-24.10-oracular-v20250619",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-19T22:49:58.093000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4riom7xy5jvosedk4dsvxlrs7reqtrcqgyegjlvcmyawqbyccimq",
+    "display-name": "daily-ubuntu-native-amd64-server-24.10-oracular-v20250618",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-18T22:37:42.433000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaard5abnggtokwexsmcksuwgt5aupg3fxajre447vbsghtpcclcpa",
+    "display-name": "daily-ubuntu-native-amd64-server-24.10-oracular-v20250617",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-17T22:40:29.733000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaawcvlkcuepojzyjbwzst2ckh47rmkgm2v2qmm7zq7tkelg5ffwqka",
+    "display-name": "daily-ubuntu-native-amd64-minimal-24.10-oracular-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-25T21:41:11.722000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaswzbly6a5ijmneyhn4lxatf42prqpt3hmibvbv3fdeadb52txroq",
+    "display-name": "daily-ubuntu-native-amd64-minimal-24.10-oracular-v20250620",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-20T21:43:31.905000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaw7b5ii2rvmd2rwjrz7vnioa5aknempnofbzhm2boh5w6othfe7za",
+    "display-name": "daily-ubuntu-native-amd64-minimal-24.10-oracular-v20250619",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-19T21:46:23.458000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaayolrf7xksk3wsyg5nihyylzsrg4mshrkndjqutirl3pdvclgqtsa",
+    "display-name": "daily-ubuntu-native-amd64-minimal-24.10-oracular-v20250617",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-17T21:44:33.571000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaqgflx5t2hetq2gmutbcfazmadnwxum64km5wt5ghtflu3g6nesdq",
+    "display-name": "daily-ubuntu-native-amd64-minimal-24.10-oracular-v20250610",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-10T22:15:59.203000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaackwkgo262oalhiyowexbnsaicqec3lvvqpyeossbj3xxswgwppga",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260722-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:16:44.798000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2ikfv77tbyulvi22qnowblj7ozd3avjnclaoudiochw7kv5zxtca",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260722-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:15:27.229000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4j4xucld2hiclxf6omucs2kgueavlga27dg7bhq7orlkik34rrfa",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260722-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:15:02.924000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaje6762njwj5sdu7qp7uog7wuxd5acyqmh3mz3azbwh6k77wtqdiq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260401-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T13:35:05.284000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaav6rwxa2fr6dwvytghr2ktvprx47yk6ugusvejgxdop4snas5xq6q",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260401-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:28:45.049000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatzikycvdkmcmrqv4dzt2urikadarveatbah6ri5jifwu2utpe77a",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260401-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:32:39.447000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamyt3zzmmxctrdieqhjqo5xi7wdcu3lfaowcm7fedpmlbrgac4iua",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260401-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:33:24.419000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaac45sguix4iqx46zhzyocvc5dz4ifqyn63zdz6aukqbkc3ceetevq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260313-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:55:48.762000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaav3x7gbz3yzj7jpugscelpj3y2k6jswcnckubqjodtmr3d3dxsj4q",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260313-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:55:44.113000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaapuw5i6qoxqirsjsacibk6hzhuuquqklyf27pgepzrnrhboofi7oa",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260313-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:55:43.259000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaeazz43dj5oy6r2k7hmc3yw5xnaxa73do2pnpa6x5yvfbkhlpltja",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260113-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T18:13:08.937000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaantsdst3cstduiuiw6mwuseeliu6adu2raxq6ffsrv6dkumq5rgha",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260113-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T18:14:26.341000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaacghfa4isxlaraj5qjxsrl5mrr5pjqh5mkkluutqnbfbmw5pnvx2a",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260113-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T18:12:42.216000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahrdheas6pedofs7n67dsi4vlb3qxvcvcjwfeai4x7r3fgpvybtaa",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20251208-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T17:49:18.753000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7tai5gj6vtgimhq4l4ypzf7jz2xj6hvsp2iruezfc4tyc27kjyoa",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20251208-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T19:31:29.164000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6inkiz544ain25b7tupo2go47v6osl4rigjd63sxym26vyzvwita",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:00:06.032000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaslitamvin24di6vxf5ifxvwpkmqpy65c63rfdpfwrafff5aqr4nq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:11:01.505000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatav3veaekr6vzwrrje3uuvo33cfchdjsphfs45u5en7y7oki5gyq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:01:40.523000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadznoqlrjweuiswrdlyorwwyri4hpccl6vxmuzwhad66anka3owla",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20251208",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:00:50.757000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavgx7siyxjjcvqglouwhkkwcndpf5c6fuqqqyl7fgisnjphrcqnha",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20250604.1-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T22:41:57.784000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatk4ht6jze4yjpzzscwj45zqmjbvqb2luinmsezc42ksqlq4jk5iq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20250604.1-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T22:42:19.099000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaecmkr2f3ifbsoqleeub6hd4ltjx2ig2dw3figf4bz2vab4mdpjnq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20250604.1-OKE-1.30.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T22:42:23.525000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamesvkmsjqy3be6qs6pzfwkxs4hw6oggwjtx2eol2ekxjtrwqglja",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20250604.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T22:41:57.658000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaanlihs5k2tiv27ruqg3b6l7edshos5a5waud4agyq3dqaj2d4y3eq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260722-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:16:59.180000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaazo5rjpfyn3gityjteqq6fu7lwgtq7rjlzkm4q2vkueacfm4677pq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260722-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:15:40.342000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajgxk725xlxk2lbd3oyjgr367mnnlfvbz62c2kggskvf7w4gts37a",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260722-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:14:55.794000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaagd3rckysw6rtcyi4xt4tvq7gzmufo2hhuvsp2c2swye33kku55ta",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260401-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T13:35:09.239000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaldtoh7r2a7leez7ulhyyax5vnrhtlgjg63xo3hu36pcq7xdzzzua",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260401-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:28:49.933000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaerjjp7wvtl3apdappn7bdfbuhwqplsgcs2btuykgoqdlpvqih4fq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260401-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:32:43.571000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajwisfq5wqfegpmreftvxoiq5axwsbkqjhw7wvcupvizhzjqnzdqa",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260401-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:33:31.190000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaqe7drkval7e6z2nkfke3irhl7wzzpycnkc5smawm3hwmgj3hqekq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260313-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:55:52.377000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6tu7k2sjsdwxicrxovtzgzrdscv2hwk6rk42kd7mmkaxqsmvr7eq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260313-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:55:50.711000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3cbcnenut57bqhsw4licbfw2vmahv4i32uc4772tx4zcd25ocrta",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260313-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:55:47.519000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavhwfaam6cwwq47fy4guspomkoy24mcg6by32farbh5sco2spnsmq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260113-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T18:18:29.988000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadfzbtnuyiypbn3vsk55zjbb523zxehdzovhj5acw2f4z56fjmslq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260113-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T18:14:42.716000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaanfuvngfhq7bh7sulpy3oygyi33efyagaahp2fnofzxdwj5346gva",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260113-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T18:17:00.078000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4jgpyrrrnipypuu5s7wsz7uvplh5fiapthgcgt5xa7ghgoehc4qq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20251208-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:11:17.676000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4zwo7hgk3t75oozh765ucvymeofvzpu2gu6cneutehyyhmk5ffrq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:11:55.990000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaas6bb4vyixjqzgiwf2laxtvqzravz7jvt2qa6i4bxu5ni34j6jsta",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T17:50:30.062000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakvfh3h5rlepolyoujkou2rpf3akxyvyf4bh5fgohtxpsapwh4tea",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:11:23.851000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaays4mu2gkegtsbq2abqg4bsfbdaoouqwya3f5lovhoimvullqh5nq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20251208",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:07:32.560000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaad7ra22y3sl2kmev4n7mvk25c7mznq2dgkvteoml6p23ebnmjuf2q",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20250604.1-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T22:45:14.242000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7dw7otrake72ontz74irm5kjm5y2iffmfnavo6ynekdxwfnzbh6q",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20250604.1-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T23:21:16.594000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakmhb2a7ttmgbf2nrlue23hnm5363see7ok7bnfdbrskqgpfsqz3a",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20250604.1-OKE-1.30.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T23:21:16.306000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajbalit43ul45piyqvtbtgisrxvbvi67vqmjxu4x3jvgk4hrpvnjq",
+    "display-name": "ubuntu-native-arm64-server-24.04-noble-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T15:47:28.174000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaayef7cdmxd6zwmtjqlj3erfxqmukrbnso5wp6va3mlxm46jl7oeaa",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20260113-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T17:55:11.173000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaat6432hgno3g75zfkcgm5sd6pvetzxw2pk4hdyj2ypk73jickhc5q",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20260113-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T17:55:07.662000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaarh2w26qjvwa2brqvofq52rr5d2thdqv7q6bglhdn7poh25a6gywq",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20260113-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T17:54:53.236000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaay2sdbkir3tfj56w7mpvk23vb4djya6ufeu7fz4bcvqhdala4zvmq",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20251208-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T19:22:24.497000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatgfu3qcwrabd2biuyzkhtdxbiem3zbi2odg5kfyhfgvwwvorxnya",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20251208-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T17:39:27.376000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3pb47iu3ujfqz7x5cs5ajvm5tpztiigo44bl4kcpzdzuks3hhfbq",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20251208-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T15:50:22.491000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaman5dmv3qksfftfm4nc6zgvui4oxutiefos5t4k5feduxo3qbfua",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T15:50:09.970000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5obwh6u3vw37pay6uw4vjye3xq3qzpfrjtkf23s3bhrfy6tdydha",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T16:00:54.807000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaj4ahdy4wp5hcsnzjp5f2j54xj227apwc6idpczn6z7ddfg3taoqq",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T15:50:02.953000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabob6ddqofcg6elyid3xhrarqq2dzwgixmflo55l6nu6whmdccoqq",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20251208",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T15:49:45.900000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaojftwcn6bt3rkqzzatkegi5lqfv2x2odq7imcyhe24ylkljjkx3q",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20250604.1-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T22:29:47.231000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4yrte4mzokfgwghrhyoa5iqu3z5pdx2iszqun5nazy3cqc6lx73a",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20250604.1-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T22:29:39.877000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2fhipenj6exf4a6veshwk6mkj3pfohq5c2gjnyzscaji3yxfkjza",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20250604.1-OKE-1.30.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T22:29:44.487000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaayb2yvs2kmagowfunztfmy25uhcerikore32x7vlatccwpgofqvma",
+    "display-name": "ubuntu-native-arm64-minimal-24.04-noble-v20250604.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T22:29:18.012000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabr6gdgc2pzenaurd2lylfzfvnvkksm36sbt4bftmgatvlcjehtua",
+    "display-name": "ubuntu-native-amd64-server-24.04-noble-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T15:47:29.711000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaam7hlmajdrzd7pvmgcofby3otrrgef4mykfqdw525ikl6h434eqiq",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20260113-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T17:55:15.046000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2j2xhplg5czcukkhpwkf65z26jy5wslphsb2o2fephjw6tgkhklq",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20260113-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T17:55:10.072000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaae5jaiwno4sk4hyorz7kfptyedpwhfqwgm4ghqbpvx3mcie57a3iq",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20260113-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T17:54:58.230000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa24722udteip22rnqyrkjfvocmtmoqnpz2vkt47zeul6buuorv33a",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20251208-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T16:00:29.760000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxdunzdsua2ug3vzwuqq62h56f3lh3vpe3urjvtamlh5iw4s3eq3q",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T15:49:51.044000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaanvskwguzthc6uvsdrz6s2hn2m4znujlokmixwvcihz4zq2rwt3oa",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T17:39:23.652000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2ysxug4lzxiq763f5373g3zsipnsr37fhsjnwlslifbxg26sl3jq",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T15:50:19.434000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahvrbmqkfiiejql3qi7hyiq3sbs6siwd6okt53fncxjco4maolplq",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T15:50:25.282000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaar3cnao4kww6l3l5weq2aabzgxmebhdn25342kigihnh4w63h5neq",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20251208",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T15:50:08.725000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaicjcy5hxgmoqt7nwilo43vlyptd4o4usqyzdkczbnk56k7d76eca",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20250604.1-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T22:29:45.152000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaasqalwjkxifqwg4wfphxgujueu5i4ct75vlny7zwbyeftdqqjm4q",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20250604.1-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T23:06:26.071000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamwnt2yf76qcl3344npqmw7rymzmwsfhrtusxr34a56qq6tu5vxtq",
+    "display-name": "ubuntu-native-amd64-minimal-24.04-noble-v20250604.1-OKE-1.30.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T23:06:54.234000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakivvsmgd2cfdc5kq3dvbrjg3u5qpc6zdonayrjuy4kivnivcf5ea",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-24.04-noble-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T12:27:26.588000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabi7unxosq2rjsnkddosauuc77cqj2lfgmblfulvfgqcfnjtv4hga",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-24.04-noble-v20260812-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T13:19:38.759000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6olz7zy3jhwosbbokj3brhfaapaeqrrirnzoufvim4ihq5h3tpda",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-24.04-noble-v20260808-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-08T12:24:13.746000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5wcmf2moo6crlchwwpksh5cabxx2ejgsupj46y4dmecdwddijwba",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-24.04-noble-v20260731-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-31T13:09:59.024000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakrxotqdnl5knvwwnqijv7q7ikwklvy3h5hiv4nboxlc4ef6bqnvq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T14:59:30.378000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaazugojrktxeiwwrqh7bocaxjcslgdbfy2c6x4gqruibaj455y4lra",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260814-OKE-1.36.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T08:57:09.051000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaqkaaraakt5xthmflvuk7lcgyv2fei6sffdzbxxadupcqgnhukbxa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260814-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T14:59:46.132000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaalally3qqg2gtdpscv4vidne5aqtlsvb7lpwt45c67hyde4gjxyma",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260814-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T14:59:36.804000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabck77uqjd6mwyxj3ik25s5lgfqseoo35eik643hfhppb6splld7a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260814-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T14:59:39.993000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaasjqae4glh4hx4axpspzwumwaa3cbkphsbogs6xb7vjquulnm56ha",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260813-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:20:20.930000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxvdgxlt5znevsh2d6r3vnyg6kxld4mhd6pd7gxkxgo4uk3h4ifia",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260813-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:20:17.402000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaawhjdoadyfhapiyspfa5xd4ngsl24u5r22g3qiaae4hm26rlt5hbq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260813-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:20:30.312000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3chrcj7mz6cnuq2qwwely7c25azg2zfmbcr2ebiwcjjzu63uy6ga",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260813-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T21:31:43.208000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2tiavuittnnvsau7nvirk6kokakpswj76zqlfdpmtdiy7xjn2k6q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260813-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:20:08.605000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaac5566vydxomxiq77ymsm5wsrjxyxsfaiefu54r7tksv5ckcapa5q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260810-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T19:15:26.423000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3gte3k7522yg2ucexnv5poymunwky3aka3ktb6ziosvdzpiy4dua",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260810-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T21:16:44.062000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaoaml6deoozxq5lmhs2laufivx2lnheazpniwilhwgw56vmdwjr5q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260807-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T14:48:28.416000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakju7pubqwfnf2tuf3ceylmd6wfll7b3omvufcuy726cluk6ospcq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260807-OKE-1.36.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T09:03:57.753000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6dh5676xngygkk5zecsum45wlfasov4j3rnyy6oajdadope72nba",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260807-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T14:48:31.378000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaoc2mxhoaa53kkl7zt3lsmjtrd5hdwu7s4maesuukuhq7x7lpuopq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260807-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T14:48:38.275000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaacuhr27iwa2gagasiynaqktn3l74r4r4jjbcadkysef25lbabobrq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260807-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T14:48:36.480000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2uyiuggrezbhucfrhd7ixativb56dsk4yhivhp5zkvjrjsz2swua",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260806-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-06T19:20:23.928000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7qvzkijntqa4x5ospdhrfeuginjqz6sxvck6i6g4lgjqrrcgb64q",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-24.04-noble-v20260806-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-06T21:14:37.360000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaagfx6cwdarx3n2ea2lnaopc7b7p3iw7ggtypmc2eaxi6mxybuzrqa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-24.04-noble-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T12:27:37.365000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaacnhfnv2peory2r32qnszrqhnjq3zcglsavlf2mgwcmavrg7kaliq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-24.04-noble-v20260812-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-12T13:19:30.903000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavtksnlg6daefnoisqdjgioreefqzn2jwsmx5g6ngp4nyebdjlsmq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-24.04-noble-v20260808-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-08T12:24:13.826000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3uiynt5pwlqtwkvgjpsenf2ui3nr3o2bulwl3vdxpkbo26z7ljbq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-24.04-noble-v20260731-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-31T13:10:15.113000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaafwx4wx2ryg3vcjz4h6q57xhqn37y2mmnplanggh7bukphnql2fnq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T14:59:29.612000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamj63pdtv6pq2ehm3kybmkzqxc6s3wuelax7k6b2jgq5ltoroev5q",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260814-OKE-1.36.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T08:57:16.358000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaad3eqngibjj3bgfkz5nau4anjdmoje3e5obi7p5sulk2af3tsdvrq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260814-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T14:59:57.961000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabcnc4ny6p4n6o3ytmooogfselglzr6vfdbtyachybhq7qrjlavzq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260814-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T15:00:10.960000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaiggwizfhwkovxkvc5ujf6a4xxzphkwzgs57ix5veqlz6cadvsaca",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260814-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T14:59:49.540000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaal2nuofm2cytzbtalpxfq26gv4uwjcupcvhwubunshfqjtn2yx2da",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260813-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:20:20.647000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaauy5cms2urk3k3pgbtmn27y3ikwultvpnwcvceqhaoyactboni2kq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260813-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:20:33.789000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaah6mvrnhmvxgtnappah5kv6yvun43xftoktnxn7kjgfdu4stjfpma",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260813-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:20:37.143000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaaqokz7g7dnzon5cnkqy5b5yq23rvjav5233fflvr2ihznaoq4rsa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260813-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T21:31:50.037000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7d3sjmepotbtjpju63rxco6rme5efbtvt2my7vf5eyo4sshwn4dq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260813-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T15:20:36.736000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaldyc3vjra3rv7urufcslcq7372ylnobq2mjhh6j2lfcft5x4iqza",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260810-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T19:15:41.348000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaarbaluml6v6jlufgo2xjlspbnglw2dlr7mqvrntzh6a6ttkmier4a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260810-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T21:16:49.048000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaar3j6slxlahix76j4nikpxixv7ytdmrmzhfpwy4sujkdy5hpsxgbq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260807-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T14:48:38+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa57clsfobmq74sxqhwyntcvp3ojkpcxxuqso7cth2gbysj4sm6lga",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260807-OKE-1.36.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T09:04:10.732000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaus6hbdyyd6o6gqmpzcmqh3fi2x4gv454qnmubrmhn4nwaim7icgq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260807-OKE-1.36.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T14:48:45.949000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadjq6m5efsgsocxsltpsnbipqwjra36d6skjrzz4onqpacub4pcaa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260807-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T14:48:38.368000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2hoagxl2hwt7dykglcxge4blm4vlm6zimyokhlbdaohgnqbgh3ma",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260807-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T14:48:53.845000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavane5u6ttzr3b6hvavavwahmaa67ct72awtflwpqurxch2fwi6lq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260806-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-06T19:20:32.165000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7i6fp6vtgxlrweulf6gwufwpeudwv3euudnphvqyg3szcmxdqa7q",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-24.04-noble-v20260806-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-06T21:14:43.572000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaav65qkk5xmkl3cxx7aiign5z2eu3vhsgfn2xqbh2ohqmoh4j2i4nq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-23.10-mantic-v20240705",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2024-07-05T03:27:12.436000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaccm63si3tgzer4i2vir6bvr4he2keci46o52ve4b3abiax5vx3oq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-23.10-mantic-v20240705",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2024-07-05T03:27:48.356000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaqzlmjkkkcwomsukb4wdcjrowa4zu4tll7l67b55zgrxiix2zdpyq",
+    "display-name": "daily-ubuntu-native-arm64-server-23.10-mantic-v20240705",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2024-07-05T03:15:42.927000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaalkbskmgxyn6tth2tz4zpls3z6tgztdb4tsex3yrxowyx2erjz65q",
+    "display-name": "daily-ubuntu-native-arm64-minimal-23.10-mantic-v20240709",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2024-07-09T15:53:29.306000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3ouprgsw52xd7idq5a3ulmnjoi7jzawlycqaievie2snlg6iyelq",
+    "display-name": "daily-ubuntu-native-amd64-server-23.10-mantic-v20240705",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2024-07-05T03:15:50.976000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaz5jqmgvftp37bdzzfflfx37d3nuv7vnkzwt45ignfotu5uvy2fyq",
+    "display-name": "daily-ubuntu-native-amd64-minimal-23.10-mantic-v20240709",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2024-07-09T15:53:40.192000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4ghqsaslowof3ztcy4nlgsgzsin47xa6u7csolsnwpfgl76gsfrq",
+    "display-name": "ubuntu-paravirtualized-arm64-server-23.04-lunar-v20230420",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-04-20T12:04:17.076000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaagsrgoyeabuhzeb3fyg26lhntmpxaxmmtdzxnhrj6vulnmvrnl46q",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-23.04-lunar-v20230420",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-04-20T12:04:08.885000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadktnt5t7k26e4lnyzlumdgbsurdcew66ivobnafgfbvejvhpuyya",
+    "display-name": "ubuntu-paravirtualized-amd64-server-23.04-lunar-v20230420",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-04-20T12:06:06.354000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaav4p5iffhilqmvrtjc7mmbl62unbekrdjou4wqd5vnfrkkk4q7pza",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-23.04-lunar-v20230420",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-04-20T12:05:41.626000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadwnpmkggebrvlhqtyjluc4atpxh6rb7esyn6hvguov2moyk5dttq",
+    "display-name": "ubuntu-native-arm64-server-23.04-lunar-v20230420",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-04-20T11:53:13.449000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaafbpexhxrusko57k47icfmukanmqmzbyvoedwggmt4sfua4nqtnha",
+    "display-name": "ubuntu-native-arm64-minimal-23.04-lunar-v20230420",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-04-20T11:53:02.252000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3kotjuhbn2y4fkyopkrfekrbmyac3z2ca2sfiykfcplmtzgi5khq",
+    "display-name": "ubuntu-native-amd64-server-23.04-lunar-v20230420",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-04-20T11:53:30.827000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa65aqvnm54neqm54w5osjgno4xzkm7nffa6aojbzd5ftr3lymbepa",
+    "display-name": "ubuntu-native-amd64-minimal-23.04-lunar-v20230420",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-04-20T11:53:02.567000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakfltcjd7mdpapnztj75g7g6foi5t3ifbmbsuoeqqa5ekzovwkpfa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-23.04-lunar-v20240123",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2024-01-23T20:16:18.492000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakwjbgjntuhbvdeklarlvqqhyfs44zzb2c2brkddyqesotskysd7a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-23.04-lunar-v20240123",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2024-01-23T20:32:36.361000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajn4bsqdwiosnmlm2z57no7buinqvdrgkd64zadbcjzum3kgkh7eq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-23.04-lunar-v20240123",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2024-01-23T20:16:44.949000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabwnex7dyjqftharwsekeaump5hyo6ee27fqz6jutri6liw7qggra",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-23.04-lunar-v20240123",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2024-01-23T20:32:35.982000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6dxi5ihkfli33oq3jijvilad4lchjq2t3nclmxud5qqqpeugap2q",
+    "display-name": "daily-ubuntu-native-arm64-server-23.04-lunar-v20240123",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2024-01-23T20:04:47.010000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3vuaosf73mz6s3r2kena3haoxrhmscu5j3ubqk4kyg3yq6v5be3q",
+    "display-name": "daily-ubuntu-native-arm64-minimal-23.04-lunar-v20240123",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2024-01-23T20:21:06.378000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaas62bhol4dglbzmcwtlvrwt3v6h5lycunbhq4fu7f6yss3pggi4la",
+    "display-name": "daily-ubuntu-native-amd64-server-23.04-lunar-v20240123",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2024-01-23T20:04:46.070000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaafc2tixf7zv6syzjbfugkyld4oevnrjdty7tjskthf6tfnhy63g3a",
+    "display-name": "daily-ubuntu-native-amd64-minimal-23.04-lunar-v20240123",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2024-01-23T20:21:09.104000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa26t64yxlsw5vy3lubqpyxbvdi2eb4n6o3eniq35dhuwhsh6vy6bq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-22.10-kinetic-v20230719",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-07-19T17:14:37.698000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaauw5hrgwagagfrsa5odescr3srenfmnda3t6qbkrb57brk2kncgvq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.10-kinetic-v20230720",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-07-20T06:01:07.824000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahq2vr3wv3myqwrj2k5flnc25wccajnvm2k54edfiorahdyagislq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-22.10-kinetic-v20230719",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-07-19T17:14:44.692000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaafg23g5hlybkhgwhudgfhqtfjcfyavw6otsbln7fy3zzneb7hjo2a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.10-kinetic-v20230720",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-07-20T06:01:35.714000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatbkckmsna5fhpf5wfq2dhx4afacqn4jywmi2xxsq2t2dfoipqjma",
+    "display-name": "daily-ubuntu-native-arm64-server-22.10-kinetic-v20230719",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-07-19T17:01:04.666000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaarz2rib2ivzqombo7r3v5as4bdjvs5hrrc7u6spp7xolzgerycgnq",
+    "display-name": "daily-ubuntu-native-arm64-minimal-22.10-kinetic-v20230720",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-07-20T05:48:02.247000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6jqf672i4g3qppurd6xicmhd44xq27lqnqd5nox6kfewc3kpb4ua",
+    "display-name": "daily-ubuntu-native-amd64-server-22.10-kinetic-v20230719",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-07-19T17:01:07.091000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaar4lkuhw5xzzhqvptfutjqmahrmhqkqeoadccj2hjkxd4inynogpa",
+    "display-name": "daily-ubuntu-native-amd64-minimal-22.10-kinetic-v20230720",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-07-20T05:48:04.323000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaafek4j4ndsd4fzfksm4maxwlq2bwckiqi33kfp5wjk3bxyhyr34na",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260722-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:47:38.221000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaas3jeuxfv6jrfmgtywgg3pxd2ke5qk7c2gsew5dllpljcjmot5aq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260722-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:47:41.164000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaapls3zixil6kuezsngzgdas5mqczajlhxcp6ts6y4iiqf5emrbq7q",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260401-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T13:35:39.864000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxiybfz2uvh3zgcau432rexh4s2bximchps6pg7j4rbp3r7b7b2zq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260401-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:35:56.637000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaycuxzv6itqsbycadgvd2wms4e2r54i27tpybakw7cji244256qbq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260401-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:35:36.032000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaafj2zu5vxksggr6frwzyw3fipgjpsv5t2kcak6r5ugprrlygx4ebq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260401-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:35:25.458000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2a33s7ukh3pi4kpeptg22twgtf7mcm66ofdtywmndmamaiisvi7q",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260313-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:55:07.595000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahzaoaauowjjr4wngzjmvjdgspambtvvz3pjpwjr2hitkhh2tenrq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260313-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:54:38.058000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaald6ppxalyragnbje4o3m3w2yxglkiroc7adrcun2lanfluivfhvq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260313-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:54:06.298000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa47ckb5erodssd2dzrpyz6uakqbxstllo7ohi4lpovaks2llybetq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260113-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T16:25:23.091000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaauvck7nnuqgxpghcquphqj7z7hdnkkq5ofu6ebsvvlk6ars4qei3q",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260113-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T16:23:58.003000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaaxn3mklyzw2afvanerqlwfzo7tvo7uwsvd2zfetrnk7z7tqqtdza",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260113-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T16:24:31.303000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavbivz7euk5o577h7sglj3tgw7yalvitpmunb6a27ekqlvqfnwlrq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T20:22:18.090000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaasv5ieeiza5stqmlflqx4c3mbcmdn6xfjon6qjjuwoud226jrvm5a",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:31:17.063000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3sj4tyg5a2k6lp6f3wmujel7cvqzvgvwb4qy5jlt67gcyg5q7dmq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T18:43:11.222000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajcc7z2vyctwodnyrbn2cegiuvuizxjpq7d7o2lf4q3kh4bqnzyhq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T20:22:06.398000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4bfu2cgqawpur7yds5xrrepioseyodvsxhqbxbcqbt62a2pul3vq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:30:25.824000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahokmsbjl2njxnagp7ltpvuxthlvtvolcoxi4kwft2yebww6xkwoq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:30:32.425000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaarx5or7yczalajj375ijwmufa7fey5dgub4gprmw6wmcpqjmqpl2q",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20251208",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:31:55.409000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaazzu5viozbmstctieawg6b23cddyy6y2lh4267o6nwv2jplqnbzla",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20250604.1-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T20:32:47.324000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6phepqqiowk5x6zj5giq3aezvmxlfetqe2zwp2lb3nxd4u7xwbqq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20250604.1-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T20:32:42.682000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatc7in2zluhtnedxzhlaoe3nwnymelg26luma6uwsdbxyiejoazwa",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20250604.1-OKE-1.30.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-05T14:36:08.921000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaax7gq5svztlpnm4pq6umg7vhpu6twoubfdhw54l5mc547ruuieodq",
+    "display-name": "ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20250604.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T20:32:47.226000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaq3wvslw6dgotgqjsg4dxaqdlay65lqmwugf3lrf63dh73boudwoa",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260722-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T17:47:41.319000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxzvg54bah3pmc43zqlxeyehvhsco7n3ggcs7wl65rdmku7nplbjq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260722-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-22T18:00:42.165000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadaktrna757o4anzecsjbvvjtcef7mwvjlccnoh2ymkkdpnadg7dq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260401-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T13:35:49.023000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaananpvkeij2evrinyruoyifpbc6sgg3phnbepgtt5yhovy7q42sua",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260401-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:36:01.683000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaalkgleznsjg2arxm34qzggn5omh3sjvdery77qxvhlrp5t5mtuwma",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260401-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:35:41.860000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaicchou4kuzxmdgqbqh43gcv3dldh3f4htppuoi7jiuocuuk2draq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260401-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-04-02T20:35:36.212000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6ylus6uhoqgoizfinonj47gxaiitlptm4wpe4txgnpqiew52haoq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260313-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:55:13.773000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaagarxyjrk3jcf5qahvjbqqrjx2fbfmy5tbeugsz6ryfoggm4o37sa",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260313-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:54:43.969000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4ju2d3mpqug2kabetdhtxg2u377ycddqmnopcf626gf6aeh4tv5a",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260313-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-03-14T01:54:14.182000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaiu7sgxt4vwezdmxzqr24gexvlvxuioi5kxajtsfmct6jrjjflraa",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260113-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T16:24:32.768000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaar3vh2qzrmf2szklpieafguao2utsffrew252452aezr2hyafwuca",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260113-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T16:24:18.027000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaac7leegtx7dwyvriiu5b3t4jpj2htjdgjbf4gc7tztbxxyot4fawq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260113-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-01-13T16:26:09.151000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaap6acy5nxglcnxuokagfyuq43iq6b7tpsrur73um3hjirtwacazgq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:32:16.214000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahyb23kol2nbrnx6tbdgeqpiikare7mp2utguf7wvctdgfejwnxka",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T18:44:59.666000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaafwsbwj72ajs7azuyknygaz2eo6fgl34wjnzudg2axrqcktihmoha",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T20:23:04.943000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaad53dgirh6efik7z5fhp2llblwrjwg7sjpiw63mz6rahs6cwvmmfq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T20:22:51.445000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadwvplvjixmr2q2hlfeldv22cltcivj3sri4jx7v3lv5guhgmar7a",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:43:03.923000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaacea5zw66dw5pat3ley3yb67pwn2vxr2w7cotmingm5madfdtkriq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T20:22:50.298000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxhryu4ow2sc5h2vbpgmsnjl6oedytoizx6qaw2e7nrnh4j3c6k2a",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20251208",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-12-08T16:32:40.289000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaanw7f2tjgfddpxnbt3sjtkgo2652yzqig7imdpxk5npaxwvmx6lba",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20250604.1-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T20:34:40.285000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaezkjtfvfbyr5owxhmgg4qplqcfkfvvzom65f7xk4crmw4z624o6q",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20250604.1-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-04T20:33:36.795000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaoka25n7sjbbtbfykug4u3x2oa7kzxy5jdchhpnwumiiwfu3fe2sq",
+    "display-name": "ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20250604.1-OKE-1.30.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-05T14:37:35.941000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7lh65w5ldadbql6564g3mwqlnbssx5qx2hexgxnnysrfd4pieuha",
+    "display-name": "ubuntu-native-arm64-server-22.04-jammy-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T15:46:38.663000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5d34d7srfuzfug2z3wcpiiumms3oyp7g4g774wgx4eggft2wtqrq",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20260113-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T16:04:42.423000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatyfgwz3m2ngssn6ka4msp7pzr53uatdebxaqbgikgjzpiv5a2yla",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20260113-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T16:05:43.404000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaarn4gcy26k6y75ozj3tl3oki3trxslgvjiaqkbj3oeoqcmrkq5dya",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20260113-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T16:05:54.766000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaoczvpyhsfx6ratg6zwc5g7szqqnhkuzrcvyghxqi6bxcnimobmkq",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T18:33:08.597000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaear4ifrowpj74e7spyty6p3tnjbfvamdfkkp5iag3ycdpijnrrea",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T20:12:15.365000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa2fflwhlkvtdnxb2cpoldhzn3rcbmah6slexm5o24m3rlqqcimhmq",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T16:21:09.936000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaae2l4spt3fepgni33psnjvykrmrtvicr6bzi6iuojhux2hn3npvea",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T20:12:05.024000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxxo2ls7gq62n3lra72m7u2q4msifq77uthxxsttyokkuspnm3idq",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T20:11:54.532000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5qp6oumqwzd5crdqfji67s4a53jqdfucb3o4rvxg4yokfu5ol74a",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T18:32:50.361000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5f2bmglnnooszwytfxrxjkvpgcxbyt7dget7ggxbx77axdr43fvq",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T16:21:27.167000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadmaag6sxci22iamlz2htmrakqjmuj37hpxv6juzotg3wnut2cgtq",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20251208",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T16:21:49.160000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatp5defgd7w32irfnux2rf6ycpayyx3rymgbfuztzbcqdltjcmnlq",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20250604.1-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T20:20:06.170000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaawtsy77z62auue6vbcai4ywegqfljyiladvqj6nvv32fgeh7rtpgq",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20250604.1-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T20:20:01.274000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaqhfpa5xljcqtsqj666ohaostt7hyo7hakwbabkxyy5ewwokdllla",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20250604.1-OKE-1.30.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-05T14:22:54.210000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaapyiivbfi4qk3d3rtsedleawfpggtovjgjb4wk5t5ogec62dgx3a",
+    "display-name": "ubuntu-native-arm64-minimal-22.04-jammy-v20250604.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T20:20:04.833000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaalhk3g3m2xjqaafeq6ntg7aixxdcqelxsw46mt2wdzisi3xtxfdpq",
+    "display-name": "ubuntu-native-amd64-server-22.04-jammy-v20260113",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T15:46:47.229000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaidp76elcyp2os5kprsfpsrkpqp2pdayjimkwk2d2r5xyo2ubwzrq",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20260113-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T16:04:51.199000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaac5i2rhr2upsvj7wgyjor2vekpjr46n3in2h77fdbgg7mkockyb6a",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20260113-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T16:05:44.022000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaooak7y54bnia2ea7jb3e3ufp6oueuoyifp6s5l3oevssabsazkbq",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20260113-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-01-13T16:06:01.734000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaofbq7hitwj23u7rowwc6ccvypgugmoy7oqardly6pkpvzul4jo6q",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T20:12:20.933000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaal2aiqqu2lsoqtypmuqdj3bq7kmua3p6ca3aysebzudccydfhr6xa",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T18:33:15.340000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaag6t4abfbf6y2u3ih5qqimn5pwbhpbosevc35rakfgm54kp62ipkq",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20251208-OKE-1.33.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T16:21:56.545000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaasdskrt6khhynqrv3h6hwih2ilxnwqodhtknhykinttxxol72n53a",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T16:21:45.053000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaaxcwpwtwfryzbavew5kiv3do5mjfyvy4lvclb2hlux5wb6vwfxxa",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20251208-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T20:12:13.203000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxn3q2yrasqeacnnizppcdejzzumae44nnx6zp5yexvxqtwhvzi2a",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T16:21:57.120000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajeng7ggivkvax6p7t47daw2lvjtbnhmgjhnlx5qbkrybo3eea5yq",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T18:33:04.930000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4d3g42weqzpvrfnfbabpyyjmiwomheqq2fcfgnjrtkaun3jv6zwq",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20251208-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T20:12:20.886000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaalc3guzkum55izao5cdtro5h5m7ikpxrphlvmkkykpyiqhbtt57hq",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20251208",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-12-08T16:21:52.392000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4oivgtu3nzmohvgrh422bulorcrmktggjoe46gf2glrzih7jqr4q",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20250604.1-OKE-1.32.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T20:20:43.659000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaanw227bkd7q52tanghc7qmja7gqhnmd7qdwv567kbeic7aupugdyq",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20250604.1-OKE-1.31.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-04T20:20:10.056000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavh7f7zswco5abqhqceke47iiidstap5u4mkzarouagy4wsg2acra",
+    "display-name": "ubuntu-native-amd64-minimal-22.04-jammy-v20250604.1-OKE-1.30.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-05T14:23:01.144000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa5yhjfbk7t55uqmdt67c6megrwe736hcfiqtqihekfn26ra6a2dqa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-22.04-jammy-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T10:21:38.699000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadveir2x2oikshq2qheyculjazs7va7vcl6xci3kweu5lxcxglv5a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-22.04-jammy-v20260813-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T10:53:49.579000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaemmlllqtnxszk6xsbw2eaw6nxjyyg6yunljn6tq6p7puh7ki7jia",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-22.04-jammy-v20260807-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T10:30:29.151000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6tu4jsepbp4pstukj6jgatv5t4ydpcqyx3l2qg3unwuapa7iy2rq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-22.04-jammy-v20260803-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-03T11:01:30.663000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahw625dhw2y64nd7tjykccxbcukw3xvfbmknocnelei2ydybghl4a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-22.04-jammy-v20260731-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-31T10:40:53.038000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaanzy2vadymfzqgwmhwuxe2fmcho4eva3brxulnatwydmubhqgexta",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260814-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T07:01:13.692000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahejgwpvvfvr7qsq3wy5rdi7vhcueq54dflhknolndnf4x6gymaba",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260813-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T23:51:57.171000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaiqw6niitnkiwdolrlqsuwjaeevtqetmbvomwpth2n2xqwx7lenjq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260810-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T15:35:23.925000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaagjftme7yxfsvapolaoh4wc3xfcjygrghyqnso7qlrk3vjzhiyzoq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260810-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T22:55:37.629000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajnjzjidh2nu4rj23pzyrafq43xgwhj7ke2tanpazfdhjqoljxdga",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260810-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T15:35:31.091000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaadryvhp3uj5hb3lnlsu3e6ahww73vq224sg2utcuvcwlpgbwhtuvq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260810-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T15:35:22.864000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaaoceh3fb4zkljfhahvbp3hmqfhhoiwqw3br3lvcgikoiwdmvi26a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260807-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T15:29:48.356000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaajoiczrnjdtpcpfel5gd5phqgd6sg2rettb4iyqytvq6l5msvjxpq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260807-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T15:29:56.251000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahorjjmazcvyvjkds7caq4gtnrhbk4ks7efcovsvabvuj2xp7u3qa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260807-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T07:07:33.135000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaukhkncnwnp5c4xgpwtg4h5nxqegruipt4f4x6sfqwzekx762nkcq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260807-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T15:29:58.872000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaobnl7ihppvt43uhrfmjxp3n5u5b4kfqhlumtzp5ejwtx4wttyi6a",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-minimal-22.04-jammy-v20260806-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-06T23:00:09.229000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6qc44mqyyuzts2junaossalj5wzx3bsrsa4lvgavis6g5nmkf3oq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-22.04-jammy-v20260814-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T10:21:49.938000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaycm5pp7ya3yxjkenjcdcncrzdb2ns6lkvmepuxhvzjrbmo6fjfaa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-22.04-jammy-v20260813-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T10:54:01.268000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavzcqbqkepxp6hvysrose5zojmurtakw2pb2kokulzcvg3fahnokq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-22.04-jammy-v20260807-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T10:30:39.646000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaarihewxzzhvctrhqu66k5s7u7pa2nnqly3r5x66ag67k33oelrlqq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-22.04-jammy-v20260803-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-03T11:01:31.154000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa4atveutbyxj4r2m5o64r6dmewqced4quvef73nmgxxlebpnd3mia",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-22.04-jammy-v20260731-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-07-31T10:41:09.151000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaahxileywwmuotala5e5iwbmng7tr4rdxuodrxouwo337fz4vrtipq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260814-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-14T07:01:19.283000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaahhrdfgvqkb4oowagedm6io2mbznxzwo4x4xuwjayjavc7e6uewa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260813-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-13T23:51:01.507000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa6lz4edpw5rzvftc3h5bxqhsxdnne5a5z6sokgubz44227ydievaq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260810-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T15:35:28.162000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaawqbeea6vmfjs7g3ho64zi3frnzengchj2czjnlgh5fndhrzjuleq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260810-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T22:55:42.126000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaunefgzkl7swm4owiihxgowlslpfltpfsdff363zrxeo66so4p5ua",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260810-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T15:35:36.741000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaagoxzpe3vmmpgmq7d6ys4kvas6cvpt2jwg6zdnussbhvjpjfrwjxq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260810-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-10T15:35:32.779000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaapyea247z2yexmiq5pw73cbymbnfnzwnxmjp53uxi2yxy7bx362ba",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260807-platform",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T15:29:49.182000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamwmryzo72lu2dy7b7klllpkojqozyf7q537dpfqfgprmargudqnq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260807-OKE-1.35.2",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T15:30:08.466000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabfjvwbv2t4eknycst5ylk5pttzb6l42pftqsbcq5jdlsnklhuymq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260807-OKE-1.34.1p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T07:07:34.904000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaah5od7sqfhqdwwymk75ickizldl4zk27gqhvrlgtfxackxssaydmq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260807-OKE-1.34.1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-07T15:30:08.390000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaacm5jy2t7zck7fr2ewnh3b4nxg3oh76m4oi6vhnycobvh66pc5gq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-22.04-jammy-v20260806-OKE-1.35.2p",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2026-08-06T23:00:16.628000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaotwlhfwwepf5jjodqabuqd3ftkdgeeac5xblvnz3vhnllu7yyudq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-21.10-impish-v20220714",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2022-07-14T10:54:17.917000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaq2wsj2tt764mrfhifujrbl422mmoxi7jsewphe32pftj25wg6eaa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-21.10-impish-v20220714",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2022-07-14T10:54:06.918000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaah4lpzh657jbpsmfrn4juqyxzj55sgvbaqzgxlug7bvlll3bqx7nq",
+    "display-name": "daily-ubuntu-native-arm64-server-21.10-impish-v20220714",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2022-07-14T10:42:15.159000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaauhhlpjde2c7meghu3giaqp6hz4tha4rhnh2cr3pi43elbtbwekuq",
+    "display-name": "daily-ubuntu-native-amd64-server-21.10-impish-v20220714",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2022-07-14T10:42:15.024000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaabd3wrbqyc6puu7tbpeyn27m5e4m5gd34rkr6ayjf4436pxhorhxa",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-20.04-focal-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-25T00:15:39.896000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaixtx5nqpqahgj7x3bb5jljtfen35fx6s22frxujkj4mhutps3i2a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-20.04-focal-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-25T00:16:32.865000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaqy7w7iuergochy2q2lgsv7jqlsfz4aodfzlz7orysmnylkpxtw6a",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-20.04-focal-v20250625",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2025-06-25T02:04:17.197000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaartbbcntv5lvntsql235t23ab6uzakdodoszuelm5yiec2on5hdtq",
+    "display-name": "daily-ubuntu-native-arm64-server-20.04-focal-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-25T00:02:56.912000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaz37jku6dsk4qh773tnin4vpvzmud7zvsw76nxolznu5ajgooow5q",
+    "display-name": "daily-ubuntu-native-amd64-server-20.04-focal-v20250624",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-25T00:03:01.119000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaawum5h53bkciz56ftsdwizgtjxnzjvzypurg345vhpqvihfl7vrq",
+    "display-name": "daily-ubuntu-native-amd64-minimal-20.04-focal-v20250625",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2025-06-25T01:50:44.308000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaakx53h5k5lff7w4u5bhwfefpqbgg5w57rpiquwrsupaifhjumf2rq",
+    "display-name": "daily-ubuntu-paravirtualized-arm64-server-18.04-bionic-v20230607",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-06-07T16:25:45.872000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaayafhpjtuonoji6vjfpvezpmbihlagwyqnvprl6khscieqav6aheq",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-server-18.04-bionic-v20230607",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-06-07T16:26:46.649000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaarashux7p4xpfbhksdf6yq7yvvjki322tqtrtbyz2b2h76gtf2sfa",
+    "display-name": "daily-ubuntu-paravirtualized-amd64-minimal-18.04-bionic-v20230607",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "PARAVIRTUALIZED",
+    "launch-options": {
+      "firmware": "BIOS"
+    },
+    "time-created": "2023-06-07T08:33:03.285000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaatyxx4mo2tctdzuzjhyahlyjfrogzh63mq26ofr5ckxr6ofktcxma",
+    "display-name": "daily-ubuntu-native-arm64-server-18.04-bionic-v20230607",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-06-07T16:15:12.374000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaxeoflpzsdpih2fk2ybpthgus73fatpakgwoxdxgwdlm4op25r7pq",
+    "display-name": "daily-ubuntu-native-amd64-server-18.04-bionic-v20230607",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-06-07T16:15:14.343000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa32yyjezt7us3kjl6hnirzu5lt63bfa2r56tddqnbscqqkaiusbqq",
+    "display-name": "daily-ubuntu-native-amd64-minimal-18.04-bionic-v20230607",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2023-06-07T08:20:58.315000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa7vbizz7iuzdhqg2hq3pl2m7afy6pnwn5vjb575gatzxpm3trpjsa",
+    "display-name": "Canonical-Ubuntu-24.04-aarch64-2026.07.17-0",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Canonical Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-07-20T17:16:08.237000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaa3gokcyldmc5skhpl5uvh5r47tncanca66t7mz5qvwomaxgaow76q",
+    "display-name": "Canonical-Ubuntu-24.04-aarch64-2026.06.29-0",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Canonical Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-07-20T23:19:05.127000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaavukymfigv3gbia4nglaotp2uqr5sc7dt5cbvjcjps4vgmrhxiv2q",
+    "display-name": "Canonical-Ubuntu-24.04-aarch64-2026.04.30-1",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Canonical Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-05-06T02:23:13.385000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaamlil23xgchazg2s2squ2xybp7wn7rdvg5nckxowpu3myh3vqy6qq",
+    "display-name": "Canonical-Ubuntu-24.04-Minimal-aarch64-2026.07.17-0",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Canonical Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-07-20T17:16:10.849000+00:00"
+  },
+  {
+    "id": "ocid1.image.oc1.phx.aaaaaaaaf2ei3v4tpptc7py3je74v6ysgwlgju2367bckc66gvqbzpf3sy7a",
+    "display-name": "Canonical-Ubuntu-24.04-Minimal-aarch64-2026.06.29-0",
+    "lifecycle-state": "AVAILABLE",
+    "operating-system": "Canonical Ubuntu",
+    "launch-mode": "NATIVE",
+    "launch-options": {
+      "firmware": "UEFI_64"
+    },
+    "time-created": "2026-07-20T23:19:14.732000+00:00"
+  }
+]

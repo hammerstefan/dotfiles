@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v uv >/dev/null 2>&1; then
+  echo "find-oracle-daily: 'uv' is required but not found on PATH. Install it: https://docs.astral.sh/uv/" >&2
+  exit 1
+fi
+
+here="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+exec uv run --quiet --project "$here/find_oracle_daily" find-oracle-daily "$@"
