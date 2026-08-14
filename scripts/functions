@@ -1,0 +1,11 @@
+export ME=$(jira me)
+jira () {
+    $(which jira) $@ | tee /tmp/jira.out;
+    line=$(tac /tmp/jira.out | grep -m1 "https://warthogs.atlassian.net/browse/" | ansi2txt | sed -r 's/.*\/([A-Z]+-[0-9]+).*/\1/')
+    issue=$line
+    if [[ -n $issue && ( -z $J || ($issue != $J) ) ]]; then
+        echo "J=$issue"
+        J=$issue
+        export J
+    fi
+}
