@@ -20,3 +20,4 @@ alias mkcd='_mkcd(){ mkdir -p "$1"; cd "$1"; }; _mkcd'
 alias mkcdtoday='_mkcdd(){ d="$(date +%Y%m%d)"; mkcd "$d"; }; _mkcdd'
 alias fzfy="fzf --tac --print0 --bind 'enter:become(echo {} | wl-copy)'"
 alias oc="uv run opencode"
+alias bfs="butterfish shell"
