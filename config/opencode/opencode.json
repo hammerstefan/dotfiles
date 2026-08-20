@@ -1,0 +1,110 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "minimax-coding-plan/MiniMax-M3",
+  "instructions": [
+    "~/.config/opencode/tool-prompt.md",
+    "~/.config/opencode/secure-prompt.md",
+    "~/.config/opencode/no-assumptions.md",
+    "~/.config/opencode/hindsight.md"
+  ],
+  "agent": {
+    "plan": {
+      "prompt": "{file:./prompt/plan.txt}",
+      "model": "minimax-coding-plan/MiniMax-M3",
+      "permission": {
+        "semble_*": "allow",
+        "context7_*": "allow"
+      }
+    },
+    "Openspec-Plan": {
+      "model": "minimax-coding-plan/MiniMax-M3",
+      "permission": {
+        "semble_*": "allow",
+        "context7_*": "allow"
+      }
+    },
+    "explore": {
+      "permission": {
+        "semble_*": "allow",
+        "context7_*": "allow"
+      }
+    }
+  },
+  "lsp": true,
+  "permission": {
+    "codesearch": "allow",
+    "websearch": "allow",
+    "question": "allow",
+    "doom_loop": "ask",
+    "*": {
+      "~/.config/opencode/command/*": "ask"
+    },
+    "read": {
+      "~/.config/opencode/command/*": "allow",
+      "~/.cache/opencode/packages/*": "allow"
+    },
+    "external_directory": {
+      "/tmp/**": "allow",
+      "~/.config/opencode/command/*": "allow"
+    }
+  },
+  "plugin": [
+    "opencode-handoff",
+    "opencode-plugin-openspec",
+    "@tarquinen/opencode-smart-title",
+    "@mlflow/opencode",
+    [
+      "@vectorize-io/opencode-hindsight",
+      {
+        "hindsightApiUrl": "http://localhost:8888",
+        "dynamicBankId": true,
+        "dynamicBankGranularity": [
+          "gitProject"
+        ],
+        "autoRecall": true,
+        "autoRetain": true
+      }
+    ]
+  ],
+  "formatter": true,
+  "mcp": {
+    "with-context": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-y", "with-context-mcp"],
+      "environment": {
+        "OBSIDIAN_API_KEY": "{env:OBSIDIAN_API_KEY}",
+        "OBSIDIAN_API_URL": "{env:OBSIDIAN_API_URL}",
+        "OBSIDIAN_VAULT": "{env:OBSIDIAN_VAULT}",
+        "PROJECT_BASE_PATH": "{env:PROJECT_BASE_PATH}"
+      },
+      "enabled": true
+    },
+    "atlassian": {
+      "type": "remote",
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "enabled": true
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+      }
+    },
+    "semble": {
+      "type": "local",
+      "command": ["uvx", "--from", "semble[mcp]", "semble"],
+      "enabled": true
+    },
+    "MiniMax": {
+      "type": "local",
+      "command": ["uvx", "minimax-coding-plan-mcp", "-y"],
+      "environment": {
+        "MINIMAX_API_KEY": "{env:MINIMAX_API_KEY}",
+        "MINIMAX_API_HOST": "https://api.minimax.io"
+      },
+      "enabled": true
+    }
+  }
+}

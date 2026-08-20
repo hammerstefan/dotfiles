@@ -1,0 +1,15 @@
+{
+  "agents": {
+    "architect":    { "model":  "minimax/MiniMax-M2.7" },
+    "coder":        { "model":  "minimax/MiniMax-M2.7" },
+    "reviewer":     { "model":  "minimax/MiniMax-M2.7" },
+    "test_engineer":{ "model":  "minimax/MiniMax-M2.7" },
+    "explorer":     { "model":  "minimax/MiniMax-M2.7" },
+    "sme":          { "model":  "minimax/MiniMax-M2.7" },
+    "critic":       { "model":  "minimax/MiniMax-M2.7" },
+    "docs":         { "model":  "minimax/MiniMax-M2.7" },
+    "designer":     { "model":  "minimax/MiniMax-M2.7" },
+    "skill_improver":{ "model": "minimax/MiniMax-M2.7" },
+    "spec_writer"   :{ "model": "minimax/MiniMax-M2.7" }
+  }
+}
