@@ -1,0 +1,45 @@
+{
+  "skill_name": "github-pending-pr-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Draft a pending review on the PR for my current branch. Add a RIGHT-side inline comment on src/cache.py line 88 with two paragraphs. Keep it editable and do not publish it.",
+      "expected_output": "The agent resolves the current repo and PR, validates the live head and diff anchor, checks for an existing authenticated-user pending review, creates one review without event, verifies it remotely, and reports the Files changed URL and unpublished state.",
+      "files": [],
+      "expectations": [
+        "The workflow does not guess the repository, PR, head SHA, path, or anchor.",
+        "The workflow checks for an existing authenticated-user PENDING review before POSTing.",
+        "The request contains an inline comments array and omits event.",
+        "The two paragraphs are encoded from real newline characters through jq rather than literal backslash-n text.",
+        "The result is verified through both the reviews endpoint and the review comments endpoint.",
+        "The response states that nothing was published and gives the Files changed URL."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Put these review notes into an editable GitHub review, but I may already have a pending review on that PR. If so, don't create duplicates or remove anything without asking me.",
+      "expected_output": "The agent fails closed when it finds a pre-existing pending review and asks the user whether to keep or explicitly replace it; it performs no mutation before that decision.",
+      "files": [],
+      "expectations": [
+        "The workflow identifies pending reviews by exact authenticated login and PENDING state.",
+        "A pre-existing pending review blocks creation.",
+        "The workflow never silently deletes or replaces a pre-existing or other-user review.",
+        "No submit, approve, request-changes, or publish action occurs."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Create a draft PR review with three inline comments. If gh's output formatter errors after creation, retry it. Also fix any malformed draft comment using PATCH.",
+      "expected_output": "The agent refuses unsafe blind retries, reconciles remote state after output failures, does not treat a missing response comments field as failure, and uses verified delete-and-recreate only for a newly-created current-invocation pending review if PATCH is unavailable.",
+      "files": [],
+      "expectations": [
+        "A jq or formatting failure after POST does not cause an immediate second POST.",
+        "The raw create response is captured before projections and missing .comments is not treated as creation failure.",
+        "Remote reviews and review comments are inspected before retry or cleanup.",
+        "The workflow accounts for pending-comment PATCH returning 404.",
+        "Deletion is allowed only after proving the review is the authenticated user's newly-created PENDING review from this invocation.",
+        "Recreation revalidates the head SHA, anchors, pending-review state, bodies, and final remote state."
+      ]
+    }
+  ]
+}
