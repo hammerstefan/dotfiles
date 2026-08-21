@@ -292,13 +292,14 @@ export const SessionStatsPlugin: Plugin = async ({ client }) => ({
           "",
           "## Session Tree",
           "",
-          "| Depth | Session | Agent | Messages | Cost | Title |",
-          "|---:|---|---|---:|---:|---|",
+          "| Depth | Session | Agent | Model | Messages | Cost | Title |",
+          "|---:|---|---|---|---:|---:|---|",
           ...stats
             .sort((left, right) => left.depth - right.depth || left.session.id.localeCompare(right.session.id))
             .map((item) => {
               const agents = [...item.agents.keys()].sort().join(", ") || "none"
-              return `| ${item.depth} | \`${item.session.id}\` | ${escapeCell(agents)} | ${item.messages} | ${formatCost(item.cost)} | ${escapeCell(item.session.title)} |`
+              const models = [...item.models.keys()].sort().join(", ") || "none"
+              return `| ${item.depth} | \`${item.session.id}\` | ${escapeCell(agents)} | ${escapeCell(models)} | ${item.messages} | ${formatCost(item.cost)} | ${escapeCell(item.session.title)} |`
             }),
           "",
           "## Completeness",
