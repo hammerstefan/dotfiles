@@ -86,11 +86,32 @@ Use only `review_inspect` for Git and GitHub data; never invoke Bash.
 
 ## Validate And Persist
 
-Parse the candidate block without repairing, completing, or guessing malformed
-content. Verify that Markdown and JSON agree. `NONE` must have no items; other
-statuses must have one or more items. If validation fails, display the Markdown
-analysis if usable, mark persistence failed, and state that the review did not
-complete successfully.
+Rebuild coordinator-owned envelope fields from the normalized contract:
+`invocation` is `independent`, exact `scope`, `focus`, `exclusions`, and
+`direction` come from the contract, and `council_summary` is `null`. Replace any
+echoed values or changed field names from the advisory response.
+
+Recover items independently using only these aliases: `type|types` to
+`attention_types`; `location` to one-element `locations`;
+`impact_severity|severity` to `impact_level`; `uncertainty_source` to
+one-element `uncertainty_sources`; `why_human_review` to `why_human`;
+`owner|reviewer` to `needed_capability`; `action|question` to `human_action`.
+Each canonical destination must have exactly one source. If a canonical field
+and alias coexist, or multiple aliases for one destination coexist, exclude the
+item and warn; never merge or choose precedence. Singular `type`, `location`,
+and `uncertainty_source` aliases contain one value/object, `types` is an array,
+and text aliases are strings. Wrong shapes exclude the item.
+Do not infer missing substantive fields. Drop unknown fields from otherwise
+valid items, reassign sequential IDs, order REQUIRED before RECOMMENDED, remove
+exact duplicate array values, and derive status from retained items. Exclude
+invalid items without discarding valid siblings.
+
+Display relevant excluded or unknown content under `### Contract Warnings`,
+naming what was replaced, renamed, dropped, or not persisted and blockquoting a
+concise redacted rendering. Never display malformed raw JSON or restore secrets,
+code dumps, or out-of-scope data. If no item survives but advisory content
+exists, report `Human review: NEEDS_MANUAL_REVIEW`, display warnings and content,
+and create no artifact. Only a wholly unusable response is `FAILED`.
 
 When status is `NONE`, do not call a persistence tool. Append:
 
@@ -131,7 +152,8 @@ structured output.
 - Persist only metadata, concise summaries, questions, and minimal redacted
   evidence. Never persist raw specialist output, code dumps, environment data,
   credentials, tokens, private keys, personal data, or secret values.
-- Fail closed on scope ambiguity, malformed output, stale locations, unsafe
-  paths, inconsistent status, or persistence errors.
+- Fail closed on scope ambiguity, stale locations, unsafe paths, substantive
+  missing item data, or persistence errors. Recover minor structural contract
+  failures only through the explicit normalization rules above.
 - There is no editorial item limit. The persistence tool independently enforces
   high technical safety ceilings against resource exhaustion.

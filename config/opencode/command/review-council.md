@@ -224,9 +224,63 @@ including incomplete automated tracing, when their potential impact is
 consequential.
 
 The agent remains strictly read-only. It must display full actionable fields
-for every item and end with one `review-human-json` candidate block. Parse that
-block without repairing or guessing malformed content. Verify that Markdown
-and JSON agree and that the supplied council summary was copied exactly.
+for every item and end with one `review-human-json` candidate block.
+
+### Recover The Candidate
+
+The coordinator owns the persistence envelope. Never trust or require the
+advisory model to reproduce it. Construct the candidate payload by copying
+these authoritative values directly from the normalized contract and chair
+result, replacing any values or field names emitted by `review-human`:
+- `invocation`: `council`.
+- Exact normalized `scope`, `focus`, `exclusions`, and `direction`.
+- Exact `council_summary` supplied at dispatch.
+
+Recover advisory items conservatively and one item at a time:
+- Accept canonical item fields as documented by `review-human`.
+- Rename only these unambiguous aliases: `type` or `types` to
+  `attention_types`; `location` to a one-element `locations` array;
+  `impact_severity` or `severity` to `impact_level`; `uncertainty_source` to a
+  one-element `uncertainty_sources` array; `why_human_review` to `why_human`;
+  `owner` or `reviewer` to `needed_capability`; `action` or `question` to
+  `human_action`.
+- Each canonical destination must have exactly one source. If its canonical
+  field coexists with any alias, or multiple aliases for that destination
+  coexist, exclude the item and emit a redacted collision warning. Never merge
+  values or choose precedence.
+- Singular aliases `type`, `location`, and `uncertainty_source` must contain one
+  value/object; plural aliases `types` must be an array. Text aliases must be
+  strings. A wrong alias shape excludes the item rather than being coerced.
+- Never infer missing locations, evidence, impact, priority, confidence, or
+  substantive text. Never convert arbitrary prose into a valid item.
+- Drop unknown fields from an otherwise valid item and record every dropped or
+  renamed field in a warning tied to that item.
+- Reassign IDs sequentially after recovery, order REQUIRED before RECOMMENDED,
+  remove exact duplicate array values, and derive overall status from retained
+  items. These are structural normalizations, not substantive repairs.
+- Validate each recovered item against the documented contract. Exclude only
+  invalid items; do not discard valid siblings.
+
+Content outside the contract is displayable but never persistable. Preserve it
+under `### Contract Warnings` using this form:
+
+```markdown
+- `HUM-002` was not persisted: missing `locations`; original advisory text follows.
+  > <concise original item or section, redacted for secrets>
+- Candidate field `reviewer_notes` is outside the persistence contract and was not persisted.
+  > <concise original content, redacted for secrets>
+```
+
+Do not display malformed raw JSON. Render relevant human-readable content from
+excluded items or unknown top-level sections, with exact warnings naming what
+was renamed, replaced, dropped, or excluded. Never restore secret-like content,
+raw reviewer outputs, code dumps, or data outside the normalized scope.
+
+If at least one item survives, persist the rebuilt candidate and report
+`Human review: REQUIRED` or `RECOMMENDED`. If no item survives but advisory
+content exists, report `Human review: NEEDS_MANUAL_REVIEW`, display the content
+and warnings, and create no artifact. If the advisory clearly reports no items,
+report `NONE`.
 
 For `NONE`, do not call a persistence tool and append:
 
@@ -240,10 +294,12 @@ revisions, locations, safety limits, and the collision-safe atomic write. On
 success, append the exact returned relative path. Never display the candidate
 JSON unless `--raw` was requested.
 
-If the human pass or required persistence fails, still return the successful
-chair report, mark `Human review: FAILED`, omit the artifact, and state that the
-overall council workflow did not complete fully. Do not retry with weakened or
-modified data.
+If the advisory response has no usable Markdown or item-like content, or the
+writer rejects a rebuilt candidate, still return the successful chair report,
+mark `Human review: FAILED`, omit the artifact, and state why. Do not make a
+second model call and do not retry persistence. Minor envelope, field-name,
+unknown-field, or per-item contract failures are recoverable as specified above
+and must not fail the whole advisory pass.
 
 If `--no-human` was supplied, show `Human review: SKIPPED` in review coverage
 and create no human-review artifact.
@@ -264,8 +320,10 @@ Return:
 ... chair-verified findings ordered by severity ...
 
 ## Human Review Attention
-**Human review:** REQUIRED | RECOMMENDED | NONE | FAILED | SKIPPED
+**Human review:** REQUIRED | RECOMMENDED | NEEDS_MANUAL_REVIEW | NONE | FAILED | SKIPPED
 ... full actionable human-attention items ...
+### Contract Warnings
+... omitted when no recovery warning exists ...
 **Artifact:** `.opencode/reviews/<generated-name>.json` | not created (...)
 
 ## Review Coverage

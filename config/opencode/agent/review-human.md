@@ -186,9 +186,13 @@ Rules for the JSON block:
 - `attention_types` uses only the five values shown; multiple values are
   allowed. `category` and `uncertainty_sources` may use accurate free-form
   lowercase hyphenated slugs.
-- In independent context, `council_summary` is `null`.
-- In council context, copy the supplied summary exactly using this shape:
-  `verdict`, `selected_reviewers`, `failed_reviewers`,
+- The coordinator, not this agent, owns all envelope metadata. Echo the supplied
+  `invocation`, `scope`, `focus`, `exclusions`, `direction`, and
+  `council_summary` when possible, but do not derive, rename, summarize, or
+  reinterpret them. A coordinator may deterministically replace these echoes
+  with its authoritative values before persistence.
+- In independent context, `council_summary` is `null`. In council context its
+  expected fields are `verdict`, `selected_reviewers`, `failed_reviewers`,
   `verified_finding_ids`, and `verified_finding_count`.
 - For `NONE`, return `items: []`. For other statuses, return one or more items.
 - Never include raw reviewer outputs, full code excerpts, credentials, tokens,
