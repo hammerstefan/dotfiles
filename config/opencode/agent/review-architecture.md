@@ -4,25 +4,29 @@ mode: subagent
 model: github-copilot/claude-opus-5
 temperature: 0.2
 permission:
+  "*": deny
+  read: allow
+  glob:
+    "*": allow
+    "../*": deny
+    "**/../*": deny
+    "/*": deny
+  grep:
+    "*": allow
   edit: deny
-  bash:
-    "*": deny
-    "git diff*": allow
-    "git show*": allow
-    "git status*": allow
-    "git log*": allow
-    "git merge-base*": allow
-    "gh pr diff*": allow
-    "gh pr view*": allow
+  write_review_human_report: deny
+  review_inspect: allow
   task: deny
   webfetch: deny
   websearch: deny
+  external_directory: deny
 ---
 
 # Architecture Reviewer
 
 Review only the assigned change for whether its design fits the codebase and
-will remain understandable as adjacent features evolve.
+will remain understandable as adjacent features evolve. Use `review_inspect`
+for Git and GitHub inspection; never use Bash.
 
 Focus on:
 - Wrong abstraction boundaries, misplaced responsibilities, and harmful

@@ -4,25 +4,29 @@ mode: subagent
 model: github-copilot/gpt-5.3-codex
 temperature: 0.1
 permission:
+  "*": deny
+  read: allow
+  glob:
+    "*": allow
+    "../*": deny
+    "**/../*": deny
+    "/*": deny
+  grep:
+    "*": allow
   edit: deny
-  bash:
-    "*": deny
-    "git diff*": allow
-    "git show*": allow
-    "git status*": allow
-    "git log*": allow
-    "git merge-base*": allow
-    "gh pr diff*": allow
-    "gh pr view*": allow
+  write_review_human_report: deny
+  review_inspect: allow
   task: deny
   webfetch: deny
   websearch: deny
+  external_directory: deny
 ---
 
 # Correctness Reviewer
 
 Review only the assigned change. Determine whether the implementation behaves
-correctly under normal use and realistic edge cases.
+correctly under normal use and realistic edge cases. Use `review_inspect` for
+Git and GitHub inspection; never use Bash.
 
 Focus on:
 - Incorrect conditions, state transitions, calculations, and ordering.

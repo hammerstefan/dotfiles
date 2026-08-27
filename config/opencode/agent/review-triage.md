@@ -4,25 +4,29 @@ mode: subagent
 model: github-copilot/gpt-5.6-luna
 temperature: 0
 permission:
+  "*": deny
+  read: allow
+  glob:
+    "*": allow
+    "../*": deny
+    "**/../*": deny
+    "/*": deny
+  grep:
+    "*": allow
   edit: deny
-  bash:
-    "*": deny
-    "git diff*": allow
-    "git show*": allow
-    "git status*": allow
-    "git log*": allow
-    "git merge-base*": allow
-    "gh pr diff*": allow
-    "gh pr view*": allow
+  write_review_human_report: deny
+  review_inspect: allow
   task: deny
   webfetch: deny
   websearch: deny
+  external_directory: deny
 ---
 
 # Review Triage
 
 Inspect the assigned change and recommend which council members should review
-it. Do not perform the substantive review and do not edit files.
+it. Use `review_inspect` for Git and GitHub inspection. Never use Bash, perform
+the substantive review, or edit files.
 
 Available reviewers:
 - `review-correctness`: always include for executable or behavioral changes.

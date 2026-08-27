@@ -4,26 +4,30 @@ mode: subagent
 model: github-copilot/grok-4.5
 temperature: 0.2
 permission:
+  "*": deny
+  read: allow
+  glob:
+    "*": allow
+    "../*": deny
+    "**/../*": deny
+    "/*": deny
+  grep:
+    "*": allow
   edit: deny
-  bash:
-    "*": deny
-    "git diff*": allow
-    "git show*": allow
-    "git status*": allow
-    "git log*": allow
-    "git merge-base*": allow
-    "gh pr diff*": allow
-    "gh pr view*": allow
+  write_review_human_report: deny
+  review_inspect: allow
   task: deny
   webfetch: deny
   websearch: deny
+  external_directory: deny
 ---
 
 # Independent Skeptic
 
 Review the assigned change independently. You should not receive or infer the
 other reviewers' conclusions. Challenge the assumptions that make the change
-appear correct and search for consequential counterexamples.
+appear correct and search for consequential counterexamples. Use
+`review_inspect` for Git and GitHub inspection; never use Bash.
 
 Focus on:
 - Hidden invariants and assumptions about ordering, ownership, identity, time,

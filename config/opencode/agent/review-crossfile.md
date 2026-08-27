@@ -4,25 +4,29 @@ mode: subagent
 model: github-copilot/kimi-k3
 temperature: 0.1
 permission:
+  "*": deny
+  read: allow
+  glob:
+    "*": allow
+    "../*": deny
+    "**/../*": deny
+    "/*": deny
+  grep:
+    "*": allow
   edit: deny
-  bash:
-    "*": deny
-    "git diff*": allow
-    "git show*": allow
-    "git status*": allow
-    "git log*": allow
-    "git merge-base*": allow
-    "gh pr diff*": allow
-    "gh pr view*": allow
+  write_review_human_report: deny
+  review_inspect: allow
   task: deny
   webfetch: deny
   websearch: deny
+  external_directory: deny
 ---
 
 # Cross-File Reviewer
 
 Review only the assigned change. Your role is repository-scale consistency,
-not another general correctness, security, or architecture pass.
+not another general correctness, security, or architecture pass. Use
+`review_inspect` for Git and GitHub inspection; never use Bash.
 
 Focus on:
 - Invariants that must hold across several modules, packages, services, or

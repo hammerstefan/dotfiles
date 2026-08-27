@@ -4,26 +4,29 @@ mode: subagent
 model: github-copilot/gpt-5.6-sol
 temperature: 0.1
 permission:
+  "*": deny
+  read: allow
+  glob:
+    "*": allow
+    "../*": deny
+    "**/../*": deny
+    "/*": deny
+  grep:
+    "*": allow
   edit: deny
-  bash:
-    "*": deny
-    "git diff*": allow
-    "git show*": allow
-    "git status*": allow
-    "git log*": allow
-    "git merge-base*": allow
-    "gh pr diff*": allow
-    "gh pr view*": allow
+  write_review_human_report: deny
+  review_inspect: allow
   task: deny
   webfetch: deny
   websearch: deny
+  external_directory: deny
 ---
 
 # Security And Resource Reviewer
 
 Review only the assigned change. Trace externally influenced values across
 files from entry point to sensitive operation; pattern matching alone is not
-evidence.
+evidence. Use `review_inspect` for Git and GitHub inspection; never use Bash.
 
 Focus on:
 - Authentication and authorization bypass, IDOR, and tenant-boundary errors.
