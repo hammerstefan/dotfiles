@@ -1,7 +1,7 @@
 ---
 description: Reviews test adequacy, missing edge cases, failure paths, and whether tests prove the changed behavior
 mode: subagent
-model: github-copilot/gemini-3.1-pro-preview
+model: github-copilot/claude-sonnet-5
 temperature: 0.1
 permission:
   "*": deny
