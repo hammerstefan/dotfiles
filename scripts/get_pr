@@ -172,12 +172,14 @@ build_init_file() {
 	local remote="$2"
 	cat <<EOF
 . "\$HOME/.bashrc"
+export GET_PR_SUBSHELL="${branch_name}"
 export GIT_CONFIG_COUNT=2
 export GIT_CONFIG_KEY_0=push.default
 export GIT_CONFIG_VALUE_0=upstream
 export GIT_CONFIG_KEY_1=remote.pushdefault
 export GIT_CONFIG_VALUE_1="${remote}"
 cd "${worktree}"
+PS1="(R) \$PS1"
 EOF
 }
 
