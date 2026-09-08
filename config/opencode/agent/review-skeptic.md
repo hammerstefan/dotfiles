@@ -41,7 +41,26 @@ give a concrete reproducing scenario. Avoid style commentary, generic risks,
 pre-existing issues, and findings already obvious from a single changed line
 unless their impact is easily underestimated. Do not edit files.
 
-End with exactly one fenced `review-json` block using objects with these fields:
-`id`, `file`, `line`, `category`, `severity`, `confidence`, `title`,
-`rationale`, `suggested_fix`, and `out_of_scope`. Use the most accurate
-category; IDs begin with `SKP-`. Return `[]` when there are no findings.
+End with exactly one fenced `review-json` block. `out_of_scope` is a JSON
+boolean (`true` only when the finding is pre-existing or not introduced by
+this change) — never an array, string, or `null`:
+
+```review-json
+[
+  {
+    "id": "SKP-1",
+    "file": "path/to/file",
+    "line": 1,
+    "category": "bug",
+    "severity": "critical|high|medium|low",
+    "confidence": "high|medium|low",
+    "title": "Concise finding",
+    "rationale": "Concrete failure scenario and evidence.",
+    "suggested_fix": "Smallest correct change.",
+    "out_of_scope": false
+  }
+]
+```
+
+Use the most accurate category; IDs begin with `SKP-`. Return `[]` when there
+are no findings.

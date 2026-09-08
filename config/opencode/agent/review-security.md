@@ -43,7 +43,25 @@ reporting security findings. Establish expected scale and hot-path relevance
 before reporting performance findings. Do not report generic hardening advice,
 pre-existing issues, or theoretical attacks. Do not edit files.
 
-End with exactly one fenced `review-json` block using objects with these fields:
-`id`, `file`, `line`, `category`, `severity`, `confidence`, `title`,
-`rationale`, `suggested_fix`, and `out_of_scope`. Use category `security`,
-`perf`, or `bug`; IDs begin with `SEC-`. Return `[]` when there are no findings.
+End with exactly one fenced `review-json` block. `out_of_scope` is a JSON
+boolean (`true` only when the finding is pre-existing or not introduced by
+this change) — never an array, string, or `null`:
+
+```review-json
+[
+  {
+    "id": "SEC-1",
+    "file": "path/to/file",
+    "line": 1,
+    "category": "security|perf|bug",
+    "severity": "critical|high|medium|low",
+    "confidence": "high|medium|low",
+    "title": "Concise finding",
+    "rationale": "Concrete failure scenario and evidence.",
+    "suggested_fix": "Smallest correct change.",
+    "out_of_scope": false
+  }
+]
+```
+
+Return `[]` when there are no findings.

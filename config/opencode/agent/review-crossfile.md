@@ -45,9 +45,26 @@ files, generic architecture preferences, broad search results without runtime
 impact, duplicate symptoms of one root cause, or pre-existing inconsistencies.
 Do not edit files.
 
-End with exactly one fenced `review-json` block using objects with these fields:
-`id`, `file`, `line`, `category`, `severity`, `confidence`, `title`,
-`rationale`, `suggested_fix`, and `out_of_scope`. Use category `crossfile`,
-`bug`, `behavior`, or `compatibility`; IDs begin with `XFL-`. In `rationale`,
-name every file or boundary needed to prove the finding. Return `[]` when
-there are no findings.
+End with exactly one fenced `review-json` block. `out_of_scope` is a JSON
+boolean (`true` only when the finding is pre-existing or not introduced by
+this change) — never an array, string, or `null`:
+
+```review-json
+[
+  {
+    "id": "XFL-1",
+    "file": "path/to/file",
+    "line": 1,
+    "category": "crossfile|bug|behavior|compatibility",
+    "severity": "critical|high|medium|low",
+    "confidence": "high|medium|low",
+    "title": "Concise finding",
+    "rationale": "Concrete failure scenario and evidence.",
+    "suggested_fix": "Smallest correct change.",
+    "out_of_scope": false
+  }
+]
+```
+
+In `rationale`, name every file or boundary needed to prove the finding.
+Return `[]` when there are no findings.

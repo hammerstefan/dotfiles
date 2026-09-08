@@ -43,7 +43,25 @@ describe a plausible regression that the current suite would miss. Do not
 duplicate an implementation bug as a test finding unless inadequate testing
 is independently actionable. Do not edit files or claim to have run tests.
 
-End with exactly one fenced `review-json` block using objects with these fields:
-`id`, `file`, `line`, `category`, `severity`, `confidence`, `title`,
-`rationale`, `suggested_fix`, and `out_of_scope`. Use category `test`; IDs
-begin with `TST-`. Return `[]` when there are no findings.
+End with exactly one fenced `review-json` block. `out_of_scope` is a JSON
+boolean (`true` only when the finding is pre-existing or not introduced by
+this change) — never an array, string, or `null`:
+
+```review-json
+[
+  {
+    "id": "TST-1",
+    "file": "path/to/file",
+    "line": 1,
+    "category": "test",
+    "severity": "critical|high|medium|low",
+    "confidence": "high|medium|low",
+    "title": "Concise finding",
+    "rationale": "Concrete failure scenario and evidence.",
+    "suggested_fix": "Smallest correct change.",
+    "out_of_scope": false
+  }
+]
+```
+
+Return `[]` when there are no findings.
