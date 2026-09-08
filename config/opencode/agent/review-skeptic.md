@@ -1,7 +1,7 @@
 ---
 description: Independently challenges a change's assumptions and searches for consequential defects missed by conventional review
 mode: subagent
-model: github-copilot/grok-4.5
+model: github-copilot/grok-4.6
 temperature: 0.2
 permission:
   "*": deny

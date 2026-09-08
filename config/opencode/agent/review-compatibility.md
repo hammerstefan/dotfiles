@@ -1,7 +1,7 @@
 ---
 description: Reviews changes for API, schema, migration, configuration, rollout, and deployment compatibility
 mode: subagent
-model: github-copilot/gpt-5.6-terra
+model: github-copilot/claude-sonnet-5
 temperature: 0.1
 permission:
   "*": deny

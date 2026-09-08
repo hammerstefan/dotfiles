@@ -1,7 +1,7 @@
 ---
 description: Adjudicates reviewer findings into a deduplicated, evidence-based final code-review verdict
 mode: subagent
-model: github-copilot/gpt-5.5
+model: github-copilot/gpt-5.6-sol
 temperature: 0.1
 permission:
   "*": deny

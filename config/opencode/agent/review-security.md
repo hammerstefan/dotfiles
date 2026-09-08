@@ -1,7 +1,7 @@
 ---
 description: Traces changed code for reachable security, privacy, performance, and resource-exhaustion defects
 mode: subagent
-model: github-copilot/gpt-5.6-sol
+model: github-copilot/gpt-6-astra
 temperature: 0.1
 permission:
   "*": deny
