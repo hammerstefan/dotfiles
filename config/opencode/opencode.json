@@ -16,13 +16,6 @@
         { "action": "context7_*", "resource": "*", "effect": "allow" }
       ]
     },
-    "Openspec-Plan": {
-      "model": "minimax-coding-plan/MiniMax-M3",
-      "permissions": [
-        { "action": "semble_*", "resource": "*", "effect": "allow" },
-        { "action": "context7_*", "resource": "*", "effect": "allow" }
-      ]
-    },
     "explore": {
       "permissions": [
         { "action": "semble_*", "resource": "*", "effect": "allow" },
@@ -43,6 +36,9 @@
     { "action": "read", "resource": "~/.cache/opencode/packages/*", "effect": "allow" },
     { "action": "external_directory", "resource": "/tmp/**", "effect": "allow" },
     { "action": "external_directory", "resource": "~/.config/opencode/command/*", "effect": "allow" }
+  ],
+  "plugins": [
+    "./plugins/openspec"
   ],
   "plugin": [
     "/home/stefan.hammer@canonical.com/.hindsight/coding-agents"
