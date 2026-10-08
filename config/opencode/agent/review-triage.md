@@ -2,7 +2,9 @@
 description: Quickly classifies a change and selects the smallest appropriate reviewer council
 mode: subagent
 model: github-copilot/gpt-5.6-luna
-temperature: 0
+request:
+  body:
+    temperature: 0
 permissions:
   - action: "*"
     resource: "*"
@@ -34,7 +36,7 @@ permissions:
   - action: review_inspect
     resource: "*"
     effect: allow
-  - action: task
+  - action: subagent
     resource: "*"
     effect: deny
   - action: webfetch
@@ -70,12 +72,31 @@ Available reviewers:
   repository-wide rename or replacement, changes across 10+ implementation
   files, or a diff touching 3+ architectural components. Do not select it for
   an ordinary multi-file feature that other specialists can review locally.
+- `review-readability`: include whenever scoped human-facing text remains after
+  exclusions. Inspect content, not extensions: documentation/specifications,
+  comments, docstrings, errors, CLI help, UI text, configuration/test descriptions,
+  and agent instructions all count. Skip machine-only strings, generated text,
+  third-party content, and excluded paths. For diffs, consider changed text and
+  clarity problems newly introduced by the change; for paths, current contents.
+
+Honor explicit `--only` selection over mode or focus. Under automatic selection,
+readability focus requires readability when relevant text remains. Low budget
+allows at most three other auto-selected specialists; readability is outside
+that limit. `--no-human` does not remove it. An empty scope dispatches nobody.
+Disclose inspection limits in `scope_summary` rather than treating unread
+content as machine-only or claiming complete coverage.
 
 Choose one mode:
-- `fast`: correctness, security, and chair.
-- `standard`: correctness, security, architecture, tests, and chair.
-- `full`: every reviewer, including cross-file, and chair.
+- `fast`: correctness, security, readability, and chair.
+- `standard`: correctness, security, architecture, tests, readability, and chair.
+- `full`: all eight specialists, including cross-file and readability, and chair.
 - `custom`: only the reviewers justified by the diff.
+
+These fixed sets apply when the user requests that fixed mode, for every
+non-empty scope. When triaging `auto`, use content-based readability selection
+even if recommending a fixed-mode label; return the exact chosen specialists
+in `reviewers`. Do not include the chair in that list. Give a content-based
+reason for selecting or skipping readability in `reasons`.
 
 Return only one fenced `review-triage-json` block:
 

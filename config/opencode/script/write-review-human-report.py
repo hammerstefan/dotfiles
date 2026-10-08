@@ -49,6 +49,7 @@ REVIEWERS = {
     "review-compatibility",
     "review-skeptic",
     "review-crossfile",
+    "review-readability",
 }
 SCOPE_KINDS = {"uncommitted", "staged", "commit", "range", "branch", "pr", "path"}
 VERDICTS = {"APPROVE", "REQUEST_CHANGES", "NEEDS_DISCUSSION"}

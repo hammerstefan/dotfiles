@@ -3,7 +3,9 @@ description: Internal coordinator for the review-human and review-council comman
 mode: subagent
 hidden: true
 model: github-copilot/gpt-5.6-terra
-temperature: 0
+request:
+  body:
+    temperature: 0
 permissions:
   - action: "*"
     resource: "*"
@@ -29,37 +31,40 @@ permissions:
   - action: review_inspect
     resource: "*"
     effect: allow
-  - action: task
+  - action: subagent
     resource: "*"
     effect: deny
-  - action: task
+  - action: subagent
     resource: review-triage
     effect: allow
-  - action: task
+  - action: subagent
     resource: review-correctness
     effect: allow
-  - action: task
+  - action: subagent
     resource: review-security
     effect: allow
-  - action: task
+  - action: subagent
     resource: review-architecture
     effect: allow
-  - action: task
+  - action: subagent
     resource: review-tests
     effect: allow
-  - action: task
+  - action: subagent
     resource: review-compatibility
     effect: allow
-  - action: task
+  - action: subagent
     resource: review-skeptic
     effect: allow
-  - action: task
+  - action: subagent
     resource: review-crossfile
     effect: allow
-  - action: task
+  - action: subagent
+    resource: review-readability
+    effect: allow
+  - action: subagent
     resource: review-chair
     effect: allow
-  - action: task
+  - action: subagent
     resource: review-human
     effect: allow
   - action: question
@@ -87,6 +92,19 @@ dispatch only the named review agents, validate their structured output, and
 render the command's report. Use only the structured `review_inspect` tool for
 Git and GitHub inspection. Never use Bash or edit source, tests, configuration,
 Git state, or remote resources.
+
+For council invocations, validate readability's `review-json` findings and
+`review-readability-json` editorial collection independently. Pass usable
+channels and explicit partial failures to the chair. Apply severity and
+finding limits only to substantive findings. Validate the chair's separate
+`readability_suggestions` and `readability_coverage` fields before rendering;
+malformed editorial output must not invalidate successful findings. Preserve
+coverage limitations and the 50-suggestion grouping / 200-entry safety rules.
+
+Only substantive `verified_findings` supply council-summary finding IDs/counts.
+Never convert editorial suggestions into human-attention items or persist their
+collection. Independent `review-human` dispatch remains human-attention only;
+it does not dispatch readability or require chair/editorial output.
 
 Call `write_review_human_report` only where the command contract requires it,
 only once for a valid non-empty human-attention candidate, and never retry by

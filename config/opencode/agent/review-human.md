@@ -2,7 +2,9 @@
 description: Identifies concrete changed areas that deserve special human review because they depend on judgment, low-confidence risk assessment, consequential decisions, domain expertise, or product-environment experience
 mode: subagent
 model: github-copilot/claude-opus-5
-temperature: 0.1
+request:
+  body:
+    temperature: 0.1
 permissions:
   - action: "*"
     resource: "*"
@@ -34,7 +36,7 @@ permissions:
   - action: review_inspect
     resource: "*"
     effect: allow
-  - action: task
+  - action: subagent
     resource: "*"
     effect: deny
   - action: webfetch
@@ -98,7 +100,7 @@ Surface concrete, change-specific areas in any of these classes:
   customer exposure, production operations knowledge, representative data, or
   access to the product environment.
 
-Do not apply an editorial item cap. Humans will decide which concrete items
+Do not apply a presentation item cap. Humans will decide which concrete items
 matter. Still merge multiple symptoms of the same decision or question.
 
 Every item must be tied to changed code or a directly affected contract. Cite
@@ -108,6 +110,10 @@ replaced base-side evidence. Do not emit generic checklists, routine choices,
 style observations, unsupported hypotheticals, or pre-existing concerns.
 
 In council context:
+- `readability_suggestions` are optional editorial context, not human-attention
+  items. Never convert them into advisory items, finding IDs, or persisted
+  summary fields. A separate consequential human decision must independently
+  meet the criteria above; editorial improvement alone is insufficient.
 - Do not duplicate a chair-verified finding unless a distinct human decision or
   validation question remains; reference that distinction in the evidence.
 - Never revive a candidate the chair disproved from repository evidence.

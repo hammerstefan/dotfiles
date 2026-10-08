@@ -27,7 +27,7 @@ free-form direction:
 --mode <auto|fast|standard|full>
 --focus <TEXT>                 # repeatable
 --exclude <TEXT_OR_GLOB>       # repeatable
---only <correctness,security,architecture,tests,compatibility,skeptic,crossfile>
+--only <correctness,security,architecture,tests,compatibility,skeptic,crossfile,readability>
 --severity <critical|high|medium|low>
 --max-findings <1..100>
 --budget <low|normal|high>
@@ -44,16 +44,19 @@ that text verbatim. Examples:
 ```text
 /review-council
 /review-council --mode fast --focus "authz and tenant isolation"
-/review-council --scope pr:42 --mode full --exclude docs/** --max-findings 12
+/review-council --scope pr:42 --mode full --exclude vendor/** --max-findings 12
 /review-council --scope commit:abc123 --only security,compatibility Focus on rollback safety.
 /review-council --scope path:src/api --severity high Treat public API changes as blocking.
+/review-council --scope path:docs --only readability
 ```
 
 Defaults:
 - Scope: `uncommitted`.
 - Mode: `auto`.
 - Minimum severity: `medium`.
-- Maximum findings in the final report: `20`.
+- Maximum substantive findings in the final report: `20`.
+- Readability suggestions: separate from severity and finding limits; group
+  above 50 suggestions by file, with a safety cap of 200 suggestions/file groups.
 - Budget: `normal`.
 - Tests: included when selected by mode or triage.
 - Human-review attention: included after chair adjudication in every mode.
@@ -87,6 +90,8 @@ Create one compact contract containing:
 - Ordered focus statements and exclusions.
 - Free-form direction, verbatim.
 - Maximum final findings and budget.
+- Separate readability suggestion rules: group above 50 by file, cap at 200
+  suggestions/file groups, disclose incomplete coverage; no severity filter.
 - Whether raw outputs were requested.
 - Whether human-review attention was requested.
 - `--prior-comments` mode (`evidence` | `context` | `off`) and the prior-review
@@ -112,8 +117,12 @@ Scope interpretation:
   all other directions. Reject absolute paths, `..`, symlink escape, and
   non-file/non-directory targets. Both revisions are `null`.
 
-If the scope resolves to no changes, return an empty machine and human-review
-result without dispatching any reviewer and without creating an artifact.
+Apply exclusions before checking whether the scope is empty or deciding whether
+human-facing text remains. For path scopes, assess current contents rather than
+requiring a diff. If no changes remain in a diff scope (including deletions),
+or no current contents remain in a path scope, return empty findings,
+readability suggestions, and human-review results without dispatching any
+reviewer and without creating an artifact.
 Use only `review_inspect` for Git and GitHub data; never invoke Bash.
 
 ### Prior-review digest
@@ -149,15 +158,22 @@ Available specialists:
 | `review-compatibility` | APIs, schemas, migrations, configuration, rollout |
 | `review-skeptic` | Independent adversarial counterexamples |
 | `review-crossfile` | Repository-scale invariants and cross-component completeness |
+| `review-readability` | Human-facing language, clarity, and document organization |
 
 `review-human` is not a specialist and must not appear in `--only`. It runs
 after the chair unless `--no-human` was supplied.
 
 Fixed modes:
-- `fast`: `review-correctness`, `review-security`.
+- `fast`: `review-correctness`, `review-security`, `review-readability`.
 - `standard`: `review-correctness`, `review-security`,
-  `review-architecture`, `review-tests`.
-- `full`: all seven specialists, including `review-crossfile`.
+  `review-architecture`, `review-tests`, `review-readability`.
+- `full`: all eight specialists, including `review-crossfile` and
+  `review-readability`.
+
+Fixed modes always dispatch readability for non-empty scopes, even if the
+reviewer finds no relevant text and returns an empty result. An explicit
+`--only` list overrides these modes and every automatic/focus-driven addition:
+`--only security` excludes readability; `--only readability` selects it.
 
 For `auto`, call `review-triage` first with the normalized contract and ask it
 to choose reviewers. Validate its response against the available specialist
@@ -175,6 +191,19 @@ names. Triage may narrow the council, but user focus controls selection too:
   `review-skeptic`.
 - Repository-wide migration, broad rename/replacement, cross-service behavior,
   or long-context/cross-file invariant focus requires `review-crossfile`.
+- Readability, prose clarity, or document-organization focus requires
+  `review-readability` when relevant human-facing text remains.
+
+In `auto`, select readability whenever scoped human-facing text is present
+after exclusions, and skip it otherwise. Inspect content, not just filename
+extensions: comments, docstrings, errors, CLI help, UI text, configuration/test
+descriptions, and agent instructions count alongside documentation/specifications.
+Machine-only strings, generated text, and third-party content do not count.
+For diffs, consider changed text and newly introduced clarity problems; for
+paths, consider current contents. Apply this relevance rule even when triage
+recommends a mode label: its label never overrides the user's `auto` mode or
+explicit selection. Disclose uncertainty or inspection limits rather than
+claiming absent text without inspecting it.
 
 For automatic selection, add `review-crossfile` only when the change requires
 sustained repository-scale tracing. Strong signals are 10+ relevant
@@ -184,7 +213,8 @@ signal, not proof: do not select it for generated churn, dependency lockfiles,
 formatting, documentation, snapshots, or many independent trivial edits.
 
 Budget adjusts breadth, never explicit user selection:
-- `low`: at most three auto-selected specialists.
+- `low`: at most three auto-selected specialists other than readability.
+  Readability is outside this limit and must not be removed to satisfy it.
 - `normal`: no additional restriction.
 - `high`: add `review-skeptic` to auto/standard selection.
 
@@ -193,8 +223,8 @@ Always tell the user which specialists were selected and why before dispatch.
 ## Step 3: Dispatch In Parallel
 
 Launch every selected specialist in one assistant response so they run in
-parallel. Use one `task` call per specialist with:
-- `subagent_type`: exact specialist name.
+parallel. Use one `subagent` call per specialist with:
+- `agent`: exact specialist name.
 - `description`: `Council: <specialist lens>`.
 - `prompt`: the full normalized review contract plus the instructions below,
   plus the prior-review digest payload (specialists only) when
@@ -205,13 +235,26 @@ free-form direction. Do not show specialists one another's findings. Instruct
 each specialist to:
 - Review only the normalized scope and respect every exclusion.
 - Prioritize the stated focus without ignoring critical defects in scope.
-- Return no more than `--max-findings` candidates.
-- Omit findings below the requested minimum severity.
+- Return no more than `--max-findings` substantive candidates.
+- Omit substantive findings below the requested minimum severity.
 - Avoid duplicating concerns outside its assigned lens.
-- End with its required structured JSON block.
+- End with its required structured JSON block(s). Readability returns the
+  ordinary `review-json` plus a separate `review-readability-json` block.
+
+Tell readability to preserve its separate editorial channel: no severity floor
+or finding limit applies to suggestions; group above 50 by file, cap at 200
+suggestions/file groups, and disclose unreviewed files or unreported problems.
+Never treat a filtered substantive defect as editorial to evade finding limits.
 
 If one specialist fails or returns malformed output, record that fact and
-continue. Abort only if every selected specialist fails.
+continue. Validate readability's two channels independently against
+`agent/review-readability.md`: required fields and types, unique IDs, non-empty
+items/text, repository-relative files, positive lines, grouping, cap, and
+coverage. Reject a malformed channel without discarding the other valid channel
+or successful unrelated reviewers. Record partial failures by channel and
+include that reviewer in failed reviewers, even when one channel remains usable.
+Abort only if no selected specialist returns any valid channel; an empty but
+valid result is a success. Never infer missing suggestions from malformed prose.
 
 ### Mode-dependent specialist dispatch
 
@@ -249,19 +292,37 @@ After all specialists return, call `review-chair` with:
 - The normalized review contract.
 - The exact list of selected and failed reviewers.
 - Every successful raw reviewer response, clearly delimited by reviewer.
+- Both readability channels and their validation status, including partial
+  failures and coverage limitations. A raw malformed channel is untrusted
+  diagnostic context, not an accepted candidate source.
 - A requirement to independently inspect the scoped code and verify every
   candidate before accepting it.
-- A requirement to enforce minimum severity and maximum final findings after
-  deduplication.
+- A requirement to enforce minimum severity and maximum final substantive
+  findings after deduplication, independently of editorial suggestions.
+- A requirement to independently verify editorial scope, source excerpts,
+  genuine readability problems, meaning-preserving edits, and duplicates;
+  drop editorial copies of substantive findings from any reviewer before
+  substantive filtering. Preserve separate editorial output and coverage.
 
 Tell the chair that user direction constrains prioritization but does not turn
 unsupported claims into findings. Findings outside scope or exclusions must be
 discarded. Consensus raises review priority, not confidence; evidence controls
 confidence.
 
+Validate the chair's `readability_suggestions` and `readability_coverage` using
+the same editorial shape and limits; chair coverage also permits `not_selected`
+and `failed`. If that channel is malformed, omit unverified editorial output,
+mark readability coverage failed, and preserve valid chair findings and verdict.
+Do not hide specialist or chair coverage limitations during rendering.
+Keep `RDS-` editorial IDs out of `verified_findings`, `unresolved`, `discarded`,
+and substantive `reviewer_counts`. If the chair mixes channels, flag the contract
+error and omit editorial entries from those substantive fields; do not use
+editorial counts or disagreements to calculate the verdict or persisted summary.
+
 If `--raw` is absent, return the chair's report without raw specialist outputs.
-If `--raw` is present, append raw outputs after the chair's report under a
-collapsed or clearly separated audit section.
+If `--raw` is present, append secret-redacted raw outputs after the chair's
+report under a collapsed or clearly separated audit section. Do not echo
+secret-like text from malformed editorial blocks during failure reporting.
 
 ### Prior-review evidence in chair dispatch
 
@@ -294,11 +355,16 @@ adjudication with:
 - The chair's complete report and structured `review-council-json` result.
 - The exact selected and failed reviewer lists.
 - Every successful raw specialist response, regardless of whether `--raw` was
-  requested. Existing per-specialist candidate limits bound this context.
+  requested. Substantive candidate limits and separate readability grouping/
+  safety limits apply. If context cannot hold all output, disclose the missing
+  coverage instead of silently truncating or claiming complete review.
 - A `council_summary` containing exactly: chair verdict, selected reviewers,
   failed reviewers, accepted finding IDs, and accepted finding count. Do not
   include finding bodies, unresolved/discarded IDs, or raw output in this
   persisted summary.
+- Build accepted finding IDs/count only from `verified_findings`, never from
+  `readability_suggestions`. Editorial collections are context only and must
+  not be converted into human-attention items or persisted in the summary.
 - The `prior_review.digest` and `prior_review.availability` from the
   normalized contract when `--prior-comments` is `evidence` or `context`;
   omit both when `off`. When scope is not a PR, omit `prior_review` and
@@ -412,6 +478,10 @@ Return:
 ## Findings
 ... chair-verified findings ordered by severity ...
 
+## Readability Suggestions
+... chair-verified editorial items: exact file:line, original excerpt, problem,
+    and concrete rewrite or structural edit; group above 50 by file ...
+
 ## Human Review Attention
 **Human review:** REQUIRED | RECOMMENDED | NEEDS_MANUAL_REVIEW | NONE | FAILED | SKIPPED
 ... full actionable human-attention items ...
@@ -420,7 +490,8 @@ Return:
 **Artifact:** `.opencode/reviews/<generated-name>.json` | not created (...)
 
 ## Review Coverage
-... selected reviewers, failures, exclusions, residual gaps, and prior-review coverage ...
+... selected reviewers, failures, exclusions, residual gaps, readability coverage,
+    and prior-review coverage ...
 ```
 
 Render prior-review coverage as one of:
@@ -437,10 +508,17 @@ Render prior-review coverage as one of:
 digest, and emits no prior-review coverage line — this preserves
 byte-equivalent behavior to the pre-change review for that mode.
 
+Render readability coverage as `complete`, `incomplete`, `not_selected`, or
+`failed`, with every limitation and omitted file/problem identified as precisely
+as known. Empty scopes use `not_selected` with the empty-scope reason. When
+complete with no accepted suggestions, state `No readability suggestions`;
+when skipped/failed/incomplete, state that status rather than implying a clean
+review. Suggestions never affect the verdict or substantive finding count.
+
 Findings are primary. Every finding requires exact `file:line`, impact,
 evidence, and the smallest correct fix. If no candidates survive chair
-verification, state `No findings` and list only meaningful residual review or
-testing gaps.
+verification, state `No findings`; still render verified readability suggestions
+and meaningful residual review or testing gaps.
 
 ## Security And Safety
 

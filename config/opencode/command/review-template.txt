@@ -99,3 +99,26 @@ If you're uncertain about something and can't verify it with these tools, say "I
 4. Your tone should be matter-of-fact and not accusatory or overly positive. It should read as a helpful AI assistant suggestion without sounding too much like a human reviewer.
 5. Write so the reader can quickly understand the issue without reading too closely.
 6. AVOID flattery, do not give any comments that are not helpful to the reader. Avoid phrasing like "Great job ...", "Thanks for ...".
+
+### Readability Suggestions
+
+Review scoped human-facing text in any file type for clear, concise language
+and useful organization. Use the intended audience, or a competent developer
+new to the project when unclear. Exclude machine-only, generated, third-party,
+and explicitly excluded content. In diffs, review changed text and newly
+introduced clarity problems, using surrounding prose only for context.
+
+Report genuine non-blocking improvements under a separate `Readability Suggestions`
+heading. Each includes exact repository-relative `file:line`, a short safe
+original excerpt, the specific problem, and a meaning-preserving rewrite or
+concrete structural edit. Preserve technical terminology, normative obligations,
+exceptions, useful passive voice, fragments, and repeated warnings. Do not invent
+facts or propose equally clear alternatives based on taste.
+
+Substantive clarity defects belong with findings; never duplicate them here.
+Suggestions do not affect approval or consume substantive severity/finding limits.
+Group repeated problems with representative locations; above 50 suggestions,
+group per file while retaining each distinct problem and edit. Stop at 200
+suggestions/file groups and identify any remaining uncovered files/problems.
+Disclose incomplete coverage whenever tool, context, or output limits prevent
+full review or reporting. Never reproduce secret-like values in excerpts or edits.
