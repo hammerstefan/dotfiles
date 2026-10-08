@@ -13,6 +13,9 @@
     ~/.Xmodmap: Xmodmap
     ~/.xinitrc: xinitrc
     ~/scripts: scripts
+    ~/.config/opencode:
+      path: config/opencode
+      force: true
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
