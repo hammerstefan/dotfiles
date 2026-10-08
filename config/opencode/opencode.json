@@ -7,106 +7,87 @@
     "~/.config/opencode/no-assumptions.md",
     "~/.config/opencode/hindsight.md"
   ],
-  "agent": {
+  "agents": {
     "plan": {
-      "prompt": "{file:./prompt/plan.txt}",
+      "system": "{file:./prompt/plan.txt}",
       "model": "minimax-coding-plan/MiniMax-M3",
-      "permission": {
-        "semble_*": "allow",
-        "context7_*": "allow"
-      }
+      "permissions": [
+        { "action": "semble_*", "resource": "*", "effect": "allow" },
+        { "action": "context7_*", "resource": "*", "effect": "allow" }
+      ]
     },
     "Openspec-Plan": {
       "model": "minimax-coding-plan/MiniMax-M3",
-      "permission": {
-        "semble_*": "allow",
-        "context7_*": "allow"
-      }
+      "permissions": [
+        { "action": "semble_*", "resource": "*", "effect": "allow" },
+        { "action": "context7_*", "resource": "*", "effect": "allow" }
+      ]
     },
     "explore": {
-      "permission": {
-        "semble_*": "allow",
-        "context7_*": "allow"
-      }
+      "permissions": [
+        { "action": "semble_*", "resource": "*", "effect": "allow" },
+        { "action": "context7_*", "resource": "*", "effect": "allow" }
+      ]
     }
   },
   "lsp": true,
-  "permission": {
-    "codesearch": "allow",
-    "websearch": "allow",
-    "review_inspect": "deny",
-    "write_review_human_report": "deny",
-    "question": "allow",
-    "doom_loop": "ask",
-    "*": {
-      "~/.config/opencode/command/*": "ask"
-    },
-    "read": {
-      "~/.config/opencode/command/*": "allow",
-      "~/.cache/opencode/packages/*": "allow"
-    },
-    "external_directory": {
-      "/tmp/**": "allow",
-      "~/.config/opencode/command/*": "allow"
-    }
-  },
+  "permissions": [
+    { "action": "codesearch", "resource": "*", "effect": "allow" },
+    { "action": "websearch", "resource": "*", "effect": "allow" },
+    { "action": "review_inspect", "resource": "*", "effect": "deny" },
+    { "action": "write_review_human_report", "resource": "*", "effect": "deny" },
+    { "action": "question", "resource": "*", "effect": "allow" },
+    { "action": "doom_loop", "resource": "*", "effect": "ask" },
+    { "action": "*", "resource": "~/.config/opencode/command/*", "effect": "ask" },
+    { "action": "read", "resource": "~/.config/opencode/command/*", "effect": "allow" },
+    { "action": "read", "resource": "~/.cache/opencode/packages/*", "effect": "allow" },
+    { "action": "external_directory", "resource": "/tmp/**", "effect": "allow" },
+    { "action": "external_directory", "resource": "~/.config/opencode/command/*", "effect": "allow" }
+  ],
   "plugin": [
-    "opencode-handoff",
-    "opencode-plugin-openspec",
-    "@tarquinen/opencode-smart-title",
-    "@mlflow/opencode",
-    [
-      "@vectorize-io/opencode-hindsight",
-      {
-        "hindsightApiUrl": "http://localhost:8888",
-        "dynamicBankId": true,
-        "dynamicBankGranularity": [
-          "gitProject"
-        ],
-        "autoRecall": true,
-        "autoRetain": true
-      }
-    ]
+    "/home/stefan.hammer@canonical.com/.hindsight/coding-agents"
   ],
   "formatter": true,
   "mcp": {
-    "with-context": {
-      "type": "local",
-      "command": "npx",
-      "args": ["-y", "with-context-mcp"],
-      "environment": {
-        "OBSIDIAN_API_KEY": "{env:OBSIDIAN_API_KEY}",
-        "OBSIDIAN_API_URL": "{env:OBSIDIAN_API_URL}",
-        "OBSIDIAN_VAULT": "{env:OBSIDIAN_VAULT}",
-        "PROJECT_BASE_PATH": "{env:PROJECT_BASE_PATH}"
+    "servers": {
+      "with-context": {
+        "type": "local",
+        "command": "npx",
+        "args": ["-y", "with-context-mcp"],
+        "environment": {
+          "OBSIDIAN_API_KEY": "{env:OBSIDIAN_API_KEY}",
+          "OBSIDIAN_API_URL": "{env:OBSIDIAN_API_URL}",
+          "OBSIDIAN_VAULT": "{env:OBSIDIAN_VAULT}",
+          "PROJECT_BASE_PATH": "{env:PROJECT_BASE_PATH}"
+        },
+        "disabled": false
       },
-      "enabled": true
-    },
-    "atlassian": {
-      "type": "remote",
-      "url": "https://mcp.atlassian.com/v1/mcp",
-      "enabled": true
-    },
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+      "atlassian": {
+        "type": "remote",
+        "url": "https://mcp.atlassian.com/v1/mcp",
+        "disabled": false
+      },
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp",
+        "headers": {
+          "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+        }
+      },
+      "semble": {
+        "type": "local",
+        "command": ["uvx", "--from", "semble[mcp]", "semble"],
+        "disabled": false
+      },
+      "MiniMax": {
+        "type": "local",
+        "command": ["uvx", "minimax-coding-plan-mcp", "-y"],
+        "environment": {
+          "MINIMAX_API_KEY": "{env:MINIMAX_API_KEY}",
+          "MINIMAX_API_HOST": "https://api.minimax.io"
+        },
+        "disabled": false
       }
-    },
-    "semble": {
-      "type": "local",
-      "command": ["uvx", "--from", "semble[mcp]", "semble"],
-      "enabled": true
-    },
-    "MiniMax": {
-      "type": "local",
-      "command": ["uvx", "minimax-coding-plan-mcp", "-y"],
-      "environment": {
-        "MINIMAX_API_KEY": "{env:MINIMAX_API_KEY}",
-        "MINIMAX_API_HOST": "https://api.minimax.io"
-      },
-      "enabled": true
     }
   }
 }

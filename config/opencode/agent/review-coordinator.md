@@ -4,32 +4,73 @@ mode: subagent
 hidden: true
 model: github-copilot/gpt-5.6-terra
 temperature: 0
-permission:
-  "*": deny
-  read: allow
-  glob:
-    "*": allow
-    "../*": deny
-    "**/../*": deny
-    "/*": deny
-  grep:
-    "*": allow
-  review_inspect: allow
-  task:
-    "*": deny
-    "review-triage": allow
-    "review-correctness": allow
-    "review-security": allow
-    "review-architecture": allow
-    "review-tests": allow
-    "review-compatibility": allow
-    "review-skeptic": allow
-    "review-crossfile": allow
-    "review-chair": allow
-    "review-human": allow
-  question: allow
-  write_review_human_report: allow
-  external_directory: deny
+permissions:
+  - action: "*"
+    resource: "*"
+    effect: deny
+  - action: read
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "../*"
+    effect: deny
+  - action: glob
+    resource: "**/../*"
+    effect: deny
+  - action: glob
+    resource: "/*"
+    effect: deny
+  - action: grep
+    resource: "*"
+    effect: allow
+  - action: review_inspect
+    resource: "*"
+    effect: allow
+  - action: task
+    resource: "*"
+    effect: deny
+  - action: task
+    resource: review-triage
+    effect: allow
+  - action: task
+    resource: review-correctness
+    effect: allow
+  - action: task
+    resource: review-security
+    effect: allow
+  - action: task
+    resource: review-architecture
+    effect: allow
+  - action: task
+    resource: review-tests
+    effect: allow
+  - action: task
+    resource: review-compatibility
+    effect: allow
+  - action: task
+    resource: review-skeptic
+    effect: allow
+  - action: task
+    resource: review-crossfile
+    effect: allow
+  - action: task
+    resource: review-chair
+    effect: allow
+  - action: task
+    resource: review-human
+    effect: allow
+  - action: question
+    resource: "*"
+    effect: allow
+  - action: write_review_human_report
+    resource: "*"
+    effect: allow
+  - action: external_directory
+    resource: "*"
+    effect: deny
 ---
 
 # Review Coordinator

@@ -3,23 +3,49 @@ description: Reviews changed code for concrete correctness, type, concurrency, a
 mode: subagent
 model: github-copilot/gpt-5.3-codex
 temperature: 0.1
-permission:
-  "*": deny
-  read: allow
-  glob:
-    "*": allow
-    "../*": deny
-    "**/../*": deny
-    "/*": deny
-  grep:
-    "*": allow
-  edit: deny
-  write_review_human_report: deny
-  review_inspect: allow
-  task: deny
-  webfetch: deny
-  websearch: deny
-  external_directory: deny
+permissions:
+  - action: "*"
+    resource: "*"
+    effect: deny
+  - action: read
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "../*"
+    effect: deny
+  - action: glob
+    resource: "**/../*"
+    effect: deny
+  - action: glob
+    resource: "/*"
+    effect: deny
+  - action: grep
+    resource: "*"
+    effect: allow
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: write_review_human_report
+    resource: "*"
+    effect: deny
+  - action: review_inspect
+    resource: "*"
+    effect: allow
+  - action: task
+    resource: "*"
+    effect: deny
+  - action: webfetch
+    resource: "*"
+    effect: deny
+  - action: websearch
+    resource: "*"
+    effect: deny
+  - action: external_directory
+    resource: "*"
+    effect: deny
 ---
 
 # Correctness Reviewer
