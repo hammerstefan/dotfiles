@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ticket readability result (structural validation; source provenance is checked separately)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ticket", "audience", "clarity_feedback", "readability_suggestions", "proposal", "open_questions", "coverage"],
+  "properties": {
+    "ticket": {
+      "type": "object", "additionalProperties": false,
+      "required": ["key", "url", "updated"],
+      "properties": {
+        "key": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*-[1-9][0-9]*$"},
+        "url": {"type": "string", "pattern": "^https://[a-z0-9-]+\\.atlassian\\.net/browse/[A-Z][A-Z0-9_]*-[1-9][0-9]*$"},
+        "updated": {"type": ["string", "null"]}
+      }
+    },
+    "audience": {"$ref": "#/$defs/text"},
+    "clarity_feedback": {"type": "array", "items": {"$ref": "#/$defs/clarity"}},
+    "readability_suggestions": {"type": "array", "items": {"$ref": "#/$defs/editorial"}},
+    "proposal": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "summary", "description", "additional_fields", "notes"],
+      "properties": {
+        "status": {"$ref": "#/$defs/status"},
+        "summary": {"type": ["string", "null"]},
+        "description": {"type": ["string", "null"]},
+        "additional_fields": {
+          "type": "array", "maxItems": 1,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["field_id", "text", "status"],
+            "properties": {
+              "field_id": {"type": "string", "pattern": "^customfield_[0-9]+$"},
+              "text": {"type": ["string", "null"]},
+              "status": {"$ref": "#/$defs/status"}
+            }
+          }
+        },
+        "notes": {"$ref": "#/$defs/texts"}
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "location", "question", "related_ids"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^TQ-[1-9][0-9]*$"},
+          "location": {"$ref": "#/$defs/location"},
+          "question": {"$ref": "#/$defs/text"},
+          "related_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^(TCL|TED)-[1-9][0-9]*$"}}
+        }
+      }
+    },
+    "coverage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "reviewed_fields", "context_sources", "limitations"],
+      "properties": {
+        "status": {"enum": ["complete", "incomplete"]},
+        "reviewed_fields": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^(summary|description|customfield_[0-9]+)$"}},
+        "context_sources": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["issue_key", "field_id", "comment_id", "availability"],
+            "properties": {
+              "issue_key": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*-[1-9][0-9]*$"},
+              "field_id": {"$ref": "#/$defs/text"},
+              "comment_id": {"type": ["string", "null"]},
+              "availability": {"enum": ["complete", "incomplete", "unavailable"]}
+            }
+          }
+        },
+        "limitations": {"$ref": "#/$defs/texts"}
+      },
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "incomplete"}}}, "then": {"properties": {"limitations": {"minItems": 1}}}},
+        {"if": {"properties": {"status": {"const": "complete"}}}, "then": {"properties": {"limitations": {"maxItems": 0}}}}
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "anyOf": [
+          {"properties": {"proposal": {"properties": {"summary": {"type": "null"}}}}},
+          {"properties": {"proposal": {"properties": {"description": {"type": "null"}}}}},
+          {"properties": {"proposal": {"properties": {"additional_fields": {"contains": {"properties": {"text": {"type": "null"}}}}}}}}
+        ]
+      },
+      "then": {"properties": {"proposal": {"properties": {"status": {"const": "incomplete"}}}}}
+    },
+    {"if": {"properties": {"coverage": {"properties": {"status": {"const": "incomplete"}}}}}, "then": {"properties": {"proposal": {"properties": {"status": {"const": "incomplete"}}}}}},
+    {"if": {"properties": {"open_questions": {"minItems": 1}}}, "then": {"properties": {"proposal": {"properties": {"status": {"enum": ["needs_clarification", "incomplete"]}}}}}},
+    {"if": {"properties": {"proposal": {"properties": {"status": {"const": "incomplete"}}}}}, "then": {"properties": {"coverage": {"properties": {"status": {"const": "incomplete"}}}}}}
+  ],
+  "$defs": {
+    "text": {"type": "string", "minLength": 1},
+    "texts": {"type": "array", "items": {"$ref": "#/$defs/text"}},
+    "status": {"enum": ["ready", "needs_clarification", "incomplete"]},
+    "location": {
+      "type": "object", "additionalProperties": false,
+      "required": ["issue_key", "field_id", "heading_path", "block"],
+      "properties": {
+        "issue_key": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*-[1-9][0-9]*$"},
+        "field_id": {"$ref": "#/$defs/text"},
+        "heading_path": {"$ref": "#/$defs/texts"},
+        "block": {"type": "integer", "minimum": 1}
+      }
+    },
+    "clarity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "location", "original", "problem", "impact", "suggested_edit"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^TCL-[1-9][0-9]*$"},
+        "location": {"$ref": "#/$defs/location"},
+        "original": {"type": "string"},
+        "problem": {"$ref": "#/$defs/text"},
+        "impact": {"$ref": "#/$defs/text"},
+        "suggested_edit": {"$ref": "#/$defs/text"}
+      }
+    },
+    "editorial": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "location", "original", "problem", "suggested_edit"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^TED-[1-9][0-9]*$"},
+        "location": {"$ref": "#/$defs/location"},
+        "original": {"type": "string"},
+        "problem": {"$ref": "#/$defs/text"},
+        "suggested_edit": {"$ref": "#/$defs/text"}
+      }
+    }
+  }
+}
