@@ -125,6 +125,18 @@ readability suggestions, and human-review results without dispatching any
 reviewer and without creating an artifact.
 Use only `review_inspect` for Git and GitHub data; never invoke Bash.
 
+Call `review_inspect` directly when it is in your tool list. When tools are exposed only through Code Mode, call it from the `execute` tool as `await tools.review_inspect({ request: { operation: "<name>", ... } })`. The `request` wrapper is required. Operations and fields:
+- `status`: no fields.
+- `uncommitted_diff`: `staged` (boolean), `path` (string or `null`).
+- `show`: `revision` (full commit ID), `path` (string or `null`).
+- `resolve`: `revision` (any ref; returns the full commit ID).
+- `first_parent`: `revision` (full commit ID; returns the commit ID followed by its parent IDs, none for a root commit).
+- `merge_base`: `left`, `right` (full commit IDs).
+- `range_diff`: `base`, `reviewed` (full commit IDs), `path` (string or `null`).
+- `pr_metadata`, `pr_diff`, `pr_discussion`: `number` (PR number).
+
+Pass `path: null` for no path filter; never omit `path`. Resolve refs with `resolve` before passing them as commit IDs. A `null` result means empty output (for example, a clean `status`), not a failure. Inside `execute`, call only the review tools named in this prompt; do not use `fetch`, other tools, or shell or file access. Read file contents with `read`, `glob`, and `grep`, not through `review_inspect`. Call `write_review_human_report` the same way, as `await tools.write_review_human_report({ payload })`, only where the command contract requires it.
+
 ### Prior-review digest
 
 When the scope is `pr:NUMBER` and `--prior-comments` is `evidence` or
@@ -245,6 +257,11 @@ Tell readability to preserve its separate editorial channel: no severity floor
 or finding limit applies to suggestions; group above 50 by file, cap at 200
 suggestions/file groups, and disclose unreviewed files or unreported problems.
 Never treat a filtered substantive defect as editorial to evade finding limits.
+Require readability to apply the shared Ambiguous-Term Scan to all scoped
+human-facing text, not only prose introductions. Request all distinct eligible
+ambiguities in its existing channels, respecting diff scope and substantive
+filters. Require incomplete coverage if reporting limits omit eligible terms;
+explicit substantive filtering still follows the existing disclosure rules.
 
 If one specialist fails or returns malformed output, record that fact and
 continue. Validate readability's two channels independently against

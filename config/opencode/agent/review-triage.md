@@ -36,6 +36,9 @@ permissions:
   - action: review_inspect
     resource: "*"
     effect: allow
+  - action: execute
+    resource: "*"
+    effect: allow
   - action: subagent
     resource: "*"
     effect: deny
@@ -52,9 +55,22 @@ permissions:
 
 # Review Triage
 
+
 Inspect the assigned change and recommend which council members should review
 it. Use `review_inspect` for Git and GitHub inspection. Never use Bash, perform
 the substantive review, or edit files.
+
+Call `review_inspect` directly when it is in your tool list. When tools are exposed only through Code Mode, call it from the `execute` tool as `await tools.review_inspect({ request: { operation: "<name>", ... } })`. The `request` wrapper is required. Operations and fields:
+- `status`: no fields.
+- `uncommitted_diff`: `staged` (boolean), `path` (string or `null`).
+- `show`: `revision` (full commit ID), `path` (string or `null`).
+- `resolve`: `revision` (any ref; returns the full commit ID).
+- `first_parent`: `revision` (full commit ID; returns the commit ID followed by its parent IDs, none for a root commit).
+- `merge_base`: `left`, `right` (full commit IDs).
+- `range_diff`: `base`, `reviewed` (full commit IDs), `path` (string or `null`).
+- `pr_metadata`, `pr_diff`, `pr_discussion`: `number` (PR number).
+
+Pass `path: null` for no path filter; never omit `path`. Resolve refs with `resolve` before passing them as commit IDs. A `null` result means empty output (for example, a clean `status`), not a failure. Inside `execute`, call only the review tools named in this prompt; do not use `fetch`, other tools, or shell or file access. Read file contents with `read`, `glob`, and `grep`, not through `review_inspect`.
 
 Available reviewers:
 - `review-correctness`: always include for executable or behavioral changes.

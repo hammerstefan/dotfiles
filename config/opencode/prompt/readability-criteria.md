@@ -76,7 +76,7 @@ Safeguards:
   clarification instead.
 - Keep precise terminology, useful passive voice, fragments in headings/labels/
   lists, and deliberate repetition, especially warnings at the point of risk.
-- Do not impose sentence-length rules, universal active voice, or example quotas.
+- For reviewed source text, do not impose sentence-length rules, universal active voice, or example quotas.
 - Do not infer whether AI wrote the text.
 - Do not rewrite executable syntax, identifiers, or quoted external text;
   review their surrounding explanations instead.
