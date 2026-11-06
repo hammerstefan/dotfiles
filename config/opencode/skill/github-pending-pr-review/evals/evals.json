@@ -18,12 +18,13 @@
     {
       "id": 2,
       "prompt": "Put these review notes into an editable GitHub review, but I may already have a pending review on that PR. If so, don't create duplicates or remove anything without asking me.",
-      "expected_output": "The agent fails closed when it finds a pre-existing pending review and asks the user whether to keep or explicitly replace it; it performs no mutation before that decision.",
+      "expected_output": "The agent fails closed when it finds a pre-existing pending review, reports its ID, and asks the user to delete it in the GitHub UI. It performs no mutation before that decision.",
       "files": [],
       "expectations": [
         "The workflow identifies pending reviews by exact authenticated login and PENDING state.",
         "A pre-existing pending review blocks creation.",
-        "The workflow never silently deletes or replaces a pre-existing or other-user review.",
+        "The workflow never deletes or replaces a pre-existing review, not even one the authenticated user owns, and never deletes another user's review.",
+        "The agent asks the user to delete the pre-existing pending review in the GitHub UI rather than deleting it through the API.",
         "No submit, approve, request-changes, or publish action occurs."
       ]
     },
@@ -39,6 +40,75 @@
         "The workflow accounts for pending-comment PATCH returning 404.",
         "Deletion is allowed only after proving the review is the authenticated user's newly-created PENDING review from this invocation.",
         "Recreation revalidates the head SHA, anchors, pending-review state, bodies, and final remote state."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Add one inline comment on src/config.py line 20 in the PR for this branch. Say the timeout should be configurable, and show me the change you would make.",
+      "expected_output": "The agent drafts a comment that asks the author a question and then gives the concrete edit as a GitHub suggestion block that replaces exactly the anchored line, and it validates the comment before creating the pending review.",
+      "files": [],
+      "expectations": [
+        "The comment opens with a question such as 'Could we' or 'Should we' and names the problem it raises.",
+        "The comment introduces the edit with wording such as 'We could change this to'.",
+        "The edit is a single suggestion block that holds the full replacement for the anchored line.",
+        "The suggestion block is validated against the anchored line and side, and a suggestion on a deleted line is replaced with quoted replacement text.",
+        "The suggestion block keeps the indentation of the anchored line, because it replaces that line.",
+        "The body reaches GitHub with real paragraph newlines rather than literal backslash-n text.",
+        "Nothing is published, submitted, approved, or marked as changes requested."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Create a pending review with two inline comments on this PR. The review comments API gave me a position but no line number and no side last time. Show me how you confirm where the comments actually landed.",
+      "expected_output": "The agent fetches the review's comments from both the pull-request-scoped and the review-scoped endpoints, establishes each anchor from the API fields when they are present and from the diff position against the PR patch otherwise, and reports which evidence verified each anchor.",
+      "files": [],
+      "expectations": [
+        "The agent reads the comments from both the pull-request-scoped comments endpoint and the review-scoped comments endpoint.",
+        "The agent maps a missing line and side from the diff position against the file's patch, counting positions from the first hunk header and letting a later hunk header consume a position.",
+        "The agent never states that an API response supplied a field the response omitted.",
+        "The agent reports which evidence verified each anchor, the API fields, the diff position, or both.",
+        "A comment whose anchor cannot be established is reported as unverified instead of verified.",
+        "The bodies are compared exactly, including the real newlines."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I already left a pending review on that PR yesterday. Delete it and put these new comments there instead.",
+      "expected_output": "The agent refuses to delete or replace the pre-existing pending review, reports its ID, and asks the user to delete it in the GitHub UI before the new review is created.",
+      "files": [],
+      "expectations": [
+        "The agent does not delete the pre-existing pending review through the API, even with an explicit request to do so.",
+        "The agent names the review it found and asks the user to remove it in the GitHub UI.",
+        "The agent does not create a second pending review while the first one exists.",
+        "No other user's review is touched.",
+        "Nothing is submitted, approved, or published."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Create the pending review with those two comments, then check they landed on the right lines. If one of them landed on the wrong line, sort it out.",
+      "expected_output": "The agent verifies the created review against the request, and when an anchor does not match, deletes only the review it created in this invocation, proves that review's identity first, rebuilds and revalidates the comments, and creates the review once more.",
+      "files": [],
+      "expectations": [
+        "The agent verifies every comment's anchor and body against the remote state before it reports success.",
+        "A mismatched anchor leads to a delete and one re-creation, not to an unbounded retry.",
+        "The delete happens only after the agent proves the review is the one it created in this invocation, owned by the authenticated user, still PENDING, on the same PR and head SHA.",
+        "After the delete the agent checks that no pre-existing review disappeared.",
+        "If the re-created review cannot be verified, the agent says so plainly rather than reporting a success it did not observe.",
+        "No submit, approve, request-changes, or publish action occurs."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Here is the exact wording I want for the comment on src/app.py line 12: 'This condition can never be false because the loop above always returns. Should we drop it?' Use it exactly as written.",
+      "expected_output": "The agent creates the pending review with the user's wording byte for byte, without rewriting it into a different shape and without adding an edit the user did not ask for.",
+      "files": [],
+      "expectations": [
+        "The body that reaches GitHub is the user's text unchanged, character for character.",
+        "The agent does not rewrite the wording, does not turn it into a different template, and does not append a suggested edit.",
+        "The body still passes the validator with real newlines and no literal backslash-n.",
+        "The agent still validates the anchor, creates the review pending, and verifies it remotely.",
+        "Nothing is submitted, approved, or published."
       ]
     }
   ]

@@ -12,17 +12,24 @@ review remains unpublished so the user can inspect and adjust it in GitHub's
 
 ## Safety boundary
 
-- Restrict mutations to creating the pending review explicitly requested by the
-  user and, when transactional recovery requires it, deleting only the pending
-  review created during the current invocation.
+- Restrict mutations to creating the pending review explicitly requested by
+  the user and, when transactional recovery requires it, deleting only the
+  pending review created during the current invocation.
+- Never delete or replace a review that existed before this invocation, not
+  even one the authenticated user owns. If a pending review already exists,
+  stop, report its ID, and ask the user to delete it in the GitHub UI. The
+  user performs that deletion, the skill proceeds afterwards.
+- Never delete another user's review, and never touch a submitted review.
+  GitHub refuses to delete a submitted review, and this skill never asks it
+  to.
 - Do not modify repository files, the index, branches, commits, remotes, or any
-  other git state. Temporary files belong under `mktemp -d`, never in the repo.
-- Never call the review submission endpoint, set `event`, approve, request
+  other git state. Temporary files belong in the private scratch directory of
+  step 0, never in the repo.
+- Never call `POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/events`,
+  never send an `event` key in any request body, never approve, request
   changes, publish comments, or merge. Even if creation and submission are
   requested together, create only the pending review; submission requires a
   separate, later user action.
-- Never delete or replace a review that existed before this invocation without
-  the user's explicit approval. Never delete another user's review.
 - Do not print tokens, credential variables, verbose authorization headers, or
   the output of commands that expose secrets. Use normal `gh` authentication.
 - Fail closed on ambiguity, stale data, invalid anchors, unexpected ownership,
@@ -56,7 +63,81 @@ normalizing them. Treat a literal backslash followed by `n` as suspicious and
 ask whether literal characters were intended; paragraph breaks must be real
 newline characters.
 
+## How to write a comment
+
+A review comment that helps is one the reader can act on without a second
+round trip. Two habits serve that.
+
+**Ask, then show.** Open with the problem as a question the author can
+answer, and follow it with the edit you would make:
+
+````markdown
+Could we name the provider here? A reader cannot tell which of the two
+credentials this line refers to.
+
+We could change this to:
+
+```suggestion
+The `jenkins.env` file in the `medic` Workshop holds these credentials.
+```
+````
+
+"Could we" and "Should we" keep the comment a conversation. A bare "this is
+wrong" makes the reader defend the code instead of reading the suggestion.
+
+**Give the edit, not the verdict.** A concrete replacement saves the reader
+the work of working out what you meant. Two forms cover most cases:
+
+- A GitHub suggestion block for a change that fits inside the anchored line
+  or lines. The block replaces exactly the lines the comment is anchored to,
+  so it must hold the full replacement for those lines.
+- Quoted replacement text when a suggestion block does not apply: the change
+  spans lines the comment does not anchor, the anchor is a deleted line, or
+  the edit needs to be read rather than applied.
+
+Keep the wording the user supplied. When the user hands over a body, use it
+as it is, and do not rewrite it into a question. Only the comments the skill
+drafts itself carry the ask-then-show shape.
+
+A suggestion block is a claim about the file's content, so hold it to that
+standard. It must keep the meaning of the line it replaces, it must not
+silently drop a check, a guard, or an error path, and it must keep the
+anchored line's indentation, because the block replaces that line rather
+than adding to it.
+
 ## Workflow
+
+### 0. Set up a private scratch directory
+
+Every command below writes into `$tmpdir` and reads `$host`, `$repo`, `$pr`
+and `$login`. Each command may run in its own shell, so keep those values in
+a file that the later steps source.
+
+Create the directory and the file:
+
+```bash
+umask 077
+state="$HOME/.local/state/gh-pending-pr-review"
+mkdir -p "$state" && chmod 700 "$state"
+tmpdir="$(mktemp -d "$state/run.XXXXXX")"
+printf 'tmpdir=%q\nstate=%q\n' "$tmpdir" "$state" >"$state/env.sh"
+```
+
+Every later command block starts by sourcing that file:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+```
+
+Remove the state directory when the work is done:
+
+```bash
+rm -rf "$HOME/.local/state/gh-pending-pr-review"
+```
+
+Also turn on `set -o pipefail` in the shell that runs the fetches. It
+matters because `gh api --paginate` writes each page as it arrives. Without
+it, a page that fails to load looks like a complete but truncated answer.
 
 ### 1. Resolve identity, repository, and PR without guessing
 
@@ -76,6 +157,7 @@ the user supplied `OWNER/REPO` and a number, use those exact values. Otherwise:
 Fetch the canonical PR object using:
 
 ```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
 gh api --hostname "$host" "repos/$repo/pulls/$pr"
 ```
 
@@ -85,59 +167,59 @@ Validate that its canonical repository/URL matches the resolved target, its
 before the POST, fetch the PR again and require the head SHA to remain equal;
 otherwise stop and revalidate all anchors.
 
-### 2. Snapshot existing reviews before any mutation
-
-Fetch all review pages and combine the JSON streams safely:
+Keep the resolved identity in the scratch file, so that the later steps find
+it in whichever shell they run in:
 
 ```bash
-reviews_before=$(gh api --hostname "$host" --paginate \
-  "repos/$repo/pulls/$pr/reviews?per_page=100" | jq -s 'add')
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+printf 'host=%q\nrepo=%q\npr=%q\nlogin=%q\n' \
+  "$host" "$repo" "$pr" "$login" >>"$state/env.sh"
+```
+
+### 2. Snapshot existing reviews before any mutation
+
+Fetch all review pages and combine the JSON streams safely. Write the raw
+pages to a file first, so that a failed page stops the workflow instead of
+leaving a truncated array that looks complete:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+gh api --hostname "$host" --paginate \
+  "repos/$repo/pulls/$pr/reviews?per_page=100" >"$tmpdir/reviews.pages.json" \
+  && jq -s 'add' "$tmpdir/reviews.pages.json" >"$tmpdir/reviews.json"
 ```
 
 Require this to be a JSON array. Record every existing review ID. Filter for
 reviews where `.user.login == $login` and `.state == "PENDING"`.
 
-- If one or more exist, do not create another. Report their IDs and ask whether
-  the user wants to keep using the existing review or explicitly authorizes its
-  replacement.
+- If one or more exist, do not create another. Report their IDs and ask the
+  user to delete them in the GitHub UI, then continue once they are gone.
 - Do not infer ownership from display names or URLs; compare authenticated
   login values exactly.
 
 ### 3. Fetch and validate the diff anchors
 
-Fetch every changed-file page into a temporary JSON file:
+Fetch every changed-file page into a temporary JSON file, again checking the
+exit status of the fetch before merging the pages:
 
 ```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
 gh api --hostname "$host" --paginate \
-  "repos/$repo/pulls/$pr/files?per_page=100" | \
-  jq -s 'add' >"$tmpdir/files.json"
+  "repos/$repo/pulls/$pr/files?per_page=100" >"$tmpdir/files.pages.json" \
+  && jq -s 'add' "$tmpdir/files.pages.json" >"$tmpdir/files.json"
 ```
 
 Require the array length to equal the PR's `changed_files`. GitHub caps this
 endpoint at 3000 files and may omit/truncate `patch`; if all files or an anchor
 cannot be verified, stop rather than guessing.
 
-Build the requested comments as JSON with actual newlines, then run the bundled
-validator:
-
-```bash
-python3 "<skill-directory>/scripts/validate_comments.py" \
-  --files "$tmpdir/files.json" \
-  --comments "$tmpdir/comments.json" \
-  --output "$tmpdir/comments.validated.json"
-```
-
-The validator checks schema, path membership, side, line, duplicate anchors,
-body limits, suspicious literal `\n`, and whether each line/side pair is
-commentable in the patch. Do not bypass a failure. If the user explicitly wants
-literal backslash-n text, rerun with `--allow-literal-backslash-n`.
-
-### 4. Preserve real paragraph newlines and construct JSON safely
+### 4. Build the comment list with real newlines and validate it
 
 Never interpolate comment text into JSON or shell code. Prefer `jq -n` with
 `--arg`, `--argjson`, and variables containing real newlines. For example:
 
 ```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
 body=$'First paragraph.\n\nSecond paragraph.'
 jq -n \
   --arg path 'src/example.py' \
@@ -149,17 +231,40 @@ jq -n \
 ```
 
 `jq` will serialize actual newlines as JSON escapes, which is correct. Do not
-set `body='First paragraph.\\n\\nSecond paragraph.'`; that sends literal `\n`
+set `body='First paragraph.\n\nSecond paragraph.'`; that sends literal `\n`
 characters. For user-provided multiline text, capture it without `eval`, then
 pass it only as a quoted `--arg` value. Never deserialize executable formats or
 pass comment data to a system command as code.
+
+Now run the bundled validator over the list you just built:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+python3 "<skill-directory>/scripts/validate_comments.py" \
+  --files "$tmpdir/files.json" \
+  --comments "$tmpdir/comments.json" \
+  --output "$tmpdir/comments.validated.json"
+```
+
+The validator checks schema, path membership, side, line, duplicate anchors,
+body limits, suspicious literal `\n`, and whether each line/side pair is
+commentable in the patch. It also checks a suggested change: at most one
+suggestion block per comment, no unclosed code fence, no suggestion on a
+deleted line, which has no new content to replace, and a suggestion that
+keeps the anchored line's indentation. Do not bypass a failure. If the user
+explicitly wants literal backslash-n text, rerun with
+`--allow-literal-backslash-n`.
+
+### 5. Construct the review payload safely
 
 Construct the request from the validated comments. Keep the review summary body
 empty unless the user specifically requested one; GitHub may not pre-populate a
 pending review body in the final submission dialog.
 
 ```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
 comments=$(jq -c . "$tmpdir/comments.validated.json")
+requested_review_body=""
 payload=$(jq -n \
   --arg commit_id "$head_sha" \
   --arg body "$requested_review_body" \
@@ -167,15 +272,19 @@ payload=$(jq -n \
   '{commit_id:$commit_id,body:$body,comments:$comments}')
 ```
 
+Set `requested_review_body` to the user's text when they asked for a summary
+body, and leave it empty otherwise.
+
 Inspect the payload structurally before POSTing: it must have the current
 `commit_id`, the expected comment count, no `event` key, and comments identical
 to the validated input.
 
-### 5. Create one pending review
+### 6. Create one pending review
 
 Save the raw response before projecting fields:
 
 ```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
 printf '%s' "$payload" | gh api --hostname "$host" --method POST \
   "repos/$repo/pulls/$pr/reviews" --input - \
   >"$tmpdir/create-response.json"
@@ -187,12 +296,23 @@ mutation succeeded. A formatting/projection failure is not a mutation failure.
 After any non-clean command outcome, inspect remote state before retrying. Never
 repeat the POST merely because output parsing failed.
 
-Parse `.id`, `.state`, `.user.login`, and `.commit_id` if available, but use the
-remote verification in the next step as the source of truth.
+Parse `.id`, `.state`, `.user.login`, and `.commit_id` if available. Keep the
+response's `.id` as `posted_review_id`. It is the strongest link between the
+review and this invocation, so hold on to it.
 
-### 6. Verify remote state
+### 7. Verify remote state
 
-Refetch all reviews and identify reviews satisfying all of these:
+Refetch all reviews into a new file. Keep the snapshot from step 2 intact,
+because the checks below and the recovery in step 8 both compare against it:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+gh api --hostname "$host" --paginate \
+  "repos/$repo/pulls/$pr/reviews?per_page=100" >"$tmpdir/reviews-after.pages.json" \
+  && jq -s 'add' "$tmpdir/reviews-after.pages.json" >"$tmpdir/reviews-after.json"
+```
+
+Identify reviews satisfying all of these:
 
 - ID was absent from the pre-mutation snapshot
 - `.user.login == $login`
@@ -204,54 +324,133 @@ Require exactly one candidate and call it `created_review_id`. If there are zero
 or multiple candidates, stop and report the actual state; do not retry or
 delete anything automatically.
 
-Fetch its inline comments from:
+When the POST returned cleanly, `created_review_id` must equal
+`posted_review_id`. A review that appeared in the meantime, for instance one
+the user started in the Files changed UI, matches every other condition but
+was not created here, so it is never adopted and never deleted. When the POST
+outcome was not clean, do not adopt a candidate at all: reconcile the remote
+state and ask the user.
 
-```text
-GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments
+Then fetch the review's comments from both endpoints:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+gh api --hostname "$host" --paginate \
+  "repos/$repo/pulls/$pr/comments?per_page=100" >"$tmpdir/pr-comments.pages.json" \
+  && jq -s 'add' "$tmpdir/pr-comments.pages.json" >"$tmpdir/pr-comments.json"
+gh api --hostname "$host" --paginate \
+  "repos/$repo/pulls/$pr/reviews/$created_review_id/comments?per_page=100" \
+  >"$tmpdir/review-comments.pages.json" \
+  && jq -s 'add' "$tmpdir/review-comments.pages.json" >"$tmpdir/review-comments.json"
 ```
 
-Compare count and each comment's `path`, `line`, `side`, and `body` against the
-validated request; require each API-returned `position` to be a positive integer
-and retain it for the final report. Compare bodies exactly, including actual
-newline characters. Also GET the review itself and reconfirm owner, PENDING
-state, PR, and head commit.
+The two endpoints return different shapes, and which one carries the anchor
+depends on the review's state. In observed responses the pull-request-scoped
+endpoint returns the full comment shape, with `line` and `side`. The
+review-scoped endpoint returns the legacy shape, which holds the diff
+`position` and omits `line` and `side`. A pending review's comments may appear
+in either. Read both and let the verifier merge them.
 
-### 7. Recover transactionally when newly-created content is wrong
+Run the bundled verifier:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+python3 "<skill-directory>/scripts/verify_review.py" \
+  --files "$tmpdir/files.json" \
+  --comments "$tmpdir/comments.validated.json" \
+  --remote "$tmpdir/pr-comments.json" \
+  --remote "$tmpdir/review-comments.json" \
+  --review-id "$created_review_id" \
+  --head-sha "$head_sha" \
+  --output "$tmpdir/verification.json"
+```
+
+The verifier establishes each comment's anchor from the API fields when the
+API states them, and otherwise from the diff position mapped against the
+file's patch. GitHub documents the position as the number of lines down from
+the file's first hunk header, and `scripts/diff_positions.py` implements that
+rule, including the detail that a later hunk header consumes a position. The
+verifier requires the API fields and the mapped position to agree when both
+are available, requires the body to match exactly, and reports the anchor of
+every comment it could not verify.
+
+Treat a non-zero exit as a failed verification. Do not report a comment as
+verified when the verifier did not verify it, and do not describe a field the
+API did not return as if it had. Say which evidence established each anchor:
+the API fields, the diff position, or both.
+
+Also GET the review itself and reconfirm owner, PENDING state, PR, and head
+commit.
+
+### 8. Recover transactionally when newly-created content is wrong
 
 GitHub documents `PATCH /repos/{owner}/{repo}/pulls/comments/{comment_id}`, but
 PATCHing a comment that belongs to a pending review can return 404. Do not rely
 on PATCH as the recovery path.
 
-If verification shows wrong formatting/content during this invocation:
+If verification shows wrong formatting or content during this invocation:
 
 1. Re-fetch the review and its comments.
-2. Require the review ID to be the unique new ID absent from the baseline,
-   owned by `$login`, still `PENDING`, on the exact PR and expected head SHA.
+2. Require the review ID to be `posted_review_id`, owned by `$login`, still
+   `PENDING`, on the exact PR and expected head SHA.
 3. Delete that review only with
-   `DELETE /repos/$repo/pulls/$pr/reviews/$created_review_id`.
+   `DELETE /repos/$repo/pulls/$pr/reviews/$posted_review_id`.
 4. Verify that ID is gone and that no pre-existing review ID disappeared.
 5. Rebuild bodies with real newlines, revalidate, recheck the PR head SHA and
    pending-review list, then create exactly once and perform full verification.
 
-If any identity/state check fails, do not delete. Ask the user how to proceed.
-A pending review found before this invocation is never automatic cleanup,
-including one apparently owned by the same login.
+The rerun writes to the same output paths as the first pass. The scripts
+overwrite their output file, so a rerun is not blocked by the first run's
+file. Do not carry a stale validation or verification report into the second
+pass: run both scripts again and read the new reports. If a rerun fails it
+writes no new report at all, so stop and fix the failure before creating
+again.
+
+If any identity or state check fails, do not delete. Ask the user how to
+proceed.
+
+A pending review found before this invocation is never automatic cleanup, and
+never a replacement target, including one apparently owned by the same login.
 
 ## Final response
 
 Report:
 
 - repository and PR number
-- pending review ID and `PENDING` state
+- pending review ID and `PENDING` state, taken from the review GET
 - verified comment count
-- each verified path, side, line and API-returned position, with confirmation
-  that the body matched (do not unnecessarily repeat sensitive comment text)
+- each verified path, side and line, with the API-returned position when the
+  API returned one, and confirmation that the body matched (do not
+  unnecessarily repeat sensitive comment text)
+- which evidence verified each anchor, and any anchor that stayed unverified
 - `<PR html_url>/files`
 - “Nothing was published, submitted, approved, or marked as changes requested.”
 
 Tell the user that pending inline comments can be reviewed and adjusted in the
 GitHub **Files changed** UI before submission. Also warn that the pending review
 summary body may not be pre-populated in GitHub's final submission dialog.
+
+If a recovery failed after the created review was deleted, say so plainly.
+Report what the remote state is, not what the workflow intended.
+
+## Bundled scripts
+
+- `scripts/validate_comments.py` checks the comment list against the PR's
+  patches and writes the validated list.
+- `scripts/diff_positions.py` maps a diff position to a blob line and side.
+  It also runs on its own with `--files`, `--path`, and `--position`.
+- `scripts/verify_review.py` compares the remote comments with the request and
+  reports what it could verify.
+
+Each script writes its output file, overwriting what was there, so a rerun
+after a recovery is not blocked by the first run's file. Each script exits
+non-zero when it cannot do its job, and prints the reason on standard error.
+
+Run the tests for all three from the skill directory:
+
+```bash
+cd "<skill-directory>" && python3 -m unittest discover -s tests
+```
 
 ## Security notes
 
