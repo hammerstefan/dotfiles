@@ -44,8 +44,8 @@ const MAX_LIST_PAGES = 50
 const LIST_PAGE_SIZE = 200
 
 /** @typedef {{ input:number, output:number, reasoning:number, cacheRead:number, cacheWrite:number }} Tokens */
-/** @typedef {{ sessions:Set<string>, messages:number, cost:number, tokens:Tokens, generatedTokens:number, generationMs:number, measuredSteps:number, unmeasuredSteps:number }} Aggregate */
-/** @typedef {{ sessionID:string, parentID:string|undefined, title:string, depth:number, cost:number, tokens:Tokens, messages:number, generatedTokens:number, generationMs:number, measuredSteps:number, unmeasuredSteps:number, agents:Map<string,Aggregate>, models:Map<string,Aggregate> }} SessionStats */
+/** @typedef {{ sessions:Set<string>, messages:number, cost:number, tokens:Tokens, generatedTokens:number, generationMs:number, measuredSteps:number, unmeasuredSteps:number, maxDurationMs:number, totalDurationMs:number }} Aggregate */
+/** @typedef {{ sessionID:string, parentID:string|undefined, title:string, depth:number, cost:number, tokens:Tokens, messages:number, generatedTokens:number, generationMs:number, measuredSteps:number, unmeasuredSteps:number, durationMs:number, agents:Map<string,Aggregate>, models:Map<string,Aggregate> }} SessionStats */
 
 const emptyTokens = () => ({
   input: 0,
@@ -64,6 +64,8 @@ const emptyAggregate = () => ({
   generationMs: 0,
   measuredSteps: 0,
   unmeasuredSteps: 0,
+  maxDurationMs: 0,
+  totalDurationMs: 0,
 })
 
 const addTokens = (target, source) => {
@@ -82,6 +84,8 @@ const addAggregate = (target, source) => {
   target.generationMs += source.generationMs
   target.measuredSteps += source.measuredSteps
   target.unmeasuredSteps += source.unmeasuredSteps
+  if (source.maxDurationMs > target.maxDurationMs) target.maxDurationMs = source.maxDurationMs
+  target.totalDurationMs += source.totalDurationMs
 }
 
 const messageTokens = (message) => ({
@@ -269,6 +273,39 @@ const throughput = (aggregate) => {
   return aggregate.generatedTokens / (aggregate.generationMs / 1000)
 }
 
+/**
+ * Wall-clock duration of a single session in milliseconds.
+ *
+ * Prefers the session record's own `time.created`/`time.updated` stamps from
+ * the OpenCode server. Falls back to the earliest assistant message start
+ * and the latest assistant message end when the session record has no time
+ * stamps, which can happen for sessions that the service API does not enrich
+ * (for example because of a degraded fallback that returned only a partial
+ * record).
+ *
+ * Returns 0 when neither source is available, so the value stays sortable
+ * and never produces NaN.
+ */
+const sessionDuration = (sessionRecord, messages) => {
+  const created = sessionRecord?.time?.created
+  const updated = sessionRecord?.time?.updated
+  if (typeof created === "number" && typeof updated === "number" && updated > created) {
+    return updated - created
+  }
+  let earliest
+  let latest
+  for (const message of messages ?? []) {
+    if (!isAssistant(message)) continue
+    const started = message.time?.created
+    const finished = message.time?.completed ?? message.time?.created
+    if (typeof started !== "number") continue
+    if (earliest === undefined || started < earliest) earliest = started
+    if (typeof finished === "number" && (latest === undefined || finished > latest)) latest = finished
+  }
+  if (earliest !== undefined && latest !== undefined && latest > earliest) return latest - earliest
+  return 0
+}
+
 const formatCost = (cost) => `$${cost.toFixed(6)}`
 const formatNumber = (value) => value.toLocaleString("en-US")
 const escapeCell = (value) =>
@@ -295,6 +332,7 @@ export const internals = {
   createSessionService,
   readServiceEndpoint,
   serviceDescriptorPath,
+  sessionDuration,
 }
 
 export default {
@@ -455,6 +493,7 @@ export default {
               generationMs: 0,
               measuredSteps: 0,
               unmeasuredSteps: 0,
+              durationMs: sessionDuration(entry.session, messages),
               agents: new Map(),
               models: new Map(),
             }
@@ -511,11 +550,15 @@ export default {
           for (const item of stats) {
             total.sessions.add(item.sessionID)
             addAggregate(total, item)
+            if (item.durationMs > total.maxDurationMs) total.maxDurationMs = item.durationMs
+            total.totalDurationMs += item.durationMs
 
             for (const [agent, agentStats] of item.agents) {
               const agentAggregate = byAgent.get(agent) ?? emptyAggregate()
               for (const id of agentStats.sessions) agentAggregate.sessions.add(id)
               addAggregate(agentAggregate, agentStats)
+              if (item.durationMs > agentAggregate.maxDurationMs) agentAggregate.maxDurationMs = item.durationMs
+              agentAggregate.totalDurationMs += item.durationMs
               byAgent.set(agent, agentAggregate)
             }
 
@@ -523,6 +566,8 @@ export default {
               const modelAggregate = byModel.get(model) ?? emptyAggregate()
               for (const id of modelStats.sessions) modelAggregate.sessions.add(id)
               addAggregate(modelAggregate, modelStats)
+              if (item.durationMs > modelAggregate.maxDurationMs) modelAggregate.maxDurationMs = item.durationMs
+              modelAggregate.totalDurationMs += item.durationMs
               byModel.set(model, modelAggregate)
             }
           }
@@ -544,6 +589,7 @@ export default {
             `**Total cost:** ${formatCost(total.cost)}`,
             `**Root cost:** ${formatCost(rootCost)}`,
             `**Subagent cost:** ${formatCost(total.cost - rootCost)}`,
+            `**Longest session:** ${formatDuration(total.maxDurationMs)}`,
             "",
             "## Tokens",
             "",
@@ -567,30 +613,30 @@ export default {
             "",
             "## By Agent",
             "",
-            "| Agent | Sessions | Messages | Steps | Cost | Input | Output | Reasoning | Cache read | Cache write | TPS |",
-            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+            "| Agent | Sessions | Messages | Steps | Cost | Input | Output | Reasoning | Cache read | Cache write | TPS | Max dur |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
             ...[...byAgent.entries()]
               .sort(([left], [right]) => left.localeCompare(right))
               .map(
                 ([agent, value]) =>
-                  `| ${escapeCell(agent)} | ${value.sessions.size} | ${value.messages} | ${value.measuredSteps} | ${formatCost(value.cost)} | ${formatNumber(value.tokens.input)} | ${formatNumber(value.tokens.output)} | ${formatNumber(value.tokens.reasoning)} | ${formatNumber(value.tokens.cacheRead)} | ${formatNumber(value.tokens.cacheWrite)} | ${formatTps(throughput(value))} |`,
+                  `| ${escapeCell(agent)} | ${value.sessions.size} | ${value.messages} | ${value.measuredSteps} | ${formatCost(value.cost)} | ${formatNumber(value.tokens.input)} | ${formatNumber(value.tokens.output)} | ${formatNumber(value.tokens.reasoning)} | ${formatNumber(value.tokens.cacheRead)} | ${formatNumber(value.tokens.cacheWrite)} | ${formatTps(throughput(value))} | ${formatDuration(value.maxDurationMs)} |`,
               ),
             "",
             "## By Model",
             "",
-            "| Model | Sessions | Messages | Steps | Cost | Input | Output | Reasoning | Cache read | Cache write | TPS |",
-            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+            "| Model | Sessions | Messages | Steps | Cost | Input | Output | Reasoning | Cache read | Cache write | TPS | Max dur |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
             ...[...byModel.entries()]
               .sort(([left], [right]) => left.localeCompare(right))
               .map(
                 ([model, value]) =>
-                  `| ${escapeCell(model)} | ${value.sessions.size} | ${value.messages} | ${value.measuredSteps} | ${formatCost(value.cost)} | ${formatNumber(value.tokens.input)} | ${formatNumber(value.tokens.output)} | ${formatNumber(value.tokens.reasoning)} | ${formatNumber(value.tokens.cacheRead)} | ${formatNumber(value.tokens.cacheWrite)} | ${formatTps(throughput(value))} |`,
+                  `| ${escapeCell(model)} | ${value.sessions.size} | ${value.messages} | ${value.measuredSteps} | ${formatCost(value.cost)} | ${formatNumber(value.tokens.input)} | ${formatNumber(value.tokens.output)} | ${formatNumber(value.tokens.reasoning)} | ${formatNumber(value.tokens.cacheRead)} | ${formatNumber(value.tokens.cacheWrite)} | ${formatTps(throughput(value))} | ${formatDuration(value.maxDurationMs)} |`,
               ),
             "",
             "## Session Tree",
             "",
-            "| Depth | Session | Agent | Model | Messages | Steps | TPS | Cost | Title |",
-            "|---:|---|---|---|---:|---:|---:|---:|---|",
+            "| Depth | Session | Agent | Model | Messages | Steps | TPS | Cost | Duration | Title |",
+            "|---:|---|---|---|---:|---:|---:|---:|---:|---|",
             ...stats
               .sort(
                 (left, right) =>
@@ -600,7 +646,7 @@ export default {
               .map((item) => {
                 const agents = [...item.agents.keys()].sort().join(", ") || "none"
                 const models = [...item.models.keys()].sort().join(", ") || "none"
-                return `| ${item.depth} | \`${item.sessionID}\` | ${escapeCell(agents)} | ${escapeCell(models)} | ${item.messages} | ${item.measuredSteps} | ${formatTps(throughput(item))} | ${formatCost(item.cost)} | ${escapeCell(item.title)} |`
+                return `| ${item.depth} | \`${item.sessionID}\` | ${escapeCell(agents)} | ${escapeCell(models)} | ${item.messages} | ${item.measuredSteps} | ${formatTps(throughput(item))} | ${formatCost(item.cost)} | ${formatDuration(item.durationMs)} | ${escapeCell(item.title)} |`
               }),
             "",
             "## Completeness",

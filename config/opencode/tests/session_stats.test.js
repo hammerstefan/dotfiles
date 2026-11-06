@@ -16,11 +16,12 @@ import sessionStats, { internals } from "../plugins/session-stats.js"
 
 const DIRECTORY = "/tmp/opencode/session-stats-tests"
 
-const session = (id, parentID, title) => ({
+const session = (id, parentID, title, time) => ({
   id,
   parentID,
   title,
   location: { directory: DIRECTORY },
+  ...(time === undefined ? {} : { time }),
 })
 
 const assistant = ({ agent, model, created, streamed, output, reasoning, cost = 0 }) => ({
@@ -35,10 +36,10 @@ const assistant = ({ agent, model, created, streamed, output, reasoning, cost = 
 
 const FIXTURE = {
   sessions: [
-    session("ses_root", undefined, "Root"),
-    session("ses_child", "ses_root", "Child"),
-    session("ses_grandchild", "ses_child", "Grandchild"),
-    session("ses_other", undefined, "Unrelated root"),
+    session("ses_root", undefined, "Root", { created: 0, updated: 10_000 }),
+    session("ses_child", "ses_root", "Child", { created: 20_000, updated: 35_000 }),
+    session("ses_grandchild", "ses_child", "Grandchild", { created: 40_000, updated: 50_000 }),
+    session("ses_other", undefined, "Unrelated root", { created: 60_000, updated: 65_000 }),
   ],
   messages: {
     ses_root: [
@@ -282,6 +283,56 @@ describe("usage totals", () => {
   test("the report states the compaction limit of the message window", async () => {
     const result = await run()
     expect(result.content).toContain("excludes messages before its last compaction")
+  })
+})
+
+describe("duration", () => {
+  test("the top-level summary reports the longest single session", async () => {
+    const result = await run()
+    // ses_child: created=20_000, updated=35_000 -> 15.0 s.
+    expect(result.content).toContain("**Longest session:** 15.0 s")
+  })
+
+  test("the session tree table includes each session's wall-clock duration", async () => {
+    const result = await run()
+    // Each row of the tree: `| depth | session | ... | duration | title |`.
+    const row = (id) =>
+      result.content
+        .split("\n")
+        .find((line) => line.startsWith("|") && line.includes(`\`${id}\``))
+    expect(row("ses_root")).toMatch(/\| 10\.0 s \|/)
+    expect(row("ses_child")).toMatch(/\| 15\.0 s \|/)
+    expect(row("ses_grandchild")).toMatch(/\| 10\.0 s \|/)
+  })
+
+  test("the by-agent table reports the longest session for each agent", async () => {
+    const result = await run()
+    // build only ran in ses_root (10s); review ran in ses_child (15s) and ses_grandchild (10s).
+    const lines = result.content.split("\n").filter((line) => line.startsWith("|") && (line.includes(" build ") || line.includes(" review ")))
+    expect(lines).toContain("| build | 1 | 2 | 1 | $0.010000 | 20 | 107 | 53 | 0 | 0 | 75.0 | 10.0 s |")
+    expect(lines).toContain("| review | 2 | 2 | 2 | $0.020000 | 20 | 260 | 40 | 0 | 0 | 42.9 | 15.0 s |")
+  })
+
+  test("sessionDuration returns 0 when there is no usable timestamp", () => {
+    expect(internals.sessionDuration(undefined, [])).toBe(0)
+    expect(internals.sessionDuration({}, [])).toBe(0)
+    expect(internals.sessionDuration({ time: {} }, [])).toBe(0)
+  })
+
+  test("sessionDuration prefers the session record timestamps", () => {
+    const session = { time: { created: 1_000, updated: 4_500 } }
+    expect(internals.sessionDuration(session, [])).toBe(3_500)
+  })
+
+  test("sessionDuration falls back to assistant message timestamps", () => {
+    const session = {}
+    const messages = [
+      { type: "user", time: { created: 0 } },
+      { type: "assistant", time: { created: 1_000, completed: 3_500 } },
+      { type: "assistant", time: { created: 4_000, completed: 4_500 } },
+    ]
+    // First created: 1_000. Last completed: 4_500. Span: 3_500 ms.
+    expect(internals.sessionDuration(session, messages)).toBe(3_500)
   })
 })
 
