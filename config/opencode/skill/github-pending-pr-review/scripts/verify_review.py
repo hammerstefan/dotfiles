@@ -3,7 +3,9 @@
 
 The check answers one question: does every comment GitHub holds sit on the
 anchor the request named, with the body the request named? It answers that
-question from the API alone, and it says which evidence it used.
+question from the API alone, and it says which evidence it used. A comment
+that names a range is checked against the start line of that range too,
+because the range is what a suggested change replaces.
 
 GitHub exposes the anchor of a review comment in two ways, and they are not
 always available together. The review-scoped endpoint
@@ -113,6 +115,8 @@ def collect(
             ("path", ("path",)),
             ("line", ("line",)),
             ("side", ("side",)),
+            ("start_line", ("start_line",)),
+            ("start_side", ("start_side",)),
             ("position", ("position",)),
             ("commit", ("commit_id", "commit")),
         ):
@@ -188,6 +192,55 @@ def resolve_anchor(
     if not isinstance(position, int) or isinstance(position, bool) or position < 1:
         return None, None, "the comment carries no diff position"
     return None, None, f"position {position} is not a commentable line of the patch"
+
+
+def range_failures(
+    label: str, identifier: int, comment: dict[str, Any], record: dict[str, Any]
+) -> list[str]:
+    """Check that the remote comment covers the range the request named.
+
+    A comment that names a range is anchored to more than one line, and the
+    start of that range is what a suggested change replaces. The remote
+    comment reports the start line when it covers a range, so the two are
+    compared. A remote comment that covers a range the request did not name
+    is a failure too, because the request could not have produced it.
+    """
+    failures: list[str] = []
+    requested_start = comment.get("start_line")
+    remote_start = record.get("start_line")
+    remote_start_is_int = isinstance(remote_start, int) and not isinstance(
+        remote_start, bool
+    )
+    if requested_start is not None:
+        if not remote_start_is_int:
+            failures.append(
+                f"{label} remote comment {identifier} does not report the "
+                "start line of the requested range"
+            )
+        elif remote_start != requested_start:
+            failures.append(
+                f"{label} requested a range that starts at line "
+                f"{requested_start} but the remote comment starts at "
+                f"{remote_start}"
+            )
+    elif remote_start_is_int:
+        failures.append(
+            f"{label} remote comment {identifier} covers a range that starts "
+            f"at line {remote_start} and the request did not name one"
+        )
+
+    requested_side = comment.get("start_side")
+    remote_side = record.get("start_side")
+    if (
+        requested_side is not None
+        and remote_side is not None
+        and remote_side != requested_side
+    ):
+        failures.append(
+            f"{label} requested a range on the {requested_side} side but the "
+            f"remote comment starts on the {remote_side} side"
+        )
+    return failures
 
 
 def verify(
@@ -295,6 +348,8 @@ def verify(
                 "in different API responses"
             )
 
+        failures.extend(range_failures(label, identifier, comment, record))
+
         commit = record.get("commit")
         if head_sha and isinstance(commit, str) and commit != head_sha:
             failures.append(
@@ -307,6 +362,7 @@ def verify(
                 "path": path,
                 "line": anchor[0],
                 "side": anchor[1],
+                "start_line": comment.get("start_line"),
                 "position": record.get("position"),
                 "verified_by": evidence,
                 "comment_id": identifier,

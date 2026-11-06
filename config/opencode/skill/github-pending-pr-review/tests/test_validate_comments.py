@@ -1,6 +1,5 @@
 """Tests for the pending-review comment validator."""
 
-import json
 import sys
 import unittest
 from pathlib import Path
@@ -19,17 +18,27 @@ PATCH = """@@ -5,4 +5,5 @@ def function():
 
 FILES = [{"filename": "src/example.py", "patch": PATCH}]
 
+TWO_HUNKS = """@@ -5,2 +5,3 @@ def function():
+ one
++TWO
+@@ -20,2 +21,3 @@ def other():
+ alpha
++beta
+"""
+
+TWO_HUNK_FILES = [{"filename": "src/example.py", "patch": TWO_HUNKS}]
+
 COLLABORATIVE_BODY = (
     "Could we make this explicit here?\n"
     "\n"
     "We could change this to:\n"
     "\n"
     "```suggestion\n"
-    "TWO\n"
+    "TWO, please\n"
     "```\n"
 )
 
-SUGGESTION_BODY = "We could change this to:\n\n```suggestion\nTWO\n```\n"
+SUGGESTION_BODY = "We could change this to:\n\n```suggestion\nTWO, please\n```\n"
 
 QUOTED_BODY = "Could we clarify this?\n\nWe could change this to `TWO`.\n"
 
@@ -110,6 +119,65 @@ class ValidateTest(unittest.TestCase):
             validate(FILES, [], False)
 
 
+class RangeCommentTest(unittest.TestCase):
+    """A range comment names the first line of the range it covers."""
+
+    def test_a_range_comment_is_accepted(self):
+        result = validate(
+            FILES,
+            [comment(line=7, side="RIGHT", start_line=6, start_side="RIGHT")],
+            False,
+        )
+        self.assertEqual(result[0]["start_line"], 6)
+        self.assertEqual(result[0]["start_side"], "RIGHT")
+        self.assertEqual(result[0]["line"], 7)
+
+    def test_a_comment_without_a_range_carries_no_start_line(self):
+        result = validate(FILES, [comment()], False)
+        self.assertNotIn("start_line", result[0])
+        self.assertNotIn("start_side", result[0])
+
+    def test_a_start_line_without_a_start_side_is_refused(self):
+        with self.assertRaises(ValidationError) as caught:
+            validate(FILES, [comment(start_line=6)], False)
+        self.assertIn("together", str(caught.exception))
+
+    def test_a_start_side_without_a_start_line_is_refused(self):
+        with self.assertRaises(ValidationError):
+            validate(FILES, [comment(start_side="RIGHT")], False)
+
+    def test_a_start_side_that_differs_from_the_side_is_refused(self):
+        with self.assertRaises(ValidationError) as caught:
+            validate(FILES, [comment(start_line=6, start_side="LEFT")], False)
+        self.assertIn("start_side", str(caught.exception))
+
+    def test_a_start_line_after_the_last_line_is_refused(self):
+        with self.assertRaises(ValidationError) as caught:
+            validate(FILES, [comment(line=6, start_line=7, start_side="RIGHT")], False)
+        self.assertIn("must not be after line", str(caught.exception))
+
+    def test_a_start_line_that_is_not_a_positive_integer_is_refused(self):
+        with self.assertRaises(ValidationError):
+            validate(FILES, [comment(start_line=0, start_side="RIGHT")], False)
+
+    def test_a_range_that_spans_a_gap_in_the_diff_is_refused(self):
+        with self.assertRaises(ValidationError) as caught:
+            validate(
+                TWO_HUNK_FILES,
+                [comment(line=21, side="RIGHT", start_line=6, start_side="RIGHT")],
+                False,
+            )
+        self.assertIn("contiguous", str(caught.exception))
+
+    def test_a_range_that_ends_outside_the_diff_is_refused(self):
+        with self.assertRaises(ValidationError):
+            validate(
+                TWO_HUNK_FILES,
+                [comment(line=99, side="RIGHT", start_line=21, start_side="RIGHT")],
+                False,
+            )
+
+
 class SuggestionBlockTest(unittest.TestCase):
     def test_a_well_formed_suggestion_is_accepted(self):
         result = validate(FILES, [comment(body=SUGGESTION_BODY)], False)
@@ -125,12 +193,12 @@ class SuggestionBlockTest(unittest.TestCase):
         self.assertIn("LEFT", str(caught.exception))
 
     def test_an_unclosed_suggestion_is_refused(self):
-        body = "We could change this to:\n\n```suggestion\nTWO\n"
+        body = "We could change this to:\n\n```suggestion\nTWO, please\n"
         with self.assertRaises(ValidationError):
             validate(FILES, [comment(body=body)], False)
 
     def test_two_suggestions_are_refused(self):
-        body = "```suggestion\nTWO\n```\n\n```suggestion\nTHREE\n```\n"
+        body = "```suggestion\nTWO, please\n```\n\n```suggestion\nTHREE\n```\n"
         with self.assertRaises(ValidationError):
             validate(FILES, [comment(body=body)], False)
 
@@ -154,6 +222,52 @@ class SuggestionBlockTest(unittest.TestCase):
         self.assertEqual(len(result), 1)
 
 
+class SuggestionShapeTest(unittest.TestCase):
+    """A suggestion has to be a change GitHub can commit in one click."""
+
+    def test_a_suggestion_that_repeats_the_anchored_line_is_refused(self):
+        body = "We could change this to:\n\n```suggestion\nTWO\n```\n"
+        with self.assertRaises(ValidationError) as caught:
+            validate(FILES, [comment(body=body)], False)
+        self.assertIn("changes nothing", str(caught.exception))
+
+    def test_a_suggestion_that_repeats_the_anchored_range_is_refused(self):
+        body = "We could change this to:\n\n```suggestion\nTWO\nthree\n```\n"
+        with self.assertRaises(ValidationError):
+            validate(
+                FILES,
+                [comment(line=7, start_line=6, start_side="RIGHT", body=body)],
+                False,
+            )
+
+    def test_a_suggestion_that_is_not_the_last_block_is_refused(self):
+        body = "```suggestion\nTWO, please\n```\n\n```python\nprint('x')\n```\n"
+        with self.assertRaises(ValidationError) as caught:
+            validate(FILES, [comment(body=body)], False)
+        self.assertIn("last block", str(caught.exception))
+
+    def test_text_after_the_suggestion_block_is_refused(self):
+        body = "We could change this to:\n\n```suggestion\nTWO, please\n```\n\nDone.\n"
+        with self.assertRaises(ValidationError) as caught:
+            validate(FILES, [comment(body=body)], False)
+        self.assertIn("after the suggestion block", str(caught.exception))
+
+    def test_an_indented_suggestion_fence_is_refused(self):
+        body = "We could change this to:\n\n  ```suggestion\n  TWO, please\n  ```\n"
+        with self.assertRaises(ValidationError) as caught:
+            validate(FILES, [comment(body=body)], False)
+        self.assertIn("first column", str(caught.exception))
+
+    def test_a_suggestion_that_keeps_the_anchored_lines_around_the_change(self):
+        body = "We could change this to:\n\n```suggestion\nTWO, please\nthree\n```\n"
+        result = validate(
+            FILES,
+            [comment(line=7, start_line=6, start_side="RIGHT", body=body)],
+            False,
+        )
+        self.assertEqual(len(result), 1)
+
+
 class FencedBlocksTest(unittest.TestCase):
     def test_blocks_are_found_in_order(self):
         blocks = fenced_blocks("a\n```suggestion\nx\n```\nb\n```python\ny\n```\n")
@@ -164,6 +278,11 @@ class FencedBlocksTest(unittest.TestCase):
     def test_an_unclosed_block_is_reported(self):
         blocks = fenced_blocks("```suggestion\nx\n")
         self.assertFalse(blocks[0].closed)
+
+    def test_a_block_carries_the_lines_it_spans(self):
+        blocks = fenced_blocks("a\n```suggestion\nx\n```\n")
+        self.assertEqual(blocks[0].start, 1)
+        self.assertEqual(blocks[0].end, 3)
 
 
 class SuggestionIndentTest(unittest.TestCase):
@@ -193,6 +312,11 @@ class SuggestionIndentTest(unittest.TestCase):
         body = "Could we rename this?\n\n```suggestion\n        renamed\n```\n"
         with self.assertRaises(ValidationError):
             validate(self.FILES, [comment(line=2, body=body)], False)
+
+    def test_a_deliberate_re_indentation_is_accepted_when_asked_for(self):
+        body = "Could we dedent this?\n\n```suggestion\nrenamed\n```\n"
+        result = validate(self.FILES, [comment(line=2, body=body)], False, True)
+        self.assertEqual(len(result), 1)
 
     def test_a_quoted_replacement_is_not_checked_for_indent(self):
         body = "Could we rename this?\n\nWe could change this to `renamed`.\n"

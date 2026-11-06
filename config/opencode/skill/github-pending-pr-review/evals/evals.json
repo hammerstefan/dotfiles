@@ -110,6 +110,34 @@
         "The agent still validates the anchor, creates the review pending, and verifies it remotely.",
         "Nothing is submitted, approved, or published."
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "Leave a review note on src/handler.py line 42 of this PR. The timeout is hard coded and should come from the config. Show me the change so I can accept it with one click.",
+      "expected_output": "The agent reads the anchored line out of the PR patch, writes a comment that opens with the question and then carries a GitHub suggestion block with the complete replacement for that line, and validates the block against the anchored line before creating the pending review.",
+      "files": [],
+      "expectations": [
+        "The comment carries a suggestion block whose content is the replacement for the anchored line, taken from the file and not from memory.",
+        "The agent reads the anchored lines before writing the block, so the replacement matches the line that is really there.",
+        "The block keeps the indentation of the anchored line, because it replaces that line.",
+        "The block is the last thing in the comment, and the explanation sits above it.",
+        "The block changes the anchored line instead of repeating it, and the validator refuses a block that repeats it.",
+        "The report says how many comments carry a one-click suggestion.",
+        "Nothing is published, submitted, approved, or marked as changes requested."
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Leave a review note on src/handler.py line 42 of this PR. The retry logic looks wrong to me, but I am not sure which behaviour the team wants here.",
+      "expected_output": "The agent writes a prose comment that asks the question and names the problem, and it leaves no suggestion block, because the right replacement is not clear. It reports that the comment carries no one-click suggestion and says why.",
+      "files": [],
+      "expectations": [
+        "The comment holds no suggestion block.",
+        "The agent does not invent replacement code to fill a suggestion block.",
+        "The comment asks the question and names the problem it raises.",
+        "The report says the comment carries no one-click suggestion and gives the reason.",
+        "Nothing is published, submitted, approved, or marked as changes requested."
+      ]
     }
   ]
 }

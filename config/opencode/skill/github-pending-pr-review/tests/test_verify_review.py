@@ -305,6 +305,56 @@ class VerifyTest(unittest.TestCase):
             verify({}, REQUESTED, [legacy_comment()], REVIEW_ID, HEAD_SHA)
 
 
+class RangeVerificationTest(unittest.TestCase):
+    """A range comment is checked against the start line of its range."""
+
+    REQUESTED = [
+        {
+            "path": "src/example.py",
+            "start_line": 6,
+            "start_side": "RIGHT",
+            "line": 7,
+            "side": "RIGHT",
+            "body": "Could we?",
+        }
+    ]
+
+    def test_a_remote_comment_that_reports_the_range_is_verified(self):
+        remote = [full_comment(line=7, position=4, start_line=6, start_side="RIGHT")]
+        report = verify(FILES, self.REQUESTED, remote, REVIEW_ID, HEAD_SHA)
+        self.assertEqual(report["failures"], [])
+        self.assertEqual(report["verified"], 1)
+        self.assertEqual(report["comments"][0]["start_line"], 6)
+
+    def test_a_remote_comment_with_another_start_line_is_refused(self):
+        remote = [full_comment(line=7, position=4, start_line=5, start_side="RIGHT")]
+        report = verify(FILES, self.REQUESTED, remote, REVIEW_ID, HEAD_SHA)
+        self.assertTrue(report["failures"])
+        self.assertTrue(
+            any("starts at line" in failure for failure in report["failures"])
+        )
+
+    def test_a_remote_comment_that_does_not_report_the_range_is_refused(self):
+        remote = [full_comment(line=7, position=4)]
+        report = verify(FILES, self.REQUESTED, remote, REVIEW_ID, HEAD_SHA)
+        self.assertTrue(report["failures"])
+        self.assertTrue(any("start line" in failure for failure in report["failures"]))
+
+    def test_a_remote_range_the_request_did_not_name_is_refused(self):
+        remote = [full_comment(line=6, position=3, start_line=5, start_side="RIGHT")]
+        report = verify(FILES, REQUESTED, remote, REVIEW_ID, HEAD_SHA)
+        self.assertTrue(report["failures"])
+        self.assertTrue(
+            any("did not name one" in failure for failure in report["failures"])
+        )
+
+    def test_a_remote_range_on_another_side_is_refused(self):
+        remote = [full_comment(line=7, position=4, start_line=6, start_side="LEFT")]
+        report = verify(FILES, self.REQUESTED, remote, REVIEW_ID, HEAD_SHA)
+        self.assertTrue(report["failures"])
+        self.assertTrue(any("side" in failure for failure in report["failures"]))
+
+
 class RealDataTest(unittest.TestCase):
     """The shapes GitHub returned for canonical/cpc-medic pull request 4."""
 

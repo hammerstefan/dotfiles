@@ -108,6 +108,172 @@ class ValidatorCommandTest(unittest.TestCase):
             self.assertIn("not commentable", result.stderr)
             self.assertFalse(output.exists())
 
+    def test_the_validator_reports_the_suggestion_coverage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            files = root / "files.json"
+            comments = root / "comments.json"
+            output = root / "out.json"
+            files.write_text(json.dumps(FILES), encoding="utf-8")
+            comments.write_text(
+                json.dumps(
+                    [
+                        dict(
+                            COMMENTS[0],
+                            body="Could we rename this?\n\n```suggestion\nTWO, please\n```\n",
+                        ),
+                        dict(COMMENTS[0], line=5),
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            result = run(
+                "validate_comments.py",
+                "--files",
+                str(files),
+                "--comments",
+                str(comments),
+                "--output",
+                str(output),
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("1 carry a one-click suggestion", result.stdout)
+            self.assertIn("1 do not", result.stdout)
+
+    def test_the_validator_refuses_a_suggestion_that_changes_nothing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            files = root / "files.json"
+            comments = root / "comments.json"
+            output = root / "out.json"
+            files.write_text(json.dumps(FILES), encoding="utf-8")
+            comments.write_text(
+                json.dumps([dict(COMMENTS[0], body="```suggestion\nTWO\n```\n")]),
+                encoding="utf-8",
+            )
+            result = run(
+                "validate_comments.py",
+                "--files",
+                str(files),
+                "--comments",
+                str(comments),
+                "--output",
+                str(output),
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("changes nothing", result.stderr)
+            self.assertFalse(output.exists())
+
+    def test_the_validator_accepts_a_deliberate_re_indentation_with_the_flag(self):
+        indented = [
+            {
+                "filename": "src/example.py",
+                "patch": "@@ -1,2 +1,2 @@\n-    old\n+    new\n",
+            }
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            files = root / "files.json"
+            comments = root / "comments.json"
+            output = root / "out.json"
+            files.write_text(json.dumps(indented), encoding="utf-8")
+            comments.write_text(
+                json.dumps(
+                    [
+                        {
+                            "path": "src/example.py",
+                            "line": 1,
+                            "side": "RIGHT",
+                            "body": "Could we dedent this?\n\n```suggestion\nnew\n```\n",
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            result = run(
+                "validate_comments.py",
+                "--files",
+                str(files),
+                "--comments",
+                str(comments),
+                "--output",
+                str(output),
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("indentation", result.stderr)
+
+            result = run(
+                "validate_comments.py",
+                "--files",
+                str(files),
+                "--comments",
+                str(comments),
+                "--output",
+                str(output),
+                "--allow-indent-change",
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+
+class AnchorTextCommandTest(unittest.TestCase):
+    def test_it_prints_the_anchored_lines(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            files = root / "files.json"
+            files.write_text(json.dumps(FILES), encoding="utf-8")
+            result = run(
+                "anchor_text.py",
+                "--files",
+                str(files),
+                "--path",
+                "src/example.py",
+                "--line",
+                "6",
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("range: 6..6", result.stdout)
+            self.assertIn("TWO", result.stdout)
+
+    def test_it_prints_json_on_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            files = root / "files.json"
+            files.write_text(json.dumps(FILES), encoding="utf-8")
+            result = run(
+                "anchor_text.py",
+                "--files",
+                str(files),
+                "--path",
+                "src/example.py",
+                "--line",
+                "7",
+                "--start-line",
+                "6",
+                "--json",
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["lines"], ["TWO", "three"])
+            self.assertEqual(payload["start_line"], 6)
+            self.assertEqual(payload["end_line"], 7)
+
+    def test_it_refuses_a_line_outside_the_patch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            files = root / "files.json"
+            files.write_text(json.dumps(FILES), encoding="utf-8")
+            result = run(
+                "anchor_text.py",
+                "--files",
+                str(files),
+                "--path",
+                "src/example.py",
+                "--line",
+                "99",
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("does not hold", result.stderr)
+
 
 class VerifierCommandTest(unittest.TestCase):
     def test_the_verifier_prints_the_report_as_json_on_standard_output(self):

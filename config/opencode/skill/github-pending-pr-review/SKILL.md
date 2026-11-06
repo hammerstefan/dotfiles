@@ -1,6 +1,6 @@
 ---
 name: github-pending-pr-review
-description: Create or draft an editable, pending GitHub pull-request review with inline comments using gh api. Use whenever the user asks to prepare, create, or draft a PR review whose comments must remain editable in GitHub before submission, especially when they mention pending reviews, inline review comments, Files changed, or not publishing yet. Never submit, approve, request changes, or publish during the creation action.
+description: Create or draft an editable, pending GitHub pull-request review with inline comments using gh api. A comment that proposes a concrete change carries a GitHub suggestion block the maintainer commits with one click, and a suggestion is never invented when the right change is not clear. Use whenever the user asks to prepare, create, or draft a PR review whose comments must remain editable in GitHub before submission, especially when they mention pending reviews, inline review comments, suggested changes, Files changed, or not publishing yet. Never submit, approve, request changes, or publish during the creation action.
 compatibility: Requires authenticated GitHub CLI (gh), jq, Python 3, and network access to the target GitHub host.
 ---
 
@@ -49,27 +49,103 @@ comments:
       First paragraph.
 
       Second paragraph.
+  - path: src/example.py
+    start_line: 40
+    start_side: RIGHT
+    line: 42
+    side: RIGHT
+    body: |-
+      A comment that covers the lines 40 to 42.
 ```
 
 Each item has exactly:
 
 - `path`: repository-relative path present in this PR's changed files
-- `line`: positive integer blob line visible in the PR diff
+- `line`: positive integer blob line visible in the PR diff, the last line of
+  the range the comment covers
 - `side`: `LEFT` for a deleted line or `RIGHT` for an added/context line
 - `body`: non-empty Markdown with the user's paragraph newlines preserved
+
+A comment may also carry the two optional fields of a range comment, and they
+come as a pair:
+
+- `start_line`: the first line of the range the comment covers
+- `start_side`: the side of that first line, the same value as `side`
+
+A comment without `start_line` covers the single line that `line` names. A
+comment with one covers every line from `start_line` to `line`, and that is
+the range a suggestion block replaces.
 
 Ask for missing or ambiguous values. Reject unsupported sides instead of
 normalizing them. Treat a literal backslash followed by `n` as suspicious and
 ask whether literal characters were intended; paragraph breaks must be real
 newline characters.
 
-## How to write a comment
+## The suggestion contract
 
-A review comment that helps is one the reader can act on without a second
-round trip. Two habits serve that.
+A comment that carries a `suggestion` block gives the maintainer a **Commit
+suggestion** button: one click and the change lands on the branch as its own
+commit, with the reviewer as a co-author. A comment without one asks for the
+work in prose. The button saves a round trip, so the skill leans on it
+whenever the replacement is clear.
 
-**Ask, then show.** Open with the problem as a question the author can
-answer, and follow it with the edit you would make:
+**Leave a suggestion when the replacement is clear and available.** A comment
+that proposes a concrete change to the lines it is anchored to carries a
+`suggestion` block holding the complete replacement for those lines. The
+replacement comes from the user, or from the file content and the diff, which
+the workflow reads before the comments are written.
+
+**Leave no suggestion when it is not.** An invented suggestion is worse than
+none, because the maintainer can commit it with one click and it lands broken.
+Write no `suggestion` block when:
+
+- the right fix depends on knowledge the reviewer does not have
+- several designs are equally reasonable and the choice belongs to the
+  maintainer
+- the change reaches another file, or lines that are not next to the anchor
+- the replacement text would have to be made up to fill the block
+
+In that case write the prose comment: open with the question, name the
+problem, and quote the candidate change inline when there is one. A correct
+prose comment always beats a one-click suggestion that silently corrupts the
+file.
+
+### How GitHub applies a suggestion
+
+The block replaces the lines the comment is anchored to:
+
+- `line` alone replaces that one line.
+- `start_line` and `line` together replace the whole range between them.
+
+So the block holds the complete replacement. Every line of the range that
+stays has to appear in the block, and a line of the range that is missing from
+the block is deleted when the maintainer commits the suggestion. Keep the
+indentation of the anchored line, because the block replaces that line rather
+than adding to it. Put the block last in the body and write the explanation
+above it, the way GitHub's own comment box writes it, so that every
+suggestion reads the same way in the **Files changed** UI. GitHub applies at
+most one suggestion block per comment, and a suggestion cannot hang on a
+deleted line, which has no new content to replace.
+
+### The check before posting
+
+Read every suggestion block as a replacement of the anchored range and ask
+one question: does applying it produce exactly the code the comment
+describes? Three failures are common.
+
+- **A line disappears.** The range covers more lines than the block repeats.
+  Repeat the lines that stay, or narrow the range to the line that changes.
+- **The code is not the code described.** The block was written from the
+  comment instead of from the file.
+- **The block was made up.** The replacement text was guessed rather than
+  taken from the file or the user. Remove the block and write prose.
+
+The validator checks the mechanical parts of this. The rest is on the agent.
+
+### Ask, then show
+
+Open with the problem as a question the author can answer, and follow it with
+the edit you would make:
 
 ````markdown
 Could we name the provider here? A reader cannot tell which of the two
@@ -85,19 +161,10 @@ The `jenkins.env` file in the `medic` Workshop holds these credentials.
 "Could we" and "Should we" keep the comment a conversation. A bare "this is
 wrong" makes the reader defend the code instead of reading the suggestion.
 
-**Give the edit, not the verdict.** A concrete replacement saves the reader
-the work of working out what you meant. Two forms cover most cases:
-
-- A GitHub suggestion block for a change that fits inside the anchored line
-  or lines. The block replaces exactly the lines the comment is anchored to,
-  so it must hold the full replacement for those lines.
-- Quoted replacement text when a suggestion block does not apply: the change
-  spans lines the comment does not anchor, the anchor is a deleted line, or
-  the edit needs to be read rather than applied.
-
 Keep the wording the user supplied. When the user hands over a body, use it
-as it is, and do not rewrite it into a question. Only the comments the skill
-drafts itself carry the ask-then-show shape.
+as it is, and do not rewrite it into a question or append a suggestion to it.
+Only the comments the skill drafts itself carry the ask-then-show shape and
+the suggestion contract.
 
 A suggestion block is a claim about the file's content, so hold it to that
 standard. It must keep the meaning of the line it replaces, it must not
@@ -215,6 +282,22 @@ cannot be verified, stop rather than guessing.
 
 ### 4. Build the comment list with real newlines and validate it
 
+Read the anchored lines before writing the bodies, so that every suggestion
+block is built from the lines that are really there:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+python3 "<skill-directory>/scripts/anchor_text.py" \
+  --files "$tmpdir/files.json" \
+  --path 'src/example.py' \
+  --line 42 \
+  --side RIGHT
+```
+
+The output holds the exact lines a suggestion block replaces, and the range
+that a range comment covers. A suggestion written from memory of the file is
+a suggestion that lands wrong.
+
 Never interpolate comment text into JSON or shell code. Prefer `jq -n` with
 `--arg`, `--argjson`, and variables containing real newlines. For example:
 
@@ -227,6 +310,20 @@ jq -n \
   --arg side 'RIGHT' \
   --arg body "$body" \
   '[{path:$path,line:$line,side:$side,body:$body}]' \
+  >"$tmpdir/comments.json"
+```
+
+A comment that covers a range names its first line as well:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+jq -n \
+  --arg path 'src/example.py' \
+  --argjson start_line 40 \
+  --argjson line 42 \
+  --arg side 'RIGHT' \
+  --arg body "$body" \
+  '[{path:$path,start_line:$start_line,line:$line,side:$side,start_side:$side,body:$body}]' \
   >"$tmpdir/comments.json"
 ```
 
@@ -248,12 +345,23 @@ python3 "<skill-directory>/scripts/validate_comments.py" \
 
 The validator checks schema, path membership, side, line, duplicate anchors,
 body limits, suspicious literal `\n`, and whether each line/side pair is
-commentable in the patch. It also checks a suggested change: at most one
+commentable in the patch. A range has to cover lines that the diff really
+holds, because GitHub anchors a comment on a contiguous run of them.
+
+It also checks a suggested change against the lines it replaces: at most one
 suggestion block per comment, no unclosed code fence, no suggestion on a
-deleted line, which has no new content to replace, and a suggestion that
+deleted line, which has no new content to replace, a fence that starts in the
+first column, a block that is the last thing in the comment, a block that
+changes something rather than repeating the anchored lines, and a block that
 keeps the anchored line's indentation. Do not bypass a failure. If the user
 explicitly wants literal backslash-n text, rerun with
-`--allow-literal-backslash-n`.
+`--allow-literal-backslash-n`. If the change is a deliberate re-indentation,
+rerun with `--allow-indent-change`.
+
+The validator reports how many comments carry a one-click suggestion, and it
+notes a suggestion that is shorter than the range it replaces, because every
+line of that range the block does not repeat is deleted when the maintainer
+commits it. Read those notes before creating the review.
 
 ### 5. Construct the review payload safely
 
@@ -273,7 +381,9 @@ payload=$(jq -n \
 ```
 
 Set `requested_review_body` to the user's text when they asked for a summary
-body, and leave it empty otherwise.
+body, and leave it empty otherwise. A range comment keeps its `start_line` and
+`start_side` in the payload; they are the fields GitHub uses to anchor the
+comment on the range that a suggestion replaces.
 
 Inspect the payload structurally before POSTing: it must have the current
 `commit_id`, the expected comment count, no `event` key, and comments identical
@@ -372,7 +482,9 @@ the file's first hunk header, and `scripts/diff_positions.py` implements that
 rule, including the detail that a later hunk header consumes a position. The
 verifier requires the API fields and the mapped position to agree when both
 are available, requires the body to match exactly, and reports the anchor of
-every comment it could not verify.
+every comment it could not verify. A comment that names a range is checked
+against the start line the remote comment reports, because the range is what
+a suggested change replaces.
 
 Treat a non-zero exit as a failed verification. Do not report a comment as
 verified when the verifier did not verify it, and do not describe a field the
@@ -423,11 +535,17 @@ Report:
   API returned one, and confirmation that the body matched (do not
   unnecessarily repeat sensitive comment text)
 - which evidence verified each anchor, and any anchor that stayed unverified
+- how many comments carry a one-click suggestion, so the maintainer knows
+  which ones can be committed with the **Commit suggestion** button
+- for every comment without a suggestion, one line on why: the change was not
+  clear enough to suggest, the anchor is a deleted line, or the wording came
+  from the user and was left untouched
 - `<PR html_url>/files`
 - “Nothing was published, submitted, approved, or marked as changes requested.”
 
 Tell the user that pending inline comments can be reviewed and adjusted in the
-GitHub **Files changed** UI before submission. Also warn that the pending review
+GitHub **Files changed** UI before submission. A suggestion block can be
+edited there before it is committed. Also warn that the pending review
 summary body may not be pre-populated in GitHub's final submission dialog.
 
 If a recovery failed after the created review was deleted, say so plainly.
@@ -437,6 +555,8 @@ Report what the remote state is, not what the workflow intended.
 
 - `scripts/validate_comments.py` checks the comment list against the PR's
   patches and writes the validated list.
+- `scripts/anchor_text.py` prints the lines a comment covers, so that a
+  suggestion block is built from the file and not from memory.
 - `scripts/diff_positions.py` maps a diff position to a blob line and side.
   It also runs on its own with `--files`, `--path`, and `--position`.
 - `scripts/verify_review.py` compares the remote comments with the request and
@@ -446,7 +566,7 @@ Each script writes its output file, overwriting what was there, so a rerun
 after a recovery is not blocked by the first run's file. Each script exits
 non-zero when it cannot do its job, and prints the reason on standard error.
 
-Run the tests for all three from the skill directory:
+Run the tests for all four from the skill directory:
 
 ```bash
 cd "<skill-directory>" && python3 -m unittest discover -s tests
