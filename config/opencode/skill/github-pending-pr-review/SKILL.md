@@ -1,6 +1,6 @@
 ---
 name: github-pending-pr-review
-description: Create or draft an editable, pending GitHub pull-request review with inline comments using gh api. A comment that proposes a concrete change carries a GitHub suggestion block the maintainer commits with one click, and a suggestion is never invented when the right change is not clear. Use whenever the user asks to prepare, create, or draft a PR review whose comments must remain editable in GitHub before submission, especially when they mention pending reviews, inline review comments, suggested changes, Files changed, or not publishing yet. Never submit, approve, request changes, or publish during the creation action.
+description: Create, draft, or append to an editable, pending GitHub pull-request review with inline comments using gh api and the modern GraphQL addPullRequestReviewThread mutation. A comment that proposes a concrete change carries a GitHub suggestion block the maintainer commits with one click, and a suggestion is never invented when the right change is not clear. Use whenever the user asks to prepare, create, draft, or add to a PR review whose comments must remain editable in GitHub before submission, especially when they mention pending reviews, inline review comments, suggested changes, Files changed, or not publishing yet. When exactly one PENDING review owned by the authenticated user already exists on the same PR and head SHA, the skill appends the new comments to it; otherwise it creates a fresh pending review. Never submit, approve, request changes, or publish during the creation or append action.
 compatibility: Requires authenticated GitHub CLI (gh), jq, Python 3, and network access to the target GitHub host.
 ---
 
@@ -15,10 +15,24 @@ review remains unpublished so the user can inspect and adjust it in GitHub's
 - Restrict mutations to creating the pending review explicitly requested by
   the user and, when transactional recovery requires it, deleting only the
   pending review created during the current invocation.
-- Never delete or replace a review that existed before this invocation, not
-  even one the authenticated user owns. If a pending review already exists,
-  stop, report its ID, and ask the user to delete it in the GitHub UI. The
-  user performs that deletion, the skill proceeds afterwards.
+- Never delete, replace, or modify a review that existed before this
+  invocation, not even one the authenticated user owns. The append path is
+  the only exception, and only in the additive direction: it may add new
+  top-level comments to a single pending review the authenticated user owns
+  on this pull request and head SHA. The append path never edits a
+  pre-existing comment, never replies to one, never updates the review's
+  summary body, and never submits the review. When two or more pending
+  reviews owned by the authenticated user match, stop, list each id, and
+  ask the user to delete the unwanted ones in the GitHub UI before
+  re-running.
+- In the append path the skill uses the modern GraphQL
+  `addPullRequestReviewThread` mutation to add one top-level comment at a
+  time, and never the deprecated `addPullRequestReviewComment` mutation. The
+  append path never calls
+  `POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/events`,
+  `PUT /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}`,
+  `PUT /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/dismissals`,
+  or `DELETE /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}`.
 - Never delete another user's review, and never touch a submitted review.
   GitHub refuses to delete a submitted review, and this skill never asks it
   to.
@@ -243,7 +257,7 @@ printf 'host=%q\nrepo=%q\npr=%q\nlogin=%q\n' \
   "$host" "$repo" "$pr" "$login" >>"$state/env.sh"
 ```
 
-### 2. Snapshot existing reviews before any mutation
+### 2. Snapshot existing reviews and decide create vs append
 
 Fetch all review pages and combine the JSON streams safely. Write the raw
 pages to a file first, so that a failed page stops the workflow instead of
@@ -257,12 +271,42 @@ gh api --hostname "$host" --paginate \
 ```
 
 Require this to be a JSON array. Record every existing review ID. Filter for
-reviews where `.user.login == $login` and `.state == "PENDING"`.
+the **candidate set**: reviews where `.user.login == $login`,
+`.state == "PENDING"`, the canonical `.pull_request_url` ends with the
+resolved pull request's `<owner>/<repo>/pull/<number>` path, and
+`.commit_id == $head_sha`. Do not infer ownership from display names or
+URLs; compare the authenticated login value exactly and the canonical URL
+byte for byte.
 
-- If one or more exist, do not create another. Report their IDs and ask the
-  user to delete them in the GitHub UI, then continue once they are gone.
-- Do not infer ownership from display names or URLs; compare authenticated
-  login values exactly.
+From the candidate set the workflow enters exactly one of three modes:
+
+- **Zero matches** -> **create mode**. Continue to step 5 and create a new
+  pending review through `POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews`.
+- **Exactly one match** -> **append mode**. Continue to step 5a. Record the
+  target review's numeric id and fetch its `node_id` with
+  `GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}` (it is
+  the `.node_id` field of the response, distinct from the numeric `.id`).
+  Snapshot every pre-existing comment on that review into
+  `$tmpdir/pre-existing-comments.json` as a JSON array of
+  `{id, path, line, side, start_line, start_side, body}` objects, taken from
+  the review-scoped endpoint
+  (`repos/$repo/pulls/$pr/reviews/$review_id/comments`). The snapshot is the
+  basis for the unchanged check in step 7a.
+- **Two or more matches** -> **refuse**. Stop without mutation, list each
+  matching review's numeric id and `commit_id`, and ask the user to delete
+  the unwanted ones in the GitHub UI before re-running. The skill never
+  picks one of the candidates on the user's behalf.
+
+A pending review on the same PR whose `.user.login` differs from
+`$login` is **not** in the candidate set. The skill never appends to it,
+and its presence does not, by itself, trigger refuse mode. The skill
+behaves as if the review did not exist; if the candidate set is empty the
+skill creates a new review on top.
+
+A pending review the authenticated user owns but whose `.commit_id` does
+not match `$head_sha` is **not** in the candidate set. The skill never
+appends to a stale review, and its presence does not, by itself, trigger
+refuse mode. Report it so the user knows why it was ignored.
 
 ### 3. Fetch and validate the diff anchors
 
@@ -389,7 +433,133 @@ Inspect the payload structurally before POSTing: it must have the current
 `commit_id`, the expected comment count, no `event` key, and comments identical
 to the validated input.
 
-### 6. Create one pending review
+When the workflow is in **append mode**, skip step 6 (it creates a new
+review, which append mode never does) and continue with step 5a. When it
+is in **create mode**, continue with step 6 and skip step 5a and step 5b.
+
+### 5a. Pre-mutation invariants (append mode)
+
+The target review's state may have changed between the step-2 snapshot and
+the first GraphQL mutation. Re-fetch the PR and the target review
+immediately before any mutation, and require all of these to be true:
+
+- the PR's `.head.sha` equals `$head_sha`,
+- the target review's `.id` equals the recorded id,
+- the target review's `.user.login` equals `$login`,
+- the target review's `.state` equals `"PENDING"`,
+- the target review's `.commit_id` equals `$head_sha`,
+- the target review's `.pull_request_url` ends with the resolved pull
+  request's `<owner>/<repo>/pull/<number>` path,
+- the target review's `.node_id` is present and well-formed (a string of
+  the form `PRR_` followed by letters and digits, distinct from the
+  numeric `.id`).
+
+If any check fails, stop without mutation and report the actual state. Do
+not proceed to step 5b with a stale snapshot.
+
+Fetch the re-checked state into the scratch directory so a later step can
+reconcile against it:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+gh api --hostname "$host" "repos/$repo/pulls/$pr" >"$tmpdir/pr-pre-mutation.json"
+gh api --hostname "$host" "repos/$repo/pulls/$pr/reviews/$target_review_id" \
+  >"$tmpdir/review-pre-mutation.json"
+```
+
+Read `.head.sha`, `.id`, `.user.login`, `.state`, `.commit_id`,
+`.pull_request_url`, and `.node_id` from `$tmpdir/review-pre-mutation.json`
+and verify them against the recorded values before sending any mutation.
+
+### 5b. Append each comment with GraphQL (append mode)
+
+GitHub's REST surface cannot add a comment to an existing pending review:
+`POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}` does
+not exist, and the older GraphQL mutation `addPullRequestReviewComment`
+was deprecated on 2023-10-01. The skill uses the modern
+`addPullRequestReviewThread` mutation, sending one mutation per appended
+comment so verification stays atomic per comment and a partial append is
+easy to report.
+
+The mutation input carries the target review's `node_id` (not the numeric
+`id`), the comment's `path`, `line`, `side`, `body`, and `subjectType:
+"LINE"`. A range comment also carries `startLine` and `startSide`. The
+input never carries `inReplyTo`: every appended comment is a top-level
+thread on the target review.
+
+Resolve the target review's `node_id` from the pre-mutation snapshot so
+the GraphQL payload can reference it:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+target_review_node_id=$(jq -r .node_id "$tmpdir/review-pre-mutation.json")
+```
+
+Loop over the validated comments in order. For each comment, build the
+GraphQL payload with `jq` and real newlines (exactly as step 5 does), save
+the raw response, and parse it before sending the next one. A failed
+mutation stops the loop without retrying; the skill does not delete the
+target review or any individual comment and does not attempt to revert
+the appended comments that did land. The `addPullRequestReviewThread`
+GraphQL mutation takes the form:
+
+```graphql
+mutation($input: AddPullRequestReviewThreadInput!) {
+  addPullRequestReviewThread(input: $input) {
+    thread {
+      id
+      isResolved
+      comments(first: 1) {
+        nodes {
+          id
+          databaseId
+          path
+          line
+          side
+          startLine
+          startSide
+          body
+        }
+      }
+    }
+  }
+}
+```
+
+A worked example for one appended comment, built from the validated
+comment list, with `subjectType: "LINE"` and the target review's
+`node_id`:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+query='mutation($input: AddPullRequestReviewThreadInput!) { addPullRequestReviewThread(input: $input) { thread { id isResolved comments(first: 1) { nodes { id databaseId path line side startLine startSide body } } } } }'
+jq -n \
+  --arg query "$query" \
+  --arg node_id "$target_review_node_id" \
+  --slurpfile comments "$tmpdir/comments.validated.json" \
+  '{query:$query,variables:{input:{pullRequestReviewId:$node_id,subjectType:"LINE",path:$comments[0][0].path,line:$comments[0][0].line,side:$comments[0][0].side,body:$comments[0][0].body}}}'
+```
+
+A range comment extends the `input` with `startLine` and `startSide`:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+jq -n \
+  --arg query "$query" \
+  --arg node_id "$target_review_node_id" \
+  --slurpfile comments "$tmpdir/comments.validated.json" \
+  '{query:$query,variables:{input:{pullRequestReviewId:$node_id,subjectType:"LINE",path:$comments[0][0].path,line:$comments[0][0].line,side:$comments[0][0].side,startLine:$comments[0][0].start_line,startSide:$comments[0][0].start_side,body:$comments[0][0].body}}}'
+```
+
+Send each mutation, capture the raw response, and parse only after the
+process exits cleanly. A non-clean outcome (non-zero exit, GraphQL
+`errors`, missing `thread`, or the returned comment not matching the
+request) stops the loop and reports which comments landed and which did
+not. The full per-comment loop and response parsing are described in
+`references/append-to-pending-review.md`; the workflow never reads a
+GraphQL `errors` field as a success.
+
+### 6. Create one pending review (create mode only)
 
 Save the raw response before projecting fields:
 
@@ -494,7 +664,80 @@ the API fields, the diff position, or both.
 Also GET the review itself and reconfirm owner, PENDING state, PR, and head
 commit.
 
-### 8. Recover transactionally when newly-created content is wrong
+In **append mode** the verification has an additional check that step 7
+does not perform: every pre-existing comment on the target review must be
+unchanged from the snapshot taken in step 2. Continue with step 7a.
+
+### 7a. Verify pre-existing comments are unchanged (append mode)
+
+Append mode can only be reported as successful when the appended comments
+landed on the requested anchors AND every pre-existing comment on the
+target review is byte-for-byte identical to the snapshot. A changed
+pre-existing comment means the append touched something the skill does not
+own, and the workflow reports it as a failure.
+
+Re-fetch the PR and the target review's comments from both endpoints,
+using the same fetches as step 7 but with the target review's id
+(`$target_review_id` recorded in step 2, not `$created_review_id`):
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+gh api --hostname "$host" --paginate \
+  "repos/$repo/pulls/$pr/comments?per_page=100" >"$tmpdir/pr-comments.pages.json" \
+  && jq -s 'add' "$tmpdir/pr-comments.pages.json" >"$tmpdir/pr-comments.json"
+gh api --hostname "$host" --paginate \
+  "repos/$repo/pulls/$pr/reviews/$target_review_id/comments?per_page=100" \
+  >"$tmpdir/review-comments.pages.json" \
+  && jq -s 'add' "$tmpdir/review-comments.pages.json" >"$tmpdir/review-comments.json"
+```
+
+Re-confirm the PR's `head.sha` and the review's `state`, `commit_id`,
+`user.login`, and `pull_request_url` against the values recorded in step
+5a. Any drift stops the workflow before running the verifier.
+
+Run `verify_review.py` once over the appended comments to confirm their
+anchors and bodies landed:
+
+```bash
+. "$HOME/.local/state/gh-pending-pr-review/env.sh"
+python3 "<skill-directory>/scripts/verify_review.py" \
+  --files "$tmpdir/files.json" \
+  --comments "$tmpdir/comments.validated.json" \
+  --remote "$tmpdir/pr-comments.json" \
+  --remote "$tmpdir/review-comments.json" \
+  --review-id "$target_review_id" \
+  --head-sha "$head_sha" \
+  --output "$tmpdir/verification-appended.json"
+```
+
+Then compare every comment in `$tmpdir/pre-existing-comments.json` (the
+snapshot from step 2) against the remote comments on the same review. A
+pre-existing comment is unchanged when its id, path, line, side,
+start_line, start_side, and body all match the snapshot. Write the
+result of that comparison to `$tmpdir/verification-unchanged.json`. The
+exact comparison logic is in `references/append-to-pending-review.md`.
+
+The final report distinguishes the two outcomes:
+
+- **appended-comment failures**: which requested comments did not land,
+  with the discrepancy named (anchor, body, missing from remote).
+- **pre-existing-comment changes**: which pre-existing comments changed,
+  with the field that changed (id, path, line, side, start_line,
+  start_side, or body) named.
+
+A failure in either category stops the workflow. The skill never deletes
+the target review, never tries to delete individual comments, never
+retries the failed mutation, and never recreates the review. The remote
+state is the result, and the report tells the user exactly what to clean
+up in the GitHub UI.
+
+### 8. Recover transactionally when newly-created content is wrong (create mode only)
+
+Step 8 applies to **create mode only**. In **append mode** there is no
+recovery: the target review was not created by this invocation and must
+not be deleted, and GitHub offers no API to delete individual review
+comments. A failed append is reported by step 7a, never retried, and
+never recovered.
 
 GitHub documents `PATCH /repos/{owner}/{repo}/pulls/comments/{comment_id}`, but
 PATCHing a comment that belongs to a pending review can return 404. Do not rely
@@ -521,12 +764,16 @@ again.
 If any identity or state check fails, do not delete. Ask the user how to
 proceed.
 
-A pending review found before this invocation is never automatic cleanup, and
-never a replacement target, including one apparently owned by the same login.
+A pending review found before this invocation is never automatic cleanup in
+create mode, and never a replacement target, including one apparently owned
+by the same login. In append mode the auto-detect decision in step 2 may
+target a single such review; the workflow never deletes it, never edits
+its pre-existing comments, never updates its summary body, and never
+submits it.
 
 ## Final response
 
-Report:
+Report, in **create mode**:
 
 - repository and PR number
 - pending review ID and `PENDING` state, taken from the review GET
@@ -543,6 +790,36 @@ Report:
 - `<PR html_url>/files`
 - “Nothing was published, submitted, approved, or marked as changes requested.”
 
+Report, in **append mode**:
+
+- repository and PR number
+- target review id (numeric and `node_id`) and `PENDING` state, taken from
+  the pre-mutation review GET
+- count of appended comments that verified, and for each one the verified
+  path, side, and line with the API-returned position when available and
+  the body match confirmation (do not unnecessarily repeat comment text)
+- count of pre-existing comments that verified unchanged, and the explicit
+  list of any pre-existing comments that changed, with the field that
+  changed (id, path, line, side, start_line, start_side, or body) named
+- count of appended comments that did not land, with the discrepancy named
+  (anchor, body, or absent from remote)
+- how many appended comments carry a one-click suggestion, so the maintainer
+  knows which ones can be committed with the **Commit suggestion** button
+- for every appended comment without a suggestion, one line on why: the
+  change was not clear enough to suggest, the anchor is a deleted line, or
+  the wording came from the user and was left untouched
+- `<PR html_url>/files#pullrequestreview-<target_review_id>` so the user
+  jumps straight to the pending review in the Files changed UI
+- “Nothing was submitted, approved, or marked as changes requested. No
+  pre-existing comment was edited, replied to, or deleted. The review's
+  summary body was not updated.”
+
+If verification reported any failure, also report: a partial append cannot
+be undone by the skill (GitHub has no API to delete individual review
+comments and the skill will not delete the target review). Name the
+appended comments that landed and the ones that did not, so the user can
+clean up in the GitHub UI.
+
 Tell the user that pending inline comments can be reviewed and adjusted in the
 GitHub **Files changed** UI before submission. A suggestion block can be
 edited there before it is committed. Also warn that the pending review
@@ -554,13 +831,17 @@ Report what the remote state is, not what the workflow intended.
 ## Bundled scripts
 
 - `scripts/validate_comments.py` checks the comment list against the PR's
-  patches and writes the validated list.
+  patches and writes the validated list. Used unchanged by create mode and
+  append mode.
 - `scripts/anchor_text.py` prints the lines a comment covers, so that a
-  suggestion block is built from the file and not from memory.
+  suggestion block is built from the file and not from memory. Used
+  unchanged by create mode and append mode.
 - `scripts/diff_positions.py` maps a diff position to a blob line and side.
   It also runs on its own with `--files`, `--path`, and `--position`.
 - `scripts/verify_review.py` compares the remote comments with the request and
-  reports what it could verify.
+  reports what it could verify. In append mode it is run once over the
+  appended comments; the unchanged check for pre-existing comments lives
+  in `references/append-to-pending-review.md`.
 
 Each script writes its output file, overwriting what was there, so a rerun
 after a recovery is not blocked by the first run's file. Each script exits

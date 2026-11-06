@@ -18,13 +18,15 @@
     {
       "id": 2,
       "prompt": "Put these review notes into an editable GitHub review, but I may already have a pending review on that PR. If so, don't create duplicates or remove anything without asking me.",
-      "expected_output": "The agent fails closed when it finds a pre-existing pending review, reports its ID, and asks the user to delete it in the GitHub UI. It performs no mutation before that decision.",
+      "expected_output": "The agent auto-detects the mode from the PR's review snapshot: zero matching pending reviews => create a new pending review; exactly one matching (login == authenticated user, state PENDING, same PR, same head SHA) => append the new comments to it through GraphQL; two or more matching => stop without mutation, list each id, and ask the user to delete the unwanted ones in the GitHub UI.",
       "files": [],
       "expectations": [
-        "The workflow identifies pending reviews by exact authenticated login and PENDING state.",
-        "A pre-existing pending review blocks creation.",
-        "The workflow never deletes or replaces a pre-existing review, not even one the authenticated user owns, and never deletes another user's review.",
-        "The agent asks the user to delete the pre-existing pending review in the GitHub UI rather than deleting it through the API.",
+        "The workflow filters pending reviews by exact authenticated login, PENDING state, canonical PR URL, and commit_id == head SHA.",
+        "Zero matching reviews routes the skill into create mode, which posts a new review through REST.",
+        "Exactly one matching review routes the skill into append mode, which sends one addPullRequestReviewThread mutation per appended comment.",
+        "Two or more matching reviews stop the workflow without mutation and list each id; the user is asked to delete the unwanted ones in the GitHub UI.",
+        "A pending review owned by a different login is excluded from the candidate set and never appended to.",
+        "A pending review on a stale head SHA is excluded from the candidate set and never appended to.",
         "No submit, approve, request-changes, or publish action occurs."
       ]
     },
@@ -74,12 +76,14 @@
     {
       "id": 6,
       "prompt": "I already left a pending review on that PR yesterday. Delete it and put these new comments there instead.",
-      "expected_output": "The agent refuses to delete or replace the pre-existing pending review, reports its ID, and asks the user to delete it in the GitHub UI before the new review is created.",
+      "expected_output": "The agent recognises the pre-existing pending review matches exactly one of the candidate set (login == authenticated user, state PENDING, same PR, same head SHA) and appends the new comments to it through GraphQL. The agent ignores the 'delete it' instruction because the review was not created in this invocation and the append path is the only additive exception to the no-touch rule. The agent does not delete the review through the API.",
       "files": [],
       "expectations": [
-        "The agent does not delete the pre-existing pending review through the API, even with an explicit request to do so.",
-        "The agent names the review it found and asks the user to remove it in the GitHub UI.",
-        "The agent does not create a second pending review while the first one exists.",
+        "The agent identifies the pre-existing pending review and confirms it is the only candidate (login, state, PR URL, head SHA).",
+        "The agent appends the new comments to that review through GraphQL addPullRequestReviewThread, one mutation per comment.",
+        "The agent refuses to delete the pre-existing pending review through the API, even with an explicit user request to do so.",
+        "The agent never updates the review's summary body and never submits, approves, dismisses, or merges.",
+        "The agent verifies that every pre-existing comment on the target review is unchanged after the append.",
         "No other user's review is touched.",
         "Nothing is submitted, approved, or published."
       ]
@@ -137,6 +141,128 @@
         "The comment asks the question and names the problem it raises.",
         "The report says the comment carries no one-click suggestion and gives the reason.",
         "Nothing is published, submitted, approved, or marked as changes requested."
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Make the security comment in the pending review you created earlier in this session lead with the risk. Keep the other comments as they are.",
+      "expected_output": "The agent proves the review came from this session, checks its current owner, PR, head, pending state and target comment, then updates only that comment body and verifies the result and unchanged siblings.",
+      "files": [],
+      "expectations": [
+        "The review ID comes from a successful creation response and verification in this session, not just the user's assertion or a matching login.",
+        "The agent resolves the target comment unambiguously and verifies its ID, author, pending state, anchor, and viewerCanUpdate before the edit.",
+        "The agent checks the review owner, pending state, PR, head SHA, and unchanged target body immediately before the mutation.",
+        "The replacement body is validated against the original anchor before the GraphQL updatePullRequestReviewComment mutation.",
+        "The agent verifies the new body and checks all other comments against the pre-edit snapshot.",
+        "The review is not deleted, recreated, submitted, or published."
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Edit the security note in my pending review from yesterday. Its ID is 42 and I own it.",
+      "expected_output": "The agent refuses the edit because the review predates the current session, and asks the user to edit it in GitHub's UI.",
+      "files": [],
+      "expectations": [
+        "A user-supplied review ID and matching login do not establish session provenance.",
+        "The agent does not modify, delete, or replace the pre-existing review.",
+        "The agent asks the user to edit the review in GitHub's UI."
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Update a comment in the review you created this session. If the PR changed or the edit request times out, keep retrying until it succeeds.",
+      "expected_output": "The agent stops on a changed head or unverifiable state. After an uncertain mutation it reads remote state, reports what it can verify, and does not retry or delete the review.",
+      "files": [],
+      "expectations": [
+        "A changed head, submitted review, changed target body, failed ownership check, or unverifiable anchor prevents mutation.",
+        "An uncertain GraphQL outcome triggers remote inspection rather than an automatic retry.",
+        "The agent does not delete or recreate the review to perform the edit.",
+        "The agent reports any unverified result without claiming success."
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Add these three comments to the pending review I left on this PR. Use the existing review, not a new one.",
+      "expected_output": "The agent auto-detects exactly one matching PENDING review (login == authenticated user, state PENDING, same PR, same head SHA) and appends each comment to it through GraphQL addPullRequestReviewThread, one mutation per comment. The agent verifies every appended comment's anchor and body against the live diff and confirms every pre-existing comment on the target review is unchanged.",
+      "files": [],
+      "expectations": [
+        "The agent identifies the pre-existing pending review as the only candidate and records its numeric id and node_id.",
+        "The agent snapshots every pre-existing comment on the target review before any mutation.",
+        "The agent sends one addPullRequestReviewThread mutation per appended comment, in order, with subjectType 'LINE' and real newlines in the body.",
+        "A range comment carries startLine and startSide in the mutation input.",
+        "The agent never uses the deprecated addPullRequestReviewComment mutation.",
+        "The agent verifies each appended comment's anchor and body against the live diff.",
+        "The agent verifies every pre-existing comment is byte-for-byte unchanged (id, path, line, side, start_line, start_side, body).",
+        "The agent reports the target review id and the GitHub Files-changed URL with /files#pullrequestreview-<id>.",
+        "Nothing is submitted, approved, dismissed, or merged."
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "I have two pending reviews open on this PR for some reason. Add these new comments to my latest one.",
+      "expected_output": "The agent refuses because the candidate set contains two or more PENDING reviews owned by the authenticated user on the same PR and head SHA. The agent stops without mutation, lists each review's numeric id and commit_id, and asks the user to delete the unwanted ones in the GitHub UI. The skill does not pick one of the candidates on the user's behalf.",
+      "files": [],
+      "expectations": [
+        "The agent refuses when two or more matching PENDING reviews exist and does not pick one.",
+        "The agent lists each matching review's id and commit_id and asks the user to disambiguate in the GitHub UI.",
+        "No mutation occurs: no GraphQL addPullRequestReviewThread, no REST POST, no PATCH, no DELETE.",
+        "No submit, approve, dismiss, request-changes, or merge action occurs."
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "My colleague left a pending review on this PR. Don't touch theirs; just put my new comments into a fresh pending review.",
+      "expected_output": "The agent excludes the colleague's pending review from the candidate set (login does not match the authenticated user). With zero matching reviews, the agent creates a new pending review through REST. The colleague's review is reported as ignored but never modified.",
+      "files": [],
+      "expectations": [
+        "The agent excludes the colleague's pending review from the candidate set because login != authenticated user.",
+        "Zero matching candidates routes the agent into create mode (REST POST).",
+        "The agent never appends to the colleague's review or edits any of its comments.",
+        "The agent never deletes the colleague's review.",
+        "The agent reports the colleague's review as ignored with its id and owner.",
+        "Nothing is submitted, approved, dismissed, or merged."
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "I left a pending review on this PR yesterday but there have been new commits since. Add these comments to that pending review.",
+      "expected_output": "The agent excludes the pre-existing pending review from the candidate set because commit_id differs from the current head SHA. The agent refuses to append to a stale review, reports the recorded head SHA and the current head SHA, and asks the user to either resubmit the stale review (in the GitHub UI) and re-run, or leave it alone.",
+      "files": [],
+      "expectations": [
+        "The agent excludes the stale pending review from the candidate set because commit_id != head SHA.",
+        "The agent refuses the append and reports the recorded and current head SHAs.",
+        "The agent does not append to the stale review or edit any of its comments.",
+        "The agent does not delete the stale review.",
+        "No mutation occurs.",
+        "Nothing is submitted, approved, dismissed, or merged."
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "Append two comments to the pending review I left open. The reviewer (you) shouldn't worry if a pre-existing comment was edited in the GitHub UI between my snapshot and the verification.",
+      "expected_output": "The agent appends the two comments, then the post-mutation unchanged check detects that a pre-existing comment differs from the snapshot (for example, the body was edited). The agent stops, makes no further mutation, names the changed comment by id and the field that changed, and lists which appended comments landed.",
+      "files": [],
+      "expectations": [
+        "The agent sends the GraphQL mutations and then re-fetches both comment endpoints.",
+        "The unchanged check compares every pre-existing comment's id, path, line, side, start_line, start_side, and body against the snapshot.",
+        "A change in any of those fields is reported as a verification failure with the field named.",
+        "The agent stops without further mutation, does not retry the failed mutations, and does not delete the target review.",
+        "The agent reports which appended comments landed and which pre-existing comments are unchanged.",
+        "Nothing is submitted, approved, dismissed, or merged."
+      ]
+    },
+    {
+      "id": 19,
+      "prompt": "Append three comments to the pending review I left open. If one of them fails to land on the right line, leave the others alone.",
+      "expected_output": "Two of the three appended comments verify; the third does not (wrong anchor or body mismatch). The agent stops after the failed verification, reports the unverified comment by id and discrepancy, lists the two that did land and the pre-existing comments that are unchanged, and warns the user that a partial append cannot be undone by the skill.",
+      "files": [],
+      "expectations": [
+        "The agent sends the GraphQL mutations sequentially and parses each response before sending the next.",
+        "The agent reports the discrepancy for the unverified comment (wrong anchor, body mismatch, or absent from remote).",
+        "The agent stops without further mutation, does not retry the failed mutation, and does not delete the target review.",
+        "The agent names the appended comments that landed and the pre-existing comments that are unchanged.",
+        "The agent warns the user that a partial append cannot be undone by the skill and names the partial state so the user can clean up in the GitHub UI.",
+        "Nothing is submitted, approved, dismissed, or merged."
       ]
     }
   ]
