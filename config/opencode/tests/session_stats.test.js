@@ -8,7 +8,10 @@
 // a `{ data, cursor }` page, and `ctx.session.context` resolves to a
 // `{ data }` envelope of Session.Message.Info records.
 
-import { describe, expect, test } from "bun:test"
+import { afterEach, beforeEach, describe, expect, test } from "bun:test"
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import sessionStats, { internals } from "../plugins/session-stats.js"
 
 const DIRECTORY = "/tmp/opencode/session-stats-tests"
@@ -83,7 +86,80 @@ const FIXTURE = {
   },
 }
 
-const registerTool = async ({ sessions, messages, wrapGet = false } = {}) => {
+// The plugin reads the live service descriptor to find the OpenCode server.
+// The tests point that lookup at a temporary directory so a real server is
+// never contacted.
+const originalFetch = globalThis.fetch
+const originalStateHome = process.env.XDG_STATE_HOME
+let stateHome
+
+beforeEach(async () => {
+  stateHome = await mkdtemp(join(tmpdir(), "opencode-session-stats-"))
+  process.env.XDG_STATE_HOME = stateHome
+})
+
+afterEach(async () => {
+  globalThis.fetch = originalFetch
+  if (originalStateHome === undefined) delete process.env.XDG_STATE_HOME
+  else process.env.XDG_STATE_HOME = originalStateHome
+  await rm(stateHome, { recursive: true, force: true })
+})
+
+/** Write a service descriptor that points at a stubbed OpenCode server. */
+const writeServiceDescriptor = async ({ url = "http://127.0.0.1:65535", password = "secret" } = {}) => {
+  const directory = join(stateHome, "opencode")
+  await mkdir(directory, { recursive: true })
+  await writeFile(
+    join(directory, "service.json"),
+    JSON.stringify({ id: "test-service", version: "2.2.5", url, pid: 1, password }),
+  )
+}
+
+/** Serve the OpenCode service API from the fixture data. */
+const serveServiceApi = ({ sessions = FIXTURE.sessions, messages = FIXTURE.messages } = {}) => {
+  const byId = new Map(sessions.map((item) => [item.id, item]))
+  const json = (body, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { "content-type": "application/json" },
+    })
+  const seen = []
+  globalThis.fetch = async (input) => {
+    const target = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
+    const url = new URL(target)
+    seen.push(url.toString())
+    if (url.pathname === "/api/session") {
+      const directory = url.searchParams.get("directory")
+      const data = sessions.filter(
+        (item) => !directory || item.location?.directory === directory,
+      )
+      return json({ data, cursor: { previous: null, next: null } })
+    }
+    const context = url.pathname.match(/^\/api\/session\/([^/]+)\/context$/)
+    if (context) {
+      const id = decodeURIComponent(context[1])
+      return json({ data: messages[id] ?? [] })
+    }
+    const session = url.pathname.match(/^\/api\/session\/([^/]+)$/)
+    if (session) {
+      const id = decodeURIComponent(session[1])
+      const found = byId.get(id)
+      if (!found) return json({ message: "not found" }, 404)
+      return json({ data: found })
+    }
+    return json({ message: "not found" }, 404)
+  }
+  return seen
+}
+
+const registerTool = async ({
+  sessions,
+  messages,
+  wrapGet = false,
+  failGetFor = [],
+  failList = false,
+  failContextFor = [],
+} = {}) => {
   const registered = {}
   const byId = new Map((sessions ?? FIXTURE.sessions).map((item) => [item.id, item]))
   const ctx = {
@@ -95,15 +171,26 @@ const registerTool = async ({ sessions, messages, wrapGet = false } = {}) => {
     },
     session: {
       get: async ({ sessionID }) => {
+        if (failGetFor.includes(sessionID)) {
+          throw new Error("session lookup failed with HTTP unknown")
+        }
         const found = byId.get(sessionID)
         if (!found) throw new Error(`unknown session ${sessionID}`)
         return wrapGet ? { data: found } : found
       },
-      list: async () => ({
-        data: [...byId.values()],
-        cursor: { previous: null, next: null },
-      }),
-      context: async ({ sessionID }) => ({ data: messages?.[sessionID] ?? FIXTURE.messages[sessionID] ?? [] }),
+      list: async () => {
+        if (failList) throw new Error("session listing failed with HTTP unknown")
+        return {
+          data: [...byId.values()],
+          cursor: { previous: null, next: null },
+        }
+      },
+      context: async ({ sessionID }) => {
+        if (failContextFor.includes(sessionID)) {
+          throw new Error("message lookup failed with HTTP unknown")
+        }
+        return { data: messages?.[sessionID] ?? FIXTURE.messages[sessionID] ?? [] }
+      },
       // The V2 plugin context exposes neither of these. A regression that uses
       // them must fail loudly instead of silently reporting zeros.
       children: async () => {
@@ -195,6 +282,93 @@ describe("usage totals", () => {
   test("the report states the compaction limit of the message window", async () => {
     const result = await run()
     expect(result.content).toContain("excludes messages before its last compaction")
+  })
+})
+
+describe("resilience", () => {
+  test("a session without a title does not break the report", async () => {
+    const sessions = [
+      ...FIXTURE.sessions,
+      session("ses_untitled", "ses_root", undefined),
+    ]
+    const result = await run({ sessions })
+    expect(result.content).toContain("ses_untitled")
+    expect(result.metadata.complete).toBe(true)
+  })
+
+  test("a failed session lookup degrades to a partial result", async () => {
+    const result = await run({ failGetFor: ["ses_child"] })
+    expect(result.metadata.complete).toBe(false)
+    expect(result.content).toContain("session lookup for ses_child failed")
+    // The listing still supplies the tree, so the report is still produced.
+    expect(result.content).toContain("**Sessions discovered:**")
+    expect(result.content).toContain("ses_grandchild")
+  })
+
+  test("a failed message lookup skips that session and marks the report partial", async () => {
+    const result = await run({ failContextFor: ["ses_grandchild"] })
+    expect(result.metadata.complete).toBe(false)
+    expect(result.content).toContain("ses_grandchild: message lookup failed")
+    expect(result.content).toContain("**Sessions aggregated:** 2")
+  })
+
+  test("a failed session listing does not abort the report", async () => {
+    const result = await run({ failList: true })
+    expect(result.metadata.complete).toBe(false)
+    expect(result.content).toContain("the session listing is unavailable")
+    expect(result.content).toContain("**Sessions discovered:**")
+  })
+})
+
+describe("service API fallback", () => {
+  test("a failed session lookup is retried through the service API", async () => {
+    await writeServiceDescriptor()
+    const seen = serveServiceApi()
+    const result = await run({ failGetFor: ["ses_child"] })
+    expect(result.metadata.complete).toBe(true)
+    expect(result.content).toContain("retried through the service API")
+    expect(result.content).toContain("**Sessions discovered:** 3")
+    expect(seen.some((url) => url.includes("/api/session/ses_child"))).toBe(true)
+  })
+
+  test("a failed session listing is retried through the service API", async () => {
+    await writeServiceDescriptor()
+    const seen = serveServiceApi()
+    const result = await run({ failList: true })
+    expect(result.metadata.complete).toBe(true)
+    expect(result.content).toContain("**Sessions discovered:** 3")
+    expect(seen.some((url) => url.startsWith("http://127.0.0.1:65535/api/session?"))).toBe(true)
+  })
+
+  test("a failed message lookup is retried through the service API", async () => {
+    await writeServiceDescriptor()
+    const seen = serveServiceApi()
+    const result = await run({ failContextFor: ["ses_grandchild"] })
+    expect(result.metadata.complete).toBe(true)
+    expect(result.content).toContain("**Sessions aggregated:** 3")
+    expect(seen.some((url) => url.includes("/api/session/ses_grandchild/context"))).toBe(true)
+  })
+
+  test("the service API request carries the service credentials", async () => {
+    await writeServiceDescriptor()
+    serveServiceApi()
+    const stub = globalThis.fetch
+    const seen = []
+    globalThis.fetch = async (input, init) => {
+      seen.push(init?.headers?.authorization)
+      return stub(input, init)
+    }
+    const result = await run({ failGetFor: ["ses_child"] })
+    expect(result.metadata.complete).toBe(true)
+    expect(seen.length).toBeGreaterThan(0)
+    const credentials = Buffer.from("opencode:secret").toString("base64")
+    expect(seen.every((value) => value === `Basic ${credentials}`)).toBe(true)
+  })
+
+  test("without a service descriptor the report stays partial", async () => {
+    const result = await run({ failGetFor: ["ses_child"] })
+    expect(result.metadata.complete).toBe(false)
+    expect(result.content).toContain("no OpenCode service endpoint is available")
   })
 })
 
