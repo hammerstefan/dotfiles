@@ -4,8 +4,14 @@ The council contract is shared in shape with the Copilot review-council skill,
 but the transport, agent names, and artifact path stay OpenCode-native.
 """
 
+import fnmatch
 from pathlib import Path
 import unittest
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +39,27 @@ def body(path: Path) -> str:
 
 
 class FeedbackPolicyContracts(unittest.TestCase):
+    @unittest.skipIf(yaml is None, "PyYAML validation package unavailable")
+    def test_coordinator_can_load_only_the_required_feedback_skill(self):
+        command = yaml.safe_load(COMMAND.read_text().split("---", 2)[1])
+        coordinator = yaml.safe_load(COORDINATOR.read_text().split("---", 2)[1])
+        self.assertEqual(command["agent"], "review-coordinator")
+        rules = coordinator["permissions"]
+
+        def effect(action, resource):
+            matches = [
+                rule["effect"]
+                for rule in rules
+                if fnmatch.fnmatchcase(action, rule["action"])
+                and fnmatch.fnmatchcase(resource, rule["resource"])
+            ]
+            return matches[-1] if matches else "ask"
+
+        self.assertEqual(effect("skill", "asd-ste100"), "allow")
+        self.assertEqual(effect("skill", "other-skill"), "deny")
+        self.assertEqual(effect("shell", "*"), "deny")
+        self.assertEqual(effect("edit", "*"), "deny")
+
     def test_all_roles_load_the_feedback_policy_without_replacing_output_contracts(
         self,
     ):

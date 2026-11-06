@@ -28,6 +28,9 @@ permissions:
   - action: grep
     resource: "*"
     effect: allow
+  - action: skill
+    resource: asd-ste100
+    effect: allow
   - action: review_inspect
     resource: "*"
     effect: allow
