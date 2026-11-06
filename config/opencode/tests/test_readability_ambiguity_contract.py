@@ -47,7 +47,16 @@ class AmbiguityContracts(unittest.TestCase):
         repo = (ROOT / "agent/review-readability.md").read_text()
         self.assertIn("report only ambiguities introduced or", repo)
         self.assertIn("Preserve the existing severity/finding filters", repo)
-        self.assertNotIn("asd-ste100", repo)
+        self.assertIn('skill({"id": "asd-ste100"})', repo)
+
+    def test_ticket_skill_scope_stays_inside_the_ticket_flow(self):
+        """The ticket command must not push its skill rules into repository reviews."""
+        command = (ROOT / "command/review-ticket.md").read_text()
+        self.assertIn(
+            "Apply its writing guidance to Jira feedback, drafts, and questions only",
+            command,
+        )
+        self.assertIn("Do not apply this skill to repository council reviews", command)
 
     def test_ticket_terms_table_uses_validated_feedback_without_new_json_fields(self):
         command = (ROOT / "command/review-ticket.md").read_text()

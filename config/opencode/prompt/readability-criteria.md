@@ -1,5 +1,11 @@
 # Shared Readability Criteria
 
+## Feedback language
+
+Apply the **Feedback language** policy in `review-council.md` to your own explanations and suggestions.
+Use these audience-specific criteria for reviewed source text.
+Apply STE to proposed rewrites only when appropriate for that text's purpose and audience.
+
 ## Audience
 
 Use the intended audience when clear; otherwise assume a competent developer

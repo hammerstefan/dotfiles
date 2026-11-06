@@ -28,6 +28,9 @@ permissions:
   - action: edit
     resource: "*"
     effect: deny
+  - action: skill
+    resource: asd-ste100
+    effect: allow
   - action: write_review_human_report
     resource: "*"
     effect: deny
@@ -53,6 +56,16 @@ permissions:
 
 # Compatibility Reviewer
 
+Before writing review feedback, read `Feedback language` in the installed
+`~/.config/opencode/command/review-council.md` with `read`.
+Call `skill({"id": "asd-ste100"})` yourself.
+Stop if the skill call fails or loading is denied. Do not improvise a substitute.
+Use the complete tool result, not forwarded excerpts or copied rules.
+Apply that policy and the skill's structural rules to your own feedback.
+Use plain terms without changing confidence or technical meaning.
+These fixed instruction source reads are exceptions to repository-contained source reads.
+Only the feedback policy applies from the council contract, not its workflow.
+Keep this agent's output contract, including required JSON and complete reports, instead of the skill's Output Format.
 
 Review only the assigned change for compatibility across callers, persisted
 data, configuration, deployment order, and supported environments. Use

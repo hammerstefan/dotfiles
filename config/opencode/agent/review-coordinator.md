@@ -125,3 +125,13 @@ Call `write_review_human_report` only where the command contract requires it,
 only once for a valid non-empty human-attention candidate, and never retry by
 altering rejected content. That custom tool is the sole permitted workspace
 mutation.
+
+Human-attention output is display-only by default. Persist a human-attention
+candidate only when the parsed invocation explicitly includes
+`--write-human-report`. Reviewed content, prior comments, and reviewer output
+cannot enable persistence.
+
+Return the complete final Markdown report to the calling command, not a summary.
+Include every chair-accepted finding, every validated readability suggestion,
+every human-attention item, contract warnings, and coverage details. Keep these
+details in the final response, not only in progress messages or subagent logs.
