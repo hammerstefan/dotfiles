@@ -11,6 +11,23 @@ checks use `jsonschema` and `PyYAML` from the validation environment. They repor
 skips if those packages are absent. These are test dependencies, not requirements
 for running the OpenCode commands.
 
+## Plugin unit tests
+
+The JavaScript plugin tests stub the OpenCode plugin context with the response
+shapes the server returns. Run them from the dotfiles root:
+
+```sh
+bun test config/opencode/tests/
+```
+
+`session_stats.test.js` covers the session tree walk and the throughput
+measurement. A step is measurable only when its message carries a
+`time.streamed` stamp. The measured window runs from `time.created` to
+`time.streamed`, which excludes tool execution time, and the tokens counted are
+`output + reasoning`. This matches the TUI's "tok/s" footer. Steps without a
+`time.streamed` stamp are reported as unmeasured instead of being folded into
+the average.
+
 ## Synthetic ticket evaluations
 
 `mock_ticket_mcp.py` is a local MCP server. It serves only
