@@ -4,7 +4,6 @@
     "name": "opencode"
   },
   "plugins": [
-    "file:///home/stefan.hammer@canonical.com/git/opencode-diffcomments",
     "./herdr-tui-session.js",
     "./herdr-opencode"
   ],
