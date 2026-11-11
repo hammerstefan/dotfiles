@@ -149,6 +149,9 @@ and it says so when it does. A cached theme can be older than the current one.
   script reference is relative.
 - The theme does not embed the Ubuntu Sans font file. A machine without
   Ubuntu Sans installed falls back to another sans-serif face.
+- The script needs a Chrome build that matches the revision the Mermaid CLI
+  pins. It reads that revision from the installed CLI and installs the exact
+  build when the Puppeteer cache does not hold it.
 
 ## Tests
 

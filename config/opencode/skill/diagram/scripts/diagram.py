@@ -606,6 +606,10 @@ def find_chrome() -> str | None:
     The Puppeteer cache comes first. A system Chromium often runs as a snap,
     and a snap cannot read the Mermaid CLI files under the system directories,
     so a system browser fails with a file error that hides the real cause.
+
+    The revision that the Mermaid CLI pins wins over any other cached build.
+    A different revision usually works, but the pinned one is the build the
+    CLI was tested against. The newest of the remaining builds comes next.
     """
     override = os.environ.get("PUPPETEER_EXECUTABLE_PATH")
     if override and Path(override).is_file() and os.access(override, os.X_OK):
@@ -616,6 +620,15 @@ def find_chrome() -> str | None:
         "chrome-headless-shell/*/chrome-headless-shell-linux64/chrome-headless-shell",
         "chrome/*/chrome-linux64/chrome",
     )
+
+    wanted = required_chrome_revision()
+    if wanted:
+        for pattern in patterns:
+            for candidate in sorted(cache.glob(pattern), reverse=True):
+                if wanted in candidate.parts and candidate.is_file():
+                    if os.access(candidate, os.X_OK):
+                        return str(candidate)
+
     for pattern in patterns:
         for candidate in sorted(cache.glob(pattern), reverse=True):
             if candidate.is_file() and os.access(candidate, os.X_OK):
@@ -628,20 +641,63 @@ def find_chrome() -> str | None:
     return None
 
 
+def required_chrome_revision() -> str | None:
+    """Return the Chrome revision that the installed Mermaid CLI expects.
+
+    The Mermaid CLI pins the browser revision through its own Puppeteer
+    dependency. The render fails when the cache holds a different revision,
+    so the install uses the pinned one.
+    """
+    candidates = [
+        Path("/usr/local/lib/node_modules/@mermaid-js/mermaid-cli"),
+        Path("/usr/lib/node_modules/@mermaid-js/mermaid-cli"),
+    ]
+    for root in candidates:
+        revisions = (
+            root
+            / "node_modules"
+            / "puppeteer-core"
+            / "lib"
+            / "puppeteer"
+            / "revisions.js"
+        )
+        if not revisions.is_file():
+            continue
+        try:
+            source = revisions.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        match = re.search(r"'chrome-headless-shell':\s*'([^']+)'", source) or re.search(
+            r"chrome-headless-shell:\s*\"([^\"]+)\"", source
+        )
+        if match:
+            return match.group(1)
+    return None
+
+
 def install_chrome() -> str | None:
     """Install the headless Chrome build and return its path.
 
     The headless shell is used because it is the build the Mermaid CLI expects
     by default, and because it runs without the desktop dependencies that a
     full Chrome install needs.
+
+    The revision comes from the Mermaid CLI when the CLI pins one. The
+    Puppeteer command is pinned to the last release that runs on Node 18,
+    because a newer Puppeteer needs Node 22.
     """
+    revision = required_chrome_revision()
+    browser = "chrome-headless-shell"
+    if revision:
+        browser = f"{browser}@{revision}"
+
     command = [
         "npx",
         "--yes",
-        "puppeteer@24",
+        "puppeteer@24.31.0",
         "browsers",
         "install",
-        "chrome-headless-shell",
+        browser,
     ]
     try:
         completed = subprocess.run(command, capture_output=True, text=True, check=False)

@@ -314,6 +314,45 @@ class ChromeTest(unittest.TestCase):
                 else:
                     diagram.os.environ["PUPPETEER_EXECUTABLE_PATH"] = previous
 
+    def test_it_reads_the_revision_the_mermaid_cli_pins(self):
+        revision = diagram.required_chrome_revision()
+        if revision is None:
+            self.skipTest("the Mermaid CLI is not installed")
+        self.assertRegex(revision, r"^\d+\.\d+\.\d+\.\d+$")
+
+    def test_it_prefers_the_pinned_revision_over_an_older_cached_build(self):
+        revision = diagram.required_chrome_revision()
+        found = diagram.find_chrome()
+        if revision is None or found is None:
+            self.skipTest("no browser or no Mermaid CLI is available")
+        parts = Path(found).parts
+        if revision not in parts:
+            self.skipTest("the pinned revision is not in the cache")
+        self.assertEqual(found, diagram.find_chrome())
+
+    def test_the_install_command_pins_the_revision(self):
+        revision = diagram.required_chrome_revision()
+        if revision is None:
+            self.skipTest("the Mermaid CLI is not installed")
+        calls: list[list[str]] = []
+
+        def fake_run(command, **kwargs):
+            calls.append(command)
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        original = diagram.subprocess.run
+        diagram.subprocess.run = fake_run
+        previous = diagram.find_chrome
+        diagram.find_chrome = lambda: "/fake/chrome"
+        try:
+            diagram.install_chrome()
+        finally:
+            diagram.subprocess.run = original
+            diagram.find_chrome = previous
+
+        self.assertEqual(len(calls), 1)
+        self.assertIn(f"chrome-headless-shell@{revision}", calls[0])
+
 
 class CacheTest(unittest.TestCase):
     def test_it_falls_back_to_the_cache_when_the_fetch_fails(self):
