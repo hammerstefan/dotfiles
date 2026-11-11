@@ -1,0 +1,159 @@
+{
+  "skill_name": "diagram",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Draw a diagram of how a user signs in: the browser posts to the auth service, the auth service checks the credentials store, and returns a token to the browser.",
+      "expected_output": "The agent chooses the flowchart family, writes a Mermaid source with the three stated elements and the two stated arrows, applies the leaf role to each node, renders it with the script, reads the rendered PNG, and reports the SVG and HTML paths.",
+      "files": [],
+      "expectations": [
+        "The agent checks that python3, mmdc, and gh auth status all work before it starts.",
+        "The agent chooses flowchart because the content describes steps and a flow, and it says why.",
+        "The source contains exactly the three elements the prompt names and no extra element.",
+        "The source contains exactly the two arrows the prompt names, and no invented arrow.",
+        "Every node carries the leaf role, and no node carries the highlight role.",
+        "The agent runs scripts/diagram.py with a name and the diagrams output directory.",
+        "The agent renders a PNG and reads it before it reports the result.",
+        "The agent reports the paths of the SVG and the HTML file, and names the family it used."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Show me the states of a deployment: queued, deploying, live, and failed, with transitions from queued to deploying, deploying to live, deploying to failed, and failed back to queued.",
+      "expected_output": "The agent chooses the state family, writes the four states and the four transitions as stated, renders it, and reports the paths.",
+      "files": [],
+      "expectations": [
+        "The agent chooses the state family, not the flowchart family, because the content describes states and transitions.",
+        "The source contains the four named states.",
+        "The source contains the four named transitions and no transition that the prompt does not state.",
+        "The source carries no flowchart class definitions, because the class definitions apply to the flowchart family only.",
+        "The agent checks the rendered output and reports the SVG and HTML paths."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Make me a picture of the customer service interaction. The customer sends a request to the support agent, the agent looks it up in the ticket system, and then the agent replies to the customer.",
+      "expected_output": "The agent chooses the sequence family, writes the three participants and the three messages as stated, renders it, and reports the paths.",
+      "files": [],
+      "expectations": [
+        "The agent chooses the sequence family because the content describes a conversation between actors over time.",
+        "The source declares three participants.",
+        "The source contains the three messages the prompt states and no fourth message.",
+        "The source carries no flowchart class definitions.",
+        "The agent renders the diagram and reports the paths."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I have a screenshot of a whiteboard with three boxes labeled Pricing, Docs, and Blog, and some arrows between them that I cannot quite read. Can you turn it into a diagram?",
+      "expected_output": "The agent inspects the image, reads only the boxes and arrows it can actually see, and leaves out any arrow it cannot read. It tells the user which arrows it left out rather than guessing them.",
+      "files": [],
+      "expectations": [
+        "The agent inspects the reference image before it chooses a family.",
+        "The agent does not invent an arrow for a connection it cannot read in the image.",
+        "The agent states in its answer which connections it left out and why.",
+        "The agent does not claim the diagram is an exact copy of the whiteboard.",
+        "The agent uses a dashed or dotted edge only when the image shows an uncertain connection, and it says so."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Draw the context diagram for our platform. The customer is a person. The platform is a system. The customer uses the platform.",
+      "expected_output": "The agent chooses the C4 family, writes the person, the system, and the relation, renders it, and checks that the C4 box carries no off-brand blue.",
+      "files": [],
+      "expectations": [
+        "The agent chooses the C4 family because the content describes people and systems.",
+        "The source declares one person and one system, and the relation between them.",
+        "The agent does not add a container or a component that the prompt does not name.",
+        "The agent checks the rendered SVG and the rendered picture for a blue box, because the C4 family leaks its own palette.",
+        "The agent reports the paths of the SVG and the HTML file."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Make a diagram of the billing data model: a customer has many orders, and each order has many line items.",
+      "expected_output": "The agent chooses the ER family, writes the two relationships with their cardinality, renders it, and reports the paths.",
+      "files": [],
+      "expectations": [
+        "The agent chooses the ER family because the content describes entities and their cardinality.",
+        "The source names the customer, the order, and the line item entities.",
+        "The source states the two relationships with the correct cardinality.",
+        "The source carries no flowchart class definitions.",
+        "The agent reports the paths of the SVG and the HTML file."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Draw a Gantt chart for our launch plan. Research runs for the first two weeks, then implementation for four weeks, and then launch in week seven.",
+      "expected_output": "The agent chooses the Gantt family, writes the three tasks with their durations, renders it, and reports the paths.",
+      "files": [],
+      "expectations": [
+        "The agent chooses the Gantt family because the content describes work over time.",
+        "The source contains the three tasks the prompt names.",
+        "The source does not add a task that the prompt does not name.",
+        "The agent reports the paths of the SVG and the HTML file."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Draw a diagram of the deployment pipeline. I want to make sure the important step stands out.",
+      "expected_output": "The agent writes a flowchart, applies the leaf role to the ordinary steps, applies the highlight role to at most one step, and never uses orange as a box colour.",
+      "files": [],
+      "expectations": [
+        "The agent applies the highlight role to at most one node.",
+        "The agent does not apply the highlight role to every node.",
+        "The agent never writes an orange fill on a node, because orange is a connector colour only.",
+        "The agent applies the leaf role to the ordinary nodes.",
+        "The agent asks the user which step matters most when the request does not say."
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "The diagram script failed with 'the rendered diagram does not meet the brand contract: the diagram contains off-brand colours: #1168BD'. What do I do?",
+      "expected_output": "The agent reads the error, works out that the C4 family leaks its own blue palette, and fixes the source or the family rather than ignoring the failure.",
+      "files": [],
+      "expectations": [
+        "The agent does not ignore the error and does not report the diagram as finished.",
+        "The agent explains that the script refuses to write a diagram that breaks the brand contract.",
+        "The agent checks whether the diagram uses the C4 family, because the C4 family leaks its own palette.",
+        "The agent re-renders and confirms the error is gone before it reports the result."
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Render this Mermaid file as a Canonical diagram: /home/me/notes.mmd",
+      "expected_output": "The agent reads the file, detects the family, renders it with the script, and checks the result. It does not rewrite the content of the file unless the family is not supported.",
+      "files": [],
+      "expectations": [
+        "The agent reads the source file before it renders it.",
+        "The agent uses the script rather than calling mmdc directly, because the script applies the brand theme and the brand check.",
+        "The agent keeps the content of the source as it is.",
+        "The agent checks the rendered output and reports the paths."
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Draw a pie chart showing our market share by vendor.",
+      "expected_output": "The agent explains that the pie family is not in the supported set, and offers a supported alternative. It does not force the content into a flowchart.",
+      "files": [],
+      "expectations": [
+        "The agent states that the pie family is not supported.",
+        "The agent offers a supported family instead of forcing a flowchart.",
+        "The agent does not silently render the pie chart and call it on-brand.",
+        "The agent explains the difference between a chart of measured data and a diagram."
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "I have no access to the brand kit repo. Can you still make me a diagram?",
+      "expected_output": "The agent explains that the script needs the private brand kit for the theme, reports the exact error from the script, and does not fall back to an unbranded diagram.",
+      "files": [],
+      "expectations": [
+        "The agent states that the brand theme comes from the private canonical/mermaid-brand-kit repository.",
+        "The agent names the gh auth login command when the script reports that it cannot read the theme.",
+        "The agent does not produce a diagram with off-brand colours and call it Canonical.",
+        "The agent does not claim that it rendered a diagram when the render failed."
+      ]
+    }
+  ]
+}
