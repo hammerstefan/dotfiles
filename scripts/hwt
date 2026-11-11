@@ -34,6 +34,7 @@ Options:
   -s, --space <name|id> branch the repository of another space
   -a, --agent <kind>    start this agent in the new space, e.g. opencode
   -t, --task <text>     its first message (with --agent; see below)
+      --task-file <path> read that message from a file, for a long one
       --argv <json>     start this argv instead, e.g. '["codex","--no-daemon"]'
                         Herdr's own agent arguments; not combined with --task
       --no-space        only create the checkout; leave the window alone
@@ -55,7 +56,9 @@ at --base. Nothing is deleted: remove a worktree with
 
 --task goes to the agent's own command line, the way Herdr starts it:
 `opencode --prompt <text>`, and `<agent> <text>` for the others. Use
---argv when an agent wants different arguments than that.
+--argv when an agent wants different arguments than that. --task-file
+reads the same message from a file, for a prompt with several paragraphs
+and quotes in it that no sensible shell line would carry.
 
 Exit status is non-zero if the branch name is invalid, the checkout cannot be
 made, or Herdr rejects the space. An existing checkout is left alone.
@@ -76,6 +79,7 @@ agent=""
 argv_json=""
 argv_given=0
 task=""
+task_file=""
 open_space=1
 dry_run=0
 
@@ -114,6 +118,11 @@ while [[ $# -gt 0 ]]; do
 	-t | --task)
 		[[ $# -ge 2 ]] || die "--task needs text"
 		task="$2"
+		shift 2
+		;;
+	--task-file)
+		[[ $# -ge 2 ]] || die "--task-file needs a path"
+		task_file="$2"
 		shift 2
 		;;
 	--no-space)
@@ -159,8 +168,24 @@ git check-ref-format --branch "$branch" >/dev/null 2>&1 ||
 [[ -z "$task" || -z "$argv_json" ]] ||
 	die "--task and --argv cannot be combined; put the task in --argv yourself"
 
+[[ -z "$task" || -z "$task_file" ]] || die "--task and --task-file cannot be combined"
+
+[[ -z "$task_file" || -z "$argv_json" ]] ||
+	die "--task-file and --argv cannot be combined; put the task in --argv yourself"
+
 [[ -z "$task" || -n "$agent" ]] ||
 	die "--task needs --agent (or write the arguments you want into --argv)"
+
+[[ -z "$task_file" || -n "$agent" ]] ||
+	die "--task-file needs --agent (or write the arguments you want into --argv)"
+
+# A file keeps a multi-paragraph prompt out of the shell's quoting.
+if [[ -n "$task_file" ]]; then
+	[[ -r "$task_file" ]] || die "cannot read '$task_file'"
+	task="$(<"$task_file")"
+	[[ -n "${task//[[:space:]]/}" ]] ||
+		die "'$task_file' is empty; the agent would start with no task"
+fi
 
 [[ -z "$agent" || $argv_given -eq 0 ]] || die "--agent and --argv cannot be combined"
 
