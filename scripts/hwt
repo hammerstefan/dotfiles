@@ -1,0 +1,315 @@
+#!/usr/bin/env bash
+#
+# hwt - make a git worktree checkout and open it as a Herdr space, the way the
+# space menu's "New worktree..." does it.
+#
+# The same two steps Herdr's shipped `worktree` mod runs, with the same
+# checkout location, so the new space nests under its repo in the spaces
+# sidebar:
+#
+#   git worktree add ~/.herdr/worktrees/<repo>/<branch> ...
+#   herdr-app do space.new --folder ~/.herdr/worktrees/<repo>/<branch>
+#
+# The difference: this runs from a shell or an agent that knows which terminal
+# it is, so the repository is the folder that terminal sits in, not a guess
+# made from the window's focus.
+
+set -euo pipefail
+
+# Checkouts go to <ROOT>/<repo>/<branch, slashes as dashes> (the mod's rule).
+ROOT="${HOME}/.herdr/worktrees"
+
+usage() {
+	cat <<'EOF'
+Usage: hwt [options] <branch>
+
+Create a new git worktree checkout and open it as a Herdr space, exactly as
+right-clicking a space and choosing "New worktree..." does. The checkout is
+at ~/.herdr/worktrees/<repo>/<branch>, and the new space sits under its
+repository in the spaces sidebar.
+
+Options:
+  -r, --repo <path>     branch this repository, whatever terminal you are in
+  -b, --base <ref>      base commit for a new branch (default: HEAD)
+  -s, --space <name|id> branch the repository of another space
+  -a, --agent <kind>    start this agent in the new space, e.g. opencode
+  -t, --task <text>     its first message (with --agent; see below)
+      --argv <json>     start this argv instead, e.g. '["codex","--no-daemon"]'
+                        Herdr's own agent arguments; not combined with --task
+      --no-space        only create the checkout; leave the window alone
+  -n, --dry-run         print the repository, checkout and command; make nothing
+  -h, --help            show this text
+
+The repository is the folder of the terminal running this, so a pane opened
+in a checkout branches that checkout wherever you have cd'd. A plain shell or
+a script has no Herdr terminal and uses the current folder. --space takes it
+from another space instead: the terminal running this if it is in that space,
+else that space's pane with the keyboard while it is on screen.
+
+The space you point at is not changed: the worktree gets a space of its own,
+named after its branch.
+
+An existing branch is checked out as it is; otherwise the branch is created
+at --base. Nothing is deleted: remove a worktree with
+`git -C <repo> worktree remove <path>` (after closing its space).
+
+--task goes to the agent's own command line, the way Herdr starts it:
+`opencode --prompt <text>`, and `<agent> <text>` for the others. Use
+--argv when an agent wants different arguments than that.
+
+Exit status is non-zero if the branch name is invalid, the checkout cannot be
+made, or Herdr rejects the space. An existing checkout is left alone.
+EOF
+}
+
+die() {
+	echo "hwt: $*" >&2
+	exit 1
+}
+
+# --- arguments ----------------------------------------------------------
+branch=""
+repo=""
+base="HEAD"
+space_want=""
+agent=""
+argv_json=""
+argv_given=0
+task=""
+open_space=1
+dry_run=0
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	-h | --help)
+		usage
+		exit 0
+		;;
+	-r | --repo)
+		[[ $# -ge 2 ]] || die "--repo needs a path"
+		repo="$2"
+		shift 2
+		;;
+	-b | --base)
+		[[ $# -ge 2 ]] || die "--base needs a ref"
+		base="$2"
+		shift 2
+		;;
+	-s | --space)
+		[[ $# -ge 2 ]] || die "--space needs a name or id"
+		space_want="$2"
+		shift 2
+		;;
+	-a | --agent)
+		[[ $# -ge 2 ]] || die "--agent needs an agent name"
+		agent="$2"
+		shift 2
+		;;
+	--argv)
+		[[ $# -ge 2 ]] || die "--argv needs JSON"
+		argv_json="$2"
+		argv_given=1
+		shift 2
+		;;
+	-t | --task)
+		[[ $# -ge 2 ]] || die "--task needs text"
+		task="$2"
+		shift 2
+		;;
+	--no-space)
+		open_space=0
+		shift
+		;;
+	-n | --dry-run)
+		dry_run=1
+		shift
+		;;
+	--)
+		shift
+		break
+		;;
+	-*)
+		die "unknown option '$1' (try --help)"
+		;;
+	*)
+		[[ -z "$branch" ]] || die "expected one branch name, got '$branch' and '$1'"
+		branch="$1"
+		shift
+		;;
+	esac
+done
+if [[ -z "$branch" && $# -gt 0 ]]; then
+	branch="$1"
+	shift
+fi
+[[ $# -eq 0 ]] || die "expected one branch name, got '$branch' and '$1'"
+
+# --- validate before touching anything ----------------------------------
+[[ -n "$branch" ]] || {
+	usage >&2
+	die "expected a branch name"
+}
+
+command -v git >/dev/null 2>&1 || die "required command 'git' not found on PATH"
+
+# git's own rules: rejects leading '-', '..', spaces, '~', '^', ':heavy' etc.
+git check-ref-format --branch "$branch" >/dev/null 2>&1 ||
+	die "invalid branch name '$branch'"
+
+[[ -z "$task" || -z "$argv_json" ]] ||
+	die "--task and --argv cannot be combined; put the task in --argv yourself"
+
+[[ -z "$task" || -n "$agent" ]] ||
+	die "--task needs --agent (or write the arguments you want into --argv)"
+
+[[ -z "$agent" || $argv_given -eq 0 ]] || die "--agent and --argv cannot be combined"
+
+[[ -z "$repo" || -z "$space_want" ]] || die "--repo and --space cannot be combined"
+
+[[ $open_space -eq 1 || -z "$space_want" ]] ||
+	die "--no-space opens nothing, so --space makes no sense with it"
+
+if [[ -n "$agent" ]]; then
+	[[ "$agent" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] ||
+		die "invalid agent name '$agent' (letters, digits, '.', '_', '-' only)"
+	command -v jq >/dev/null 2>&1 || die "required command 'jq' not found on PATH"
+	# The agent's first message is its own CLI argument, as Herdr passes it
+	# to `space.new --argv`: opencode reads a prompt only with --prompt.
+	if [[ -n "$task" ]]; then
+		case "$agent" in
+		opencode) argv_json="$(jq -cn --arg a "$agent" --arg t "$task" '[$a, "--prompt", $t]')" ;;
+		*) argv_json="$(jq -cn --arg a "$agent" --arg t "$task" '[$a, $t]')" ;;
+		esac
+	else
+		argv_json="$(jq -cn --arg a "$agent" '[$a]')"
+	fi
+fi
+
+# --- which repository ---------------------------------------------------
+# Where you are is the folder of the terminal running this: the pane, not the
+# process' working directory, so a checkout you opened stays the subject even
+# after a cd. A plain shell or a script has no Herdr terminal to ask.
+work_dir="$repo"
+if [[ -z "$work_dir" ]]; then
+	cwd=""
+	if [[ -n "${HC_TERMINAL_ID:-}" ]]; then
+		command -v hc >/dev/null 2>&1 || die "required command 'hc' not found on PATH"
+		command -v jq >/dev/null 2>&1 || die "required command 'jq' not found on PATH"
+		cwd="$(hc get "$HC_TERMINAL_ID" 2>/dev/null | jq -r '.cwd // empty')" || cwd=""
+	fi
+	work_dir="${cwd:-$PWD}"
+fi
+
+# --space names another space to take the repository from.
+if [[ -n "$space_want" ]]; then
+	command -v herdr-app >/dev/null 2>&1 ||
+		die "--space needs herdr-app on PATH; no checkout was made"
+	command -v jq >/dev/null 2>&1 || die "required command 'jq' not found on PATH"
+
+	all_spaces="$(herdr-app ls 2>/dev/null)" ||
+		die "cannot read the Herdr window; no checkout was made"
+
+	space_json="$(jq -cr --arg w "$space_want" '
+		[.spaces[] | select(.id == $w or .name == $w)] |
+		if length == 0 then "NONE" elif length > 1 then "AMBIGUOUS" else .[0] end' <<<"$all_spaces")" ||
+		die "cannot read the spaces from the Herdr window; no checkout was made"
+	[[ "$space_json" != "AMBIGUOUS" ]] ||
+		die "'$space_want' names more than one space; use its id (nothing was made)"
+	[[ "$space_json" != "NONE" ]] ||
+		die "no space named '$space_want' (herdr-app ls lists them; nothing was made)"
+	[[ -z "$(jq -r '.machine // empty' <<<"$space_json")" ]] ||
+		die "space '$space_want' lives on another machine; only this computer's repositories can be branched here"
+
+	space_id="$(jq -r '.id' <<<"$space_json")"
+	status_json="$(herdr-app status 2>/dev/null)" ||
+		die "cannot read the Herdr window; no checkout was made"
+
+	# The terminal running this, if it is in that space; else the pane with the
+	# keyboard, while that space is on screen. Herdr remembers the tab a space
+	# was left on but not its pane, so a space that is neither is refused.
+	space_terminal=""
+	if [[ -n "${HC_TERMINAL_ID:-}" ]] && command -v hc >/dev/null 2>&1; then
+		caller_info="$(hc get "$HC_TERMINAL_ID" 2>/dev/null)" || caller_info=""
+		if [[ -n "$caller_info" &&
+			"$(jq -r '.labels["herdr.space"] // empty' <<<"$caller_info")" == "$space_id" ]]; then
+			space_terminal="$HC_TERMINAL_ID"
+		fi
+	fi
+	if [[ -z "$space_terminal" &&
+		"$(jq -r '.space // empty' <<<"$status_json")" == "$space_id" ]]; then
+		focused_pane="$(jq -r '.focused_pane // empty' <<<"$status_json")"
+		space_terminal="$(jq -r --arg p "$focused_pane" '
+			.tabs[].terminals[] | select(.pane == $p) | .terminal' <<<"$space_json")"
+	fi
+	[[ -n "$space_terminal" ]] ||
+		die "space '$space_want' is not on screen and this terminal is not in it; show that space, or name its repository with --repo <path>"
+
+	command -v hc >/dev/null 2>&1 || die "required command 'hc' not found on PATH"
+	work_dir="$(hc get "$space_terminal" 2>/dev/null | jq -r '.cwd // empty')" || work_dir=""
+	[[ -n "$work_dir" ]] ||
+		die "cannot read the folder of terminal '$space_terminal', the one to use from space '$space_want'"
+	git -C "$work_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
+		die "terminal '$space_terminal' in space '$space_want' is in '$work_dir', which is not in a git repository; name one with --repo <path>"
+	printf 'hwt: space %s, terminal %s (%s)\n' "$space_want" "$space_terminal" "$work_dir" >&2
+fi
+
+# The main checkout: `git worktree list --porcelain` lists it first. The repo
+# name and the checkout location both come from it, never from a linked
+# worktree's own folder (which is named after the branch).
+main_root="$(git -C "$work_dir" worktree list --porcelain 2>/dev/null |
+	awk '/^worktree /{print substr($0, 10); exit}')" || main_root=""
+[[ -n "$main_root" ]] ||
+	die "'$work_dir' is not in a git repository (use --repo <path>)"
+
+repo_name="$(basename -- "$main_root")"
+slug="$(printf '%s' "$branch" | sed -E 's/[^A-Za-z0-9._-]+/-/g; s/^-+//; s/-+$//')"
+[[ -n "$slug" ]] || die "branch '$branch' has no characters usable in a folder name"
+path="${ROOT}/${repo_name}/${slug}"
+
+[[ ! -e "$path" ]] || die "checkout already exists: $path"
+
+new_branch=0
+if ! git -C "$main_root" show-ref --verify --quiet "refs/heads/$branch"; then
+	new_branch=1
+	git -C "$main_root" rev-parse --verify --quiet "${base}^{commit}" >/dev/null ||
+		die "'$base' is not a commit in $main_root"
+fi
+
+if [[ $dry_run -eq 1 ]]; then
+	printf 'hwt: repository %s\n' "$main_root"
+	printf 'hwt: checkout   %s (%s)\n' "$path" \
+		"$([[ $new_branch -eq 1 ]] && printf 'new branch %s from %s' "$branch" "$base" ||
+			printf 'existing branch %s' "$branch")"
+	printf 'hwt: herdr      %s\n' "$([[ -n "$argv_json" ]] &&
+		printf 'space.new --folder %s --argv %s' "$path" "$argv_json" ||
+		printf 'space.new --folder %s' "$path")"
+	exit 0
+fi
+
+# --- create the checkout ------------------------------------------------
+if [[ $new_branch -eq 1 ]]; then
+	git -C "$main_root" worktree add -b "$branch" "$path" "$base" ||
+		die "git worktree add failed for new branch '$branch'"
+else
+	git -C "$main_root" worktree add "$path" "$branch" ||
+		die "git worktree add failed for existing branch '$branch'"
+fi
+
+if [[ $open_space -eq 0 ]]; then
+	echo "hwt: $branch -> $path" >&2
+	exit 0
+fi
+
+# --- open it in Herdr ---------------------------------------------------
+if ! command -v herdr-app >/dev/null 2>&1 || ! herdr-app status >/dev/null 2>&1; then
+	echo "hwt: warning: no running Herdr window; checkout left at $path" >&2
+	exit 0
+fi
+
+space_args=(do space.new --folder "$path")
+[[ -n "$argv_json" ]] && space_args+=(--argv "$argv_json")
+
+herdr-app "${space_args[@]}" ||
+	die "worktree created at $path, but Herdr rejected the space"
+
+echo "hwt: $branch -> $path" >&2
