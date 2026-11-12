@@ -33,6 +33,8 @@ Options:
   -b, --base <ref>      base commit for a new branch (default: HEAD)
   -s, --space <name|id> branch the repository of another space
   -a, --agent <kind>    start this agent in the new space, e.g. opencode
+  -m, --model <ref>     with --agent opencode: create its session with this
+                        model, as provider/model or provider/model#variant
   -t, --task <text>     its first message (with --agent; see below)
       --task-file <path> read that message from a file, for a long one
       --argv <json>     start this argv instead, e.g. '["codex","--no-daemon"]'
@@ -41,11 +43,14 @@ Options:
   -n, --dry-run         print the repository, checkout and command; make nothing
   -h, --help            show this text
 
-The repository is the folder of the terminal running this, so a pane opened
-in a checkout branches that checkout wherever you have cd'd. A plain shell or
-a script has no Herdr terminal and uses the current folder. --space takes it
-from another space instead: the terminal running this if it is in that space,
-else that space's pane with the keyboard while it is on screen.
+The repository is the folder of what runs in the terminal running this: a
+shell in front means the pane's folder, so a pane opened in a checkout
+branches that checkout wherever you have cd'd; an agent or a program in front
+means the folder it was started in, which may be a checkout other than the
+pane's. A plain shell or a script has no Herdr terminal and uses the current
+folder. --space takes it from another space instead: the terminal running
+this if it is in that space, else that space's pane with the keyboard while
+it is on screen.
 
 The space you point at is not changed: the worktree gets a space of its own,
 named after its branch.
@@ -59,6 +64,11 @@ at --base. Nothing is deleted: remove a worktree with
 --argv when an agent wants different arguments than that. --task-file
 reads the same message from a file, for a prompt with several paragraphs
 and quotes in it that no sensible shell line would carry.
+
+--model pins the model of the opencode session. Its interactive command takes
+no --model, so hwt creates the session on opencode's background server with
+that model, and the tab opens it with --session. Without --model opencode
+creates a session on its configured default.
 
 Exit status is non-zero if the branch name is invalid, the checkout cannot be
 made, or Herdr rejects the space. An existing checkout is left alone.
@@ -76,6 +86,7 @@ repo=""
 base="HEAD"
 space_want=""
 agent=""
+model=""
 argv_json=""
 argv_given=0
 task=""
@@ -107,6 +118,11 @@ while [[ $# -gt 0 ]]; do
 	-a | --agent)
 		[[ $# -ge 2 ]] || die "--agent needs an agent name"
 		agent="$2"
+		shift 2
+		;;
+	-m | --model)
+		[[ $# -ge 2 ]] || die "--model needs a model reference"
+		model="$2"
 		shift 2
 		;;
 	--argv)
@@ -189,6 +205,15 @@ fi
 
 [[ -z "$agent" || $argv_given -eq 0 ]] || die "--agent and --argv cannot be combined"
 
+[[ -z "$model" || -n "$agent" ]] || die "--model needs --agent opencode"
+[[ -z "$model" || "$agent" == opencode ]] ||
+	die "--model applies to --agent opencode only; give another agent its own --argv"
+[[ -z "$model" || "$model" =~ ^[A-Za-z0-9._~/-]+(#[A-Za-z0-9._-]+)?$ ]] ||
+	die "invalid model reference '$model' (provider/model, optionally #variant)"
+
+[[ -z "$model" || $open_space -eq 1 ]] ||
+	die "--model is set on the session the new space opens; drop --no-space"
+
 [[ -z "$repo" || -z "$space_want" ]] || die "--repo and --space cannot be combined"
 
 [[ $open_space -eq 1 || -z "$space_want" ]] ||
@@ -208,21 +233,51 @@ if [[ -n "$agent" ]]; then
 	else
 		argv_json="$(jq -cn --arg a "$agent" '[$a]')"
 	fi
+	# opencode's interactive command takes no --model either. The model is set
+	# on the session, not in the client's config, so the tab must open a
+	# session that already carries it: hwt creates that session below, once
+	# the checkout exists, and folds its id into the argv as --session. A
+	# private (`--standalone`) server keeps its pending question forms in its
+	# own memory, out of the shared server — and out of the questions panel.
+	if [[ -n "$model" ]]; then
+		command -v opencode >/dev/null 2>&1 ||
+			die "--model needs 'opencode' on PATH to create the session"
+	fi
 fi
 
 # --- which repository ---------------------------------------------------
-# Where you are is the folder of the terminal running this: the pane, not the
-# process' working directory, so a checkout you opened stays the subject even
-# after a cd. A plain shell or a script has no Herdr terminal to ask.
+# Where you are is what runs in the terminal running this. A shell in front
+# means the pane's folder, so a checkout you opened stays the subject even
+# after a cd. An agent in front is a program started in a checkout of its own,
+# and that checkout is the subject: the pane it happens to sit in may belong
+# to another repository. A plain shell or a script has no Herdr terminal to
+# ask, and uses the current folder.
 work_dir="$repo"
 if [[ -z "$work_dir" ]]; then
-	cwd=""
+	pane_cwd=""
 	if [[ -n "${HC_TERMINAL_ID:-}" ]]; then
 		command -v hc >/dev/null 2>&1 || die "required command 'hc' not found on PATH"
 		command -v jq >/dev/null 2>&1 || die "required command 'jq' not found on PATH"
-		cwd="$(hc get "$HC_TERMINAL_ID" 2>/dev/null | jq -r '.cwd // empty')" || cwd=""
+		term_json="$(hc get "$HC_TERMINAL_ID" 2>/dev/null)" || term_json=""
+		if [[ -n "$term_json" ]]; then
+			pane_cwd="$(jq -r '.cwd // empty' <<<"$term_json")" || pane_cwd=""
+			fg_argv0="$(jq -r '.foreground.argv[0] // empty' <<<"$term_json")" || fg_argv0=""
+			fg_cwd="$(jq -r '.foreground.cwd // empty' <<<"$term_json")" || fg_cwd=""
+			case "${fg_argv0##*/}" in
+			"" | bash | dash | ash | sh | zsh | fish | ksh | mksh | tcsh | csh | nu)
+				work_dir="$pane_cwd"
+				printf 'hwt: terminal %s, pane folder %s\n' \
+					"$HC_TERMINAL_ID" "$work_dir" >&2
+				;;
+			*)
+				work_dir="${fg_cwd:-$pane_cwd}"
+				printf 'hwt: terminal %s, %s runs in %s\n' \
+					"$HC_TERMINAL_ID" "${fg_argv0##*/}" "$work_dir" >&2
+				;;
+			esac
+		fi
 	fi
-	work_dir="${cwd:-$PWD}"
+	work_dir="${work_dir:-${pane_cwd:-$PWD}}"
 fi
 
 # --space names another space to take the repository from.
@@ -305,8 +360,13 @@ if [[ $dry_run -eq 1 ]]; then
 	printf 'hwt: checkout   %s (%s)\n' "$path" \
 		"$([[ $new_branch -eq 1 ]] && printf 'new branch %s from %s' "$branch" "$base" ||
 			printf 'existing branch %s' "$branch")"
-	printf 'hwt: herdr      %s\n' "$([[ -n "$argv_json" ]] &&
-		printf 'space.new --folder %s --argv %s' "$path" "$argv_json" ||
+	preview_json="$argv_json"
+	if [[ -n "$model" ]]; then
+		printf 'hwt: session    session.create at %s with %s\n' "$path" "$model"
+		preview_json="$(jq -cn --argjson a "$argv_json" '[$a[0], "--session", "<new>"] + $a[1:]')"
+	fi
+	printf 'hwt: herdr      %s\n' "$([[ -n "$preview_json" ]] &&
+		printf 'space.new --folder %s --argv %s' "$path" "$preview_json" ||
 		printf 'space.new --folder %s' "$path")"
 	exit 0
 fi
@@ -329,6 +389,31 @@ fi
 if ! command -v herdr-app >/dev/null 2>&1 || ! herdr-app status >/dev/null 2>&1; then
 	echo "hwt: warning: no running Herdr window; checkout left at $path" >&2
 	exit 0
+fi
+
+# The model is a session property. Create the session on opencode's background
+# server — never a private one — so every surface sees the same session: the
+# tab opens it with --session, and its first prompt lands on it.
+if [[ -n "$model" ]]; then
+	provider="${model%%/*}"
+	rest="${model#*/}"
+	if [[ "$rest" == *"#"* ]]; then
+		model_id="${rest%%#*}"
+		variant="${rest#*#}"
+	else
+		model_id="$rest"
+		variant=""
+	fi
+	session_payload="$(jq -cn --arg p "$provider" --arg i "$model_id" --arg v "$variant" --arg d "$path" '
+		{ model: ({providerID: $p, id: $i} + (if $v == "" then {} else {variant: $v} end)),
+		  location: {directory: $d} }')"
+	if ! session_json="$(opencode api session.create --data "$session_payload" 2>&1)"; then
+		die "worktree created at $path, but the OpenCode session could not be created: $session_json"
+	fi
+	session_id="$(jq -r '.data.id // empty' <<<"$session_json" 2>/dev/null)" || session_id=""
+	[[ -n "$session_id" ]] ||
+		die "worktree created at $path, but the OpenCode session could not be read: $session_json"
+	argv_json="$(jq -c --arg s "$session_id" '[.[0], "--session", $s] + .[1:]' <<<"$argv_json")"
 fi
 
 space_args=(do space.new --folder "$path")

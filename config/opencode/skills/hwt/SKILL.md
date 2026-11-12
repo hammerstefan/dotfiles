@@ -42,10 +42,11 @@ as the work does in the sidebar:
   ("spike option 2" → `spike/option-2`). Never `work`, `task`, `tmp`, or a
   number alone.
 
-The repository is the folder of the terminal running this, so a session
-started from a checkout branches that checkout's repository. Do not cd
-elsewhere for it. When the ask names another space or repository, use
-`hwt --space <name>` or `hwt --repo <path>` and say so in the report.
+The repository is the folder of the program in front in this terminal, so a
+session started from a checkout branches that checkout's repository even when
+its pane belongs to another one. Do not cd elsewhere for it. When the ask
+names another space or repository, use `hwt --space <name>` or
+`hwt --repo <path>` and say so in the report.
 
 ## 3. Write the prompt
 
@@ -108,12 +109,26 @@ checkout path, because that is where the session starts.
 
 ## 4. Spawn
 
-Dry run first, then for real, from this session's shell:
+Dry run first, then for real, from this session's shell. Pass this session's
+own model, so the new one does not fall back to the configured default:
 
 ```
-hwt -n --agent opencode --task-file <prompt file> <branch>
-hwt    --agent opencode --task-file <prompt file> <branch>
+model="$(opencode session export "$OPENCODE_SESSION_ID" |
+	jq -r '.info.model | "\(.providerID)/\(.id)" +
+		(if .variant then "#\(.variant)" else "" end)")"
+
+hwt -n --agent opencode --model "$model" --task-file <prompt file> <branch>
+hwt    --agent opencode --model "$model" --task-file <prompt file> <branch>
 ```
+
+When `OPENCODE_SESSION_ID` is unset or the export fails, leave `--model` out
+and say which default the new session will use instead.
+
+`--model` does not start a private OpenCode server. `hwt` creates the session
+on OpenCode's background server and opens it with `--session`. Never replace
+that with `OPENCODE_CONFIG_CONTENT` or `--standalone`: pending `question`
+forms live in the server's memory, so a private server hides them from every
+other surface, the Questions panel included, while the session sits blocked.
 
 If `hwt` is not on PATH, stop and say so. Do not hand-build its two steps:
 the checkout location and the space name must stay the ones Herdr's own
@@ -137,6 +152,8 @@ Give, in a few lines:
   `hwt: <branch> -> <path>`);
 - the base: `HEAD` of the main checkout for a new branch, or the `--base` you
   passed;
+- the model it runs: `provider/model#variant` taken from this session, or the
+  default the new session falls back to;
 - what the new session was told, one line per section of the prompt;
 - the prompt file's path, so the person can read or edit what was sent;
 - whether this checkout had uncommitted changes, because the new branch
