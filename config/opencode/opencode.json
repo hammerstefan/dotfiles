@@ -1,6 +1,41 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "minimax-coding-plan/MiniMax-M3",
+  "providers": {
+    "openrouter": {
+      "models": {
+        "~deepseek/deepseek-flash-latest": {
+          "variants": [
+            { "id": "fast", "body": { "provider": { "order": ["baseten/fast"] } } }
+          ]
+        },
+        "deepseek-flash-fast": {
+          "modelID": "~deepseek/deepseek-flash-latest",
+          "name": "DeepSeek Flash Latest (fast)",
+          "family": "deepseek-flash",
+          "type": "chat",
+          "releaseDate": "2026-09-14",
+          "body": { "provider": { "order": ["baseten/fast"] } },
+          "capabilities": {
+            "tools": true,
+            "input": ["text", "image"],
+            "output": ["text"],
+            "temperature": true,
+            "reasoning": {
+              "supported": true,
+              "effort": ["none", "low", "high", "max"]
+            }
+          },
+          "limit": { "context": 1048576, "output": 943718 },
+          "cost": {
+            "input": 0.006,
+            "output": 0.5,
+            "cache": { "read": 0.005 }
+          }
+        }
+      }
+    }
+  },
   "instructions": [
     "~/.config/opencode/tool-prompt.md",
     "~/.config/opencode/secure-prompt.md",
