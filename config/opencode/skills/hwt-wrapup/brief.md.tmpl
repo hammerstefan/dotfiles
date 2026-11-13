@@ -18,14 +18,6 @@ Close the source worktree: {{CLOSE}}
 
 {{SESSIONS}}
 
-Every one of them is an OpenCode session at or under {{SOURCE_WORKTREE}}.
-Export each to a file and read the files, never the store:
-
-```sh
-mkdir -p {{STATE}}/transcripts
-opencode session export <id> > {{STATE}}/transcripts/<id>.json
-```
-
 An export is `{info, messages}`. In `messages[]`, `type` is `user`, `assistant`
 or `synthetic`: a user message's words are `.text`; an assistant's are in
 `.content[]`, whose items are `text`, `reasoning` or `tool` (a tool call's input
@@ -35,14 +27,15 @@ Never paste a whole transcript into your own context.
 
 # The trigger session's trace
 
-The person ran the wrapup from this worktree's own session. It is the ask, not
-the work, so it is not in the list above; its words and its links are quoted
-above, and its full export is at
+The person ran the wrapup from this worktree's own session, so that session is
+not in the list above: its words and its links are quoted there, and its full
+export is at
 
     {{TRACE}}
 
 Read it where a quote is ambiguous, or where the work it did landed in another
-checkout, on another branch, or in the issues and pull requests it links. Read
+checkout, on another branch, or in the issues and pull requests it links. When
+the list above is empty, the trace is the work: read it as the one input. Read
 it the same way — flattened, in slices — and never whole.
 
 The fail-safe reading, in order:
@@ -73,7 +66,6 @@ The fail-safe reading, in order:
 2. **One digest per session**, each in a background subagent, launched in
    parallel. Give each subagent exactly one export path, the path to write its
    digest (`{{STATE}}/digests/<id>.md`), and this shape:
-
    - what the person asked for, in their words;
    - what was produced, and whether it worked;
    - every correction the person made to the agent's behaviour, quoted;
@@ -84,6 +76,8 @@ The fail-safe reading, in order:
    - what here should *not* become a skill, and why.
 
    A digest is a claim about a transcript: quote, never paraphrase into a fact.
+   When the list above is empty, the trigger session's trace is that one input:
+   read it the same way, and write the same digest shape from it.
 
 3. **Synthesise.** Cluster the digests into lessons. When a digest is ambiguous,
    read that part of its transcript yourself — the export is right there. Per

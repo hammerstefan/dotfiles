@@ -55,11 +55,13 @@ brief names the trigger session's whole export for the rest.
 
 The script prints `wrapup: refused: <check>` and exits 3 when a check fails: not
 in a linked worktree, a tool missing from `PATH`, `gh` unauthenticated, a wrapup
-branch that already exists, an offline `git fetch`, a worktree with no session
-other than its trigger, or a brief template it cannot find.
+branch that already exists, an offline `git fetch`, a brief template it cannot
+find, or a worktree where neither the trigger session's export nor any other
+session can be read.
 
-Repeat the reason and stop. Never choose another branch, base, repository or
-session set to get past a refusal.
+A worktree made by `hwt` usually holds one session — the trigger — and that is
+not a refusal any more: its export is the brief's evidence, quoted and linked,
+and the brief names it as the reflection session's one input.
 
 ## What the script decides, and what you report
 

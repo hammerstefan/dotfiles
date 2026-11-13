@@ -162,6 +162,27 @@ def newest_session(directory: str) -> str:
     return ""
 
 
+def session_directory(db: Path, session: str) -> str | None:
+    """Where a session lives, or None when it cannot be read."""
+    try:
+        con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=10)
+    except sqlite3.Error:
+        return None
+    try:
+        row = con.execute("select directory from session_v2 where id = ?",
+                          (session,)).fetchone()
+        return row[0] if row else None
+    except sqlite3.Error:
+        return None
+    finally:
+        con.close()
+
+
+def in_worktree(where: str | None, directory: str) -> bool:
+    return bool(where) and (where == directory or
+                            where.startswith(directory + "/"))
+
+
 # --- the trigger session's trace ----------------------------------------
 
 def export_session(session: str, target: Path) -> dict | None:
@@ -272,6 +293,34 @@ def produced(trace: dict, source: str, base: str, branch: str, repo: str) -> str
 
 # --- rendering -----------------------------------------------------------
 
+def sessions_section(rows: list[dict], source: str, state: Path) -> str:
+    """The sessions a reflection session reads apart from the trigger's trace."""
+    if not rows:
+        return (
+            "None. The worktree's only session is the trigger session, whose\n"
+            "words and links are quoted above and whose export is the trace\n"
+            "below. That export is the work: treat it as the one input, and stop\n"
+            "after it — there is no second session to compare it with."
+        )
+    lines = [
+        f"- `{row['id']}` \u2014 {one_line(row['title'] or '(untitled)', 90)} "
+        f"\u2014 {'subagent' if row['parent_id'] else 'top-level'} "
+        f"\u2014 {row['messages']} messages, {human(row['bytes'])}"
+        for row in rows
+    ]
+    lines += [
+        "",
+        f"Every one of them is an OpenCode session at or under {source}.",
+        "Export each to a file and read the files, never the store:",
+        "",
+        "```sh",
+        f"mkdir -p {state}/transcripts",
+        f"opencode session export <id> > {state}/transcripts/<id>.json",
+        "```",
+    ]
+    return "\n".join(lines)
+
+
 def template_path() -> Path:
     candidates = []
     if os.environ.get("HWT_WRAPUP_TEMPLATE"):
@@ -367,12 +416,24 @@ def main() -> int:
                       "someone's work - name it, remove nothing")
 
     # 3. The sessions.
-    trigger = args.session or os.environ.get("OPENCODE_SESSION_ID") or ""
+    # The trigger is the session the wrapup runs from, so it must live in this
+    # worktree. OPENCODE_SESSION_ID is not exported to every shell, and when it
+    # is it can belong to another checkout: trust it only when it points here.
+    trigger = ""
+    if args.session:
+        if not in_worktree(session_directory(DB, args.session), source):
+            raise Refused(f"--session {args.session} is not a session in {source}")
+        trigger = args.session
+    else:
+        candidate = os.environ.get("OPENCODE_SESSION_ID") or ""
+        if in_worktree(session_directory(DB, candidate), source):
+            trigger = candidate
     if not trigger:
         trigger = newest_session(source)
     if not trigger:
-        raise Refused("cannot tell which session is the trigger: set "
-                      "OPENCODE_SESSION_ID or pass --session")
+        raise Refused("cannot tell which session is the trigger: no session "
+                      "belongs to this worktree; set OPENCODE_SESSION_ID or "
+                      "pass --session")
 
     fallback = False
     try:
@@ -380,9 +441,6 @@ def main() -> int:
     except (sqlite3.Error, OSError):
         sessions = session_rows_fallback(source)
         fallback = True
-    if not sessions:
-        raise Refused("no session in this worktree is left to read: nothing is "
-                      "closed, so its work keeps its only copy")
 
     state = Path(args.state) if args.state else STATE_ROOT / f"hwt-wrapup-{slug}"
     state.mkdir(parents=True, exist_ok=True)
@@ -392,6 +450,16 @@ def main() -> int:
     if trace is None:
         trace_path.unlink(missing_ok=True)
         warn(f"could not export the trigger session {trigger}; the brief says so")
+    # A worktree made by `hwt` usually holds one session, the trigger, and that
+    # session did the work. Its export is the brief's evidence, so it is enough
+    # on its own; refuse only when neither source can be read.
+    if not sessions and trace is None:
+        raise Refused("nothing in this worktree can be read: the trigger session "
+                      "would not export and no other session exists, so nothing "
+                      "is closed")
+    if not sessions:
+        warn(f"{source} holds no session besides the trigger; its trace is the "
+             "only input")
 
     checks = run(["git", "-C", source, "status", "--porcelain"], check=False).stdout
 
@@ -410,11 +478,7 @@ def main() -> int:
         "CLOSE": "no, because the person passed --keep" if args.keep else "yes",
         "STATE": str(state),
         "TRACE": str(trace_path) if trace else "(the export failed; see the report)",
-        "SESSIONS": "\n".join(
-            f"- `{row['id']}` \u2014 {one_line(row['title'] or '(untitled)', 90)} "
-            f"\u2014 {'subagent' if row['parent_id'] else 'top-level'} "
-            f"\u2014 {row['messages']} messages, {human(row['bytes'])}"
-            for row in sessions),
+        "SESSIONS": sessions_section(sessions, source, state),
         "PERSON_WORDS": person_words(trace) if trace else "",
         "PRODUCED": produced(trace, source, base, branch, repo) if trace else "",
         "NOTES": "",
@@ -464,8 +528,11 @@ def main() -> int:
         f"{'clean' if not checks.strip() else 'DIRTY'})")
     say(f"  wrapup    {wrapup_branch} at {checkout}")
     say(f"  target    {repo} -> {default_branch}  (base {base})")
-    say(f"  sessions  {len(sessions)} to read; the trigger session's own tree is "
-        "excluded")
+    if sessions:
+        say(f"  sessions  {len(sessions)} to read; the trigger session's own tree "
+            "is excluded")
+    else:
+        say("  sessions  none besides the trigger session; its trace is the input")
     for row in sessions[:SESSIONS_SHOWN]:
         kind = "subagent" if row["parent_id"] else "top-level"
         say(f"            {row['id']}  {one_line(row['title'] or '(untitled)', 58)}"
