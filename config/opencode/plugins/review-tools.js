@@ -15,9 +15,20 @@
 //   `git rev-parse --show-toplevel`, cached per session.
 // - `context.abort` became `context.signal` (with a fallback shim like
 //   plugins/session-stats.js uses).
+// - Every inspection reserves its worst-case output against both the caller
+//   and the shared worktree byte budgets before its command starts. When
+//   either budget cannot fit the reservation yet, the call waits in a
+//   per-worktree admission queue that is bounded in length and wait time,
+//   instead of failing. A budget whose consumed bytes alone already forbid
+//   another reservation is exhausted for the rest of the window and fails
+//   fast with the original message. When a budget window rolls over with
+//   calls still in flight, the in-flight reservations are carried into the
+//   successor window, and settling a lease refunds unused bytes on every
+//   exit path, including spawn failure, abort and over-limit output.
 
 const MAX_OUTPUT_BYTES = 8 * 1024 * 1024
 const MAX_ERROR_BYTES = 64 * 1024
+const RESERVATION_BYTES = MAX_OUTPUT_BYTES + MAX_ERROR_BYTES
 const MAX_COMMANDS_PER_CALLER = 20
 const MAX_REMOTE_CALLS_PER_CALLER = 5
 const MAX_BYTES_PER_CALLER = 24 * 1024 * 1024
@@ -26,6 +37,8 @@ const MAX_REMOTE_CALLS_PER_WORKTREE = 80
 const MAX_BYTES_PER_WORKTREE = 384 * 1024 * 1024
 const MAX_WINDOW_MILLISECONDS = 10 * 60 * 1000
 const COMMAND_TIMEOUT_MILLISECONDS = 60 * 1000
+const MAX_QUEUED_PER_WORKTREE = 32
+const MAX_QUEUE_WAIT_MILLISECONDS = 120 * 1000
 
 const MAX_TRANSPORT_BYTES = 1024 * 1024
 const MAX_WRITER_OUTPUT_BYTES = 16 * 1024
@@ -35,6 +48,7 @@ const MAX_CACHED_WORKTREES = 200
 
 const callerBudgets = new Map()
 const worktreeBudgets = new Map()
+const worktreeGates = new Map()
 const attemptedInvocations = new Set()
 const sessionWorktrees = new Map()
 
@@ -220,30 +234,55 @@ const assertRequestSafety = (value) => {
   }
 }
 
-const budgetFor = (budgets, key) => {
+const openWindow = (started) => ({
+  started,
+  commands: 0,
+  remoteCalls: 0,
+  bytes: 0,
+  inFlight: 0,
+  inFlightBytes: 0,
+  inFlightCommands: 0,
+  inFlightRemoteCalls: 0,
+  successor: null,
+})
+
+const budgetFor = (budgets, key, windowMilliseconds) => {
   const now = Date.now()
   for (const [candidate, value] of budgets) {
-    if (now - value.started >= MAX_WINDOW_MILLISECONDS) budgets.delete(candidate)
+    if (now - value.started < windowMilliseconds) continue
+    if (value.inFlight === 0) {
+      budgets.delete(candidate)
+      continue
+    }
+    // The window expired while calls are still in flight. Retire it and
+    // carry only the in-flight activity into a fresh window: active
+    // reservations keep counting against the caps, completed charges expire
+    // with the old window, and settling leases walk the successor chain to
+    // land on the freshest window.
+    const replacement = openWindow(now)
+    replacement.commands = value.inFlightCommands
+    replacement.remoteCalls = value.inFlightRemoteCalls
+    replacement.bytes = value.inFlightBytes
+    replacement.inFlight = value.inFlight
+    replacement.inFlightBytes = value.inFlightBytes
+    replacement.inFlightCommands = value.inFlightCommands
+    replacement.inFlightRemoteCalls = value.inFlightRemoteCalls
+    value.successor = replacement
+    budgets.set(candidate, replacement)
   }
   const existing = budgets.get(key)
-  if (!existing || now - existing.started >= MAX_WINDOW_MILLISECONDS) {
-    const replacement = {
-      started: now,
-      commands: 0,
-      remoteCalls: 0,
-      bytes: 0,
-    }
-    budgets.set(key, replacement)
-    return replacement
-  }
-  return existing
+  if (existing) return existing
+  const replacement = openWindow(now)
+  budgets.set(key, replacement)
+  return replacement
 }
 
-const readBounded = async (stream, maximum, abort) => {
+const readBounded = async (stream, maximum, abort, countBytes) => {
   const chunks = []
   let total = 0
   for await (const chunk of stream) {
     total += chunk.byteLength
+    if (countBytes) countBytes(chunk.byteLength)
     if (total > maximum) {
       abort()
       throw new Error("read-only review inspection exceeded its output safety limit")
@@ -261,61 +300,168 @@ const readBounded = async (stream, maximum, abort) => {
 
 const decode = (bytes, fatal) => new TextDecoder("utf-8", { fatal }).decode(bytes)
 
-const validateReservation = (budget, command, byteReservation, limits, label) => {
-  const nextCommands = budget.commands + 1
-  const nextRemoteCalls = budget.remoteCalls + Number(command[0] === "gh")
-  if (nextCommands > limits.commands) {
-    throw new Error(`review inspection exceeded its ${label} command budget`)
+const reserveCapacity = (command, cwd, caller, windowMilliseconds) => {
+  const isRemote = Number(command[0] === "gh")
+  const callerBudget = budgetFor(callerBudgets, `${cwd}:${caller}`, windowMilliseconds)
+  const worktreeBudget = budgetFor(worktreeBudgets, cwd, windowMilliseconds)
+  const budgetPairs = [
+    [callerBudget, MAX_COMMANDS_PER_CALLER, MAX_REMOTE_CALLS_PER_CALLER, "caller"],
+    [worktreeBudget, MAX_COMMANDS_PER_WORKTREE, MAX_REMOTE_CALLS_PER_WORKTREE, "shared worktree"],
+  ]
+  for (const [budget, commandLimit, remoteLimit, label] of budgetPairs) {
+    if (budget.commands + 1 > commandLimit) {
+      throw new Error(`review inspection exceeded its ${label} command budget`)
+    }
+    if (budget.remoteCalls + isRemote > remoteLimit) {
+      throw new Error(`review inspection exceeded its ${label} remote-call budget`)
+    }
   }
-  if (nextRemoteCalls > limits.remoteCalls) {
-    throw new Error(`review inspection exceeded its ${label} remote-call budget`)
+  const callerBytesBlocked = callerBudget.bytes + RESERVATION_BYTES > MAX_BYTES_PER_CALLER
+  const worktreeBytesBlocked = worktreeBudget.bytes + RESERVATION_BYTES > MAX_BYTES_PER_WORKTREE
+  if (callerBytesBlocked || worktreeBytesBlocked) {
+    // Bytes still held by in-flight calls free up when those calls settle, so
+    // this is contention worth waiting for. A budget whose consumed bytes
+    // alone already forbid another reservation is exhausted for the rest of
+    // the window: fail fast with the original message instead of queuing.
+    const callerExhausted =
+      callerBudget.bytes - callerBudget.inFlightBytes + RESERVATION_BYTES > MAX_BYTES_PER_CALLER
+    const worktreeExhausted =
+      worktreeBudget.bytes - worktreeBudget.inFlightBytes + RESERVATION_BYTES >
+      MAX_BYTES_PER_WORKTREE
+    if (worktreeExhausted) {
+      throw new Error("review inspection exceeded its shared worktree byte budget")
+    }
+    if (callerExhausted) {
+      throw new Error("review inspection exceeded its caller byte budget")
+    }
+    return { waiting: true, blocked: worktreeBytesBlocked ? "worktree" : "caller" }
   }
-  if (budget.bytes + byteReservation > limits.bytes) {
-    throw new Error(`review inspection exceeded its ${label} byte budget`)
+  for (const budget of [callerBudget, worktreeBudget]) {
+    budget.commands += 1
+    budget.remoteCalls += isRemote
+    budget.bytes += RESERVATION_BYTES
+    budget.inFlight += 1
+    budget.inFlightBytes += RESERVATION_BYTES
+    budget.inFlightCommands += 1
+    budget.inFlightRemoteCalls += isRemote
+  }
+  return { waiting: false, lease: { callerBudget, worktreeBudget, isRemote } }
+}
+
+const settleLease = (lease, consumedBytes) => {
+  const charge = Math.min(consumedBytes, RESERVATION_BYTES)
+  const unusedBytes = RESERVATION_BYTES - charge
+  for (const reserved of [lease.callerBudget, lease.worktreeBudget]) {
+    let current = reserved
+    while (current.successor) current = current.successor
+    current.bytes -= unusedBytes
+    current.inFlightBytes -= RESERVATION_BYTES
+    current.inFlight -= 1
+    current.inFlightCommands -= 1
+    current.inFlightRemoteCalls -= lease.isRemote
   }
 }
 
-const applyReservation = (budget, command, byteReservation) => {
-  const nextCommands = budget.commands + 1
-  const nextRemoteCalls = budget.remoteCalls + Number(command[0] === "gh")
-  budget.commands = nextCommands
-  budget.remoteCalls = nextRemoteCalls
-  budget.bytes += byteReservation
+const cleanupWaiter = (waiter) => {
+  if (waiter.timer !== null) clearTimeout(waiter.timer)
+  if (waiter.signal && waiter.onAbort) waiter.signal.removeEventListener("abort", waiter.onAbort)
 }
 
-const run = async (command, cwd, signal, caller) => {
-  const callerBudget = budgetFor(callerBudgets, `${cwd}:${caller}`)
-  const worktreeBudget = budgetFor(worktreeBudgets, cwd)
-  const byteReservation = MAX_OUTPUT_BYTES + MAX_ERROR_BYTES
-  validateReservation(
-    callerBudget,
-    command,
-    byteReservation,
-    {
-      commands: MAX_COMMANDS_PER_CALLER,
-      remoteCalls: MAX_REMOTE_CALLS_PER_CALLER,
-      bytes: MAX_BYTES_PER_CALLER,
-    },
-    "caller",
-  )
-  validateReservation(
-    worktreeBudget,
-    command,
-    byteReservation,
-    {
-      commands: MAX_COMMANDS_PER_WORKTREE,
-      remoteCalls: MAX_REMOTE_CALLS_PER_WORKTREE,
-      bytes: MAX_BYTES_PER_WORKTREE,
-    },
-    "shared worktree",
-  )
-  applyReservation(callerBudget, command, byteReservation)
-  applyReservation(worktreeBudget, command, byteReservation)
+const pumpGate = (cwd) => {
+  const gate = worktreeGates.get(cwd)
+  if (!gate) return
+  const remaining = []
+  let worktreeBlocked = false
+  for (const waiter of gate.queue) {
+    if (waiter.removed) continue
+    if (worktreeBlocked) {
+      remaining.push(waiter)
+      continue
+    }
+    let outcome
+    try {
+      outcome = reserveCapacity(waiter.command, cwd, waiter.caller, waiter.windowMilliseconds)
+    } catch (error) {
+      waiter.removed = true
+      cleanupWaiter(waiter)
+      waiter.reject(error)
+      continue
+    }
+    if (!outcome.waiting) {
+      waiter.removed = true
+      cleanupWaiter(waiter)
+      waiter.resolve(outcome.lease)
+      continue
+    }
+    // Reservations are uniform, so once the shared worktree budget cannot
+    // fit one, no later waiter can either. A waiter blocked only by its own
+    // caller budget stays put, and later waiters keep their turn.
+    if (outcome.blocked === "worktree") worktreeBlocked = true
+    remaining.push(waiter)
+  }
+  gate.queue = remaining
+}
 
+const acquireCapacity = (command, cwd, signal, caller, options) => {
+  const windowMilliseconds = options.windowMilliseconds ?? MAX_WINDOW_MILLISECONDS
+  const queueWaitMilliseconds = options.queueWaitMilliseconds ?? MAX_QUEUE_WAIT_MILLISECONDS
+  if (signal?.aborted) {
+    return Promise.reject(new Error("review inspection was aborted before it started"))
+  }
+  let immediate
+  try {
+    immediate = reserveCapacity(command, cwd, caller, windowMilliseconds)
+  } catch (error) {
+    return Promise.reject(error)
+  }
+  if (!immediate.waiting) return Promise.resolve(immediate.lease)
+  let gate = worktreeGates.get(cwd)
+  if (!gate) {
+    gate = { queue: [] }
+    worktreeGates.set(cwd, gate)
+  }
+  gate.queue = gate.queue.filter((waiter) => !waiter.removed)
+  if (gate.queue.length >= MAX_QUEUED_PER_WORKTREE) {
+    return Promise.reject(new Error("review inspection queue is saturated"))
+  }
+  return new Promise((resolve, reject) => {
+    const waiter = {
+      command,
+      caller,
+      windowMilliseconds,
+      signal,
+      timer: null,
+      onAbort: null,
+      removed: false,
+      resolve,
+      reject,
+    }
+    waiter.timer = setTimeout(() => {
+      waiter.removed = true
+      cleanupWaiter(waiter)
+      reject(new Error("review inspection timed out waiting for inspection capacity"))
+    }, queueWaitMilliseconds)
+    if (signal) {
+      waiter.onAbort = () => {
+        waiter.removed = true
+        cleanupWaiter(waiter)
+        reject(new Error("review inspection was aborted while waiting for inspection capacity"))
+      }
+      signal.addEventListener("abort", waiter.onAbort, { once: true })
+    }
+    gate.queue.push(waiter)
+  })
+}
+
+const run = async (command, cwd, signal, caller, options = {}) => {
+  const lease = await acquireCapacity(command, cwd, signal, caller, options)
+  let consumedBytes = 0
+  const countBytes = (byteLength) => {
+    consumedBytes += byteLength
+  }
   const controller = new AbortController()
   const forwardAbort = () => controller.abort()
-  signal.addEventListener("abort", forwardAbort, { once: true })
-  let actualBytes
+  signal?.addEventListener("abort", forwardAbort, { once: true })
   try {
     const process = Bun.spawn(command, {
       cwd,
@@ -323,27 +469,23 @@ const run = async (command, cwd, signal, caller) => {
       stdout: "pipe",
       stderr: "pipe",
       signal: controller.signal,
-      timeout: COMMAND_TIMEOUT_MILLISECONDS,
+      timeout: options.commandTimeoutMilliseconds ?? COMMAND_TIMEOUT_MILLISECONDS,
       killSignal: "SIGKILL",
     })
     const [stdout, stderr, exitCode] = await Promise.all([
-      readBounded(process.stdout, MAX_OUTPUT_BYTES, () => controller.abort()),
-      readBounded(process.stderr, MAX_ERROR_BYTES, () => controller.abort()),
+      readBounded(process.stdout, MAX_OUTPUT_BYTES, () => controller.abort(), countBytes),
+      readBounded(process.stderr, MAX_ERROR_BYTES, () => controller.abort(), countBytes),
       process.exited,
     ])
-    actualBytes = stdout.byteLength + stderr.byteLength
     if (exitCode !== 0) {
       const detail = decode(stderr, false).trim()
       throw new Error(detail.slice(0, 2000) || "read-only review inspection failed")
     }
     return decode(stdout, true)
   } finally {
-    if (actualBytes !== undefined) {
-      const unusedBytes = byteReservation - actualBytes
-      callerBudget.bytes -= unusedBytes
-      worktreeBudget.bytes -= unusedBytes
-    }
-    signal.removeEventListener("abort", forwardAbort)
+    settleLease(lease, consumedBytes)
+    pumpGate(cwd)
+    signal?.removeEventListener("abort", forwardAbort)
   }
 }
 
@@ -618,7 +760,7 @@ export default {
 
           let result
           try {
-            result = JSON.parse(stdout)
+            result = JSON.parse(decode(stdout, false))
           } catch {
             throw new Error("human-review report writer returned malformed output")
           }
@@ -644,4 +786,20 @@ export default {
       })
     })
   },
+}
+
+// Test surface for config/opencode/tests/review_tools.test.js. OpenCode loads
+// only the default export; the named export exists so the admission queue and
+// the budget accounting can be exercised directly by `bun test`.
+export const internals = {
+  run,
+  buildInspectCommand,
+  debugState: () => ({
+    callers: [...callerBudgets.entries()].map(([key, window]) => [key, { ...window }]),
+    worktrees: [...worktreeBudgets.entries()].map(([key, window]) => [key, { ...window }]),
+    queuedPerWorktree: [...worktreeGates.entries()].map(([key, gate]) => [
+      key,
+      gate.queue.filter((waiter) => !waiter.removed).length,
+    ]),
+  }),
 }
