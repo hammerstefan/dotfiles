@@ -110,8 +110,10 @@ claim about a tool. `evals/` holds those lessons as assertions.
 - `evals/evals.json` — the assertions the brief must satisfy, one eval per
   lesson from that review.
 - `evals/grade.py` — grades `brief.md.tmpl` and this file against them. Run it
-  after a change to either:
+  after a change to either. `--render` also renders a fresh brief and checks it
+  for unfilled placeholders and missing steps:
 
   ```sh
   python3 <skill dir>/evals/grade.py
+  python3 <skill dir>/evals/grade.py --render --worktree <a worktree>
   ```
