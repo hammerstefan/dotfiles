@@ -6,3 +6,6 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 scripts/.opencode/
+/.opencode/
+/config/opencode/service.json
+/config/opencode/opencode.json.hindsight-backup
