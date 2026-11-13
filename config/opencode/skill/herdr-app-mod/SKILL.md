@@ -1,6 +1,6 @@
 ---
 name: herdr-app-mod
-description: Write, change, or debug a mod for the Herdr desktop app (herdr-app) — a panel, button, layout, or gpui view under ~/.config/herdr-app. Use when the task is to add or change a herdr-app panel, button, badge or layout, when a mod renders nothing, never updates, ignores its timer, does nothing when clicked, or when work touches ~/.config/herdr-app, herdr-plugins/mods, or a mod's main.js. Not for driving Herdr's spaces, tabs, panes or agents (that is the herdr skill) and not for herdr-core.
+description: Write, change, or debug a mod for the Herdr desktop app (herdr-app) — a panel, button, layout, or gpui view under ~/.config/herdr-app. Use when the task is to add or change a herdr-app panel, button, badge or layout, when a mod renders nothing, never updates, ignores its timer, does nothing when clicked, or when work touches ~/.config/herdr-app, herdr-plugins/mods, or a mod's main.js — including any mod that talks to OpenCode (its sessions, open tabs, `opencode api` calls, agent rows, `OC |`-branded terminal titles, done/blocked states). Not for driving Herdr's spaces, tabs, panes or agents (that is the herdr skill) and not for herdr-core.
 ---
 
 # herdr-app mods
@@ -99,12 +99,74 @@ other mods read.
 - A mod that lists agents calls `setAgentOrder(addresses)` on render; without
   it `agent.next` and `agent.prev` follow the model's order, not your list.
 
+## Talking to OpenCode
+
+Verified against OpenCode v2.2.6 and v2.2.7; each of these cost live
+debugging, and the version-sensitive ones will drift again.
+
+The TUI brands the terminal window title `OC | <session title>` (`terminal.title`
+defaults on; the whole string caps at 40 chars, so long titles end in `…`), and
+Herdr passes it through as the agent/pane `title`. Strip exactly the prefix
+(`/^OC \| /` — a title may legitimately contain `| ` elsewhere) and treat a
+trailing `…` as truncation: compare a cleaned title against a session title as
+a prefix, never for equality.
+
+A pane hosting exactly one session reports through the root status alone:
+`hc get <t> --json` shows `status: {app, state}` and the branded title, and has
+**no `records` field at all**. When records do appear they hold only the
+pending child-session reports (a working pane mid-turn, extra TUI tabs) —
+never the whole session set — so a pane↔session join built on `records`
+silently covers nothing for the common one-session case. Join on program
+(`app` or `program.key`), pane `cwd`, and the stripped title instead — and
+re-check the shape live after an OpenCode upgrade: the records field changed
+between v2.2.6 and v2.2.7.
+
+Call the API through the CLI's operation-id form — `opencode api session.list
+--param directory=$dir --param limit=200`; it is the version-independent shape
+and the one this repo's mods use. Query strings on the method+path form
+(`opencode api GET '/api/session?directory=…'`) silently did nothing on v2.2.6
+and are honored on v2.2.7 — API behaviors drift between versions, so when a
+filter seems ignored, test it live against the installed binary before
+trusting any comment. If filters are ignored only when the call goes through a
+shell, suspect an unquoted `&` splitting the command, not the CLI. Verified
+shapes: `session.list` → `{data, cursor}`; `session.active` →
+`{data: {<sessionID>: {type}}}`; `session.permission.list` and
+`session.form.list` take a sessionID. Never call `session.view`: it marks an
+idle transition observed and clears done on every surface — record a local
+"seen" timestamp instead.
+
+"Done" is two derivations of one event. Herdr's: finished while unattended; it
+flips to idle the moment anyone looks. OpenCode's: idle with `time.viewed`
+missing or older than `time.idle`. A session can read done on one side and
+idle on the other; the pane-backed row is authoritative.
+
+OpenCode keeps every session forever, and forks and re-runs pile up
+same-titled sessions in one folder (forks suffix "(fork #1)" and set no parent
+id). A panel that lists sessions must dedupe — keep the newest per title plus
+folder and count the folded ones — or it renders duplicate rows.
+
+The TUI persists its open tabs — including idle ones — to
+`~/.local/state/opencode/<channel>/tui/tabs.json` and watches that file (atomic
+writes under a lock): reading is safe, writing never is. Entries outlive a
+killed TUI, so attribute a directory's tabs only while a live OpenCode pane
+sits in it (`p.app === "opencode"` exists only while it runs).
+
+When one entity shows up twice, find which renderer produced each row before
+theorizing: the same session arrives over two independent channels — the
+pane-backed agent row and the polled row — and a row's age column tells them
+apart. Check `hc get` ground truth, not a shape documented from an older
+version.
+
 ## The UI facts that bite
 
 - Use theme colors. `muted` is a 60% mix of foreground and background: fine
   for a label, too dim for body text. `dim` is dimmer still.
 - Give a flex child that holds text `min_w(0)`, or its content pushes the
   column wider than the window instead of truncating.
+- Agent-row icons follow the shipped agents panel: the program table's
+  one-color glyphs render as `svg(p.icon).size(16).text_color(t.foreground)`
+  when `p.tint`, else `image(p.icon)` at 16. Smaller dim variants read as
+  noise next to the title; the glyph carries the agent's identity.
 - `herdr-app ls` lists terminals only. A mod pane appears only in `panes()`
   and in screenshots.
 
