@@ -1,0 +1,110 @@
+{
+  "skill_name": "hwt-wrapup",
+  "subject": "The instructions the reflection session reads: brief.md.tmpl and SKILL.md.",
+  "note": "These evals grade the brief, not a whole reflection run. A full run costs a session and a pull request, so the deterministic artifact is graded on every change and a real wrapup is the final check. Each expectation comes from the review of the skills and guidance in PR 62 of monitor-agent (session ses_e295a5760ffeYWj7OxODCSSkyg).",
+  "evals": [
+    {
+      "id": 1,
+      "name": "claims-are-checked-not-inherited",
+      "prompt": "Wrap up this worktree. One session recorded that two branch names collide, and the lesson is about to become a skill.",
+      "expected_output": "The brief requires the reflection session to run every example before it writes it, to record the command and its result in the pull request, and to treat a session quote as evidence rather than as a fact.",
+      "files": [],
+      "expectations": [
+        "The brief requires the reflection session to run every example a skill states before the commit.",
+        "The brief requires the command and its result to be recorded in the pull request body.",
+        "The brief states that a session quote is evidence, not a fact."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "tool-facts-name-their-scope",
+      "prompt": "A session says the lxc client has no -p flag, and the lesson becomes an AGENTS.md rule.",
+      "expected_output": "The brief requires every claim about a tool to name the version tested, every claim about a command to name the subcommand tested, and a blanket claim about a binary to be split or dropped.",
+      "files": [],
+      "expectations": [
+        "The brief requires a claim about a tool or command to name the version tested.",
+        "The brief requires a claim about flags or behaviour to name the subcommand tested.",
+        "The brief forbids a blanket claim about a binary and requires it to be split per subcommand or dropped."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "description-is-the-trigger",
+      "prompt": "The lesson becomes a new skill, and OpenCode will inject its frontmatter description into every session.",
+      "expected_output": "The brief requires each description sentence to stay under 25 words, keeps the person's trigger phrases, and treats the description as the only text OpenCode shows before it loads the skill.",
+      "files": [],
+      "expectations": [
+        "The brief requires every description sentence to stay under 25 words.",
+        "The brief requires the person's trigger phrases to survive the rewrite.",
+        "The brief treats the description as the only text OpenCode shows before it loads the skill."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "mechanical-work-becomes-a-script",
+      "prompt": "The lesson is the rule 'grep the changed files for banned words before the commit'.",
+      "expected_output": "The brief requires a mechanical check to become a script with an exit code, and requires that script to run in the check step 7.",
+      "files": [],
+      "expectations": [
+        "The brief requires a mechanical check to be a script with an exit code rather than a prose rule.",
+        "The brief requires the script to run with the other checks in step 7."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "style-conformance-is-measured",
+      "prompt": "The source repository has a writing guide and a style linter.",
+      "expected_output": "The brief requires the linter to run on every changed file, the counts to appear in the pull request body, and each remaining hard finding to be named and justified.",
+      "files": [],
+      "expectations": [
+        "The brief requires the repository's linter to run on every changed file.",
+        "The brief requires the linter counts in the pull request body.",
+        "The brief requires each remaining hard finding to be named and justified."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "a-skipped-eval-has-a-true-reason",
+      "prompt": "The reflection session considers skipping the skill-creator eval runs.",
+      "expected_output": "The brief no longer claims that project skills are unloadable before merge, gives the true reason (skills are discovered at session start), and requires the session to say what it ran and what it did not.",
+      "files": [],
+      "expectations": [
+        "The brief does not claim that project skills are unloadable before merge or that OpenCode reads skills from the global directory.",
+        "The brief gives the true reason a skill may not load in the session that created it: skills are discovered at session start.",
+        "The brief requires the session to say which evals it ran and which it did not."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "the-review-gate-precedes-the-pull-request",
+      "prompt": "Before it opens the pull request, the reflection session reviews what it wrote.",
+      "expected_output": "The brief requires a self-review on the five criteria (context efficiency, reliability, description and trigger, deterministic script, style), and requires the verdict to agree with the findings.",
+      "files": [],
+      "expectations": [
+        "The brief requires a self-review on context efficiency, reliability, description and trigger quality, scriptability, and style.",
+        "The brief requires the verdict to agree with the findings."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "one-correction-reaches-every-copy",
+      "prompt": "The same false claim appears in a skill, AGENTS.md, and the knowledge base, and in a commit message.",
+      "expected_output": "The brief requires a search for the other copies of a corrected claim, including commit messages, and requires every copy to be corrected in the same pull request.",
+      "files": [],
+      "expectations": [
+        "The brief requires a search for other copies of a corrected claim.",
+        "The brief requires commit messages to be corrected too."
+      ]
+    },
+    {
+      "id": 9,
+      "name": "the-description-budget-is-bounded",
+      "prompt": "The skill description is injected into every session, and the lesson becomes a skill.",
+      "expected_output": "The brief caps the whole description, not only each sentence.",
+      "files": [],
+      "expectations": [
+        "The brief caps the whole description, not only each sentence."
+      ]
+    }
+  ]
+}
