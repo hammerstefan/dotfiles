@@ -25,6 +25,18 @@ The session a wrapup spawns, in a worktree of its own, to read the transcripts
 and produce the wrapup's output.
 _Avoid_: summariser, wrapup session
 
+**Trigger session**:
+The worktree session a wrapup runs from, and whose export its brief quotes. The
+trigger session's own tree is excluded from the sessions to read, because it is
+the ask rather than the work.
+_Avoid_: current session, main session
+
+**Trace**:
+The trigger session's export: the person's words quoted in the brief, and the
+file the reflection session reads when a quote is ambiguous or the work landed
+somewhere the brief cannot see.
+_Avoid_: log, dump
+
 **Lesson**:
 A correction, convention or procedure that the sessions demonstrate and a
 future session would otherwise have to learn again.
