@@ -4,7 +4,7 @@ Use this workflow only when the user asks to edit an inline comment on a
 pending review this session created. This is a body edit, not review creation
 or transactional recovery. Do not delete and recreate the review.
 
-## Check provenance
+## Verify provenance
 
 1. Find the successful creation response and verification in this session's
    own tool output. Record the host, repository, PR, review ID, owner, head
@@ -15,9 +15,10 @@ or transactional recovery. Do not delete and recreate the review.
 3. If the creation response, verification, or target identity is unavailable,
    stop without mutation. Ask the user to edit the comment in GitHub's UI.
 
-## Check current state
+## Verify current state
 
-Use the private scratch setup and identity checks from the creation workflow.
+Use the private scratch setup and identity verification from the
+creation workflow.
 Fetch the PR, review, changed files, and all pages of the review's comments.
 Also fetch the pull-request-scoped comments as in creation step 7. Save the
 complete review and comment snapshot before editing.
@@ -43,7 +44,7 @@ new body. Do not change the anchor as part of a body edit.
 Immediately before mutation, fetch the PR, review, and target again. Require
 the same head, owner, `PENDING` states, anchor, and original body. If any
 changed, stop and ask the user. GitHub does not offer a conditional body update
-in this mutation, so this check cannot eliminate a concurrent edit race.
+in this mutation, so this verification cannot eliminate a concurrent edit race.
 
 ## Update and verify
 
@@ -51,7 +52,7 @@ Use the target comment's verified GraphQL node ID, not its numeric REST ID, in
 GitHub's `updatePullRequestReviewComment` mutation. GitHub documents the
 mutation and its `pullRequestReviewCommentId` and `body` fields at
 <https://docs.github.com/en/graphql/reference/pulls#updatepullrequestreviewcomment>.
-Keep the body in a JSON file, not in shell code. For a validated one-item list:
+Keep the body in a JSON file, not in shell code. For a verified one-item list:
 
 ```bash
 . "$HOME/.local/state/gh-pending-pr-review/env.sh"
@@ -75,7 +76,8 @@ ID, body, and anchor. If a comparison fails, report the mismatch and stop.
 Do not overwrite another change or recreate the review. The remote state is
 the result, even if verification fails.
 
-Report the review ID and state, the changed comment's path and anchor, and
-whether the new body and other comments were verified. State that nothing was
-published, submitted, approved, or marked as changes requested. Link the PR's
-**Files changed** view. Clean up only the scratch files created for this edit.
+Report the review ID and state, the changed comment's path and anchor,
+and whether the new body and other comments verified. State that the
+skill did not publish, submit, approve, or mark anything as changes
+requested. Link the PR's **Files changed** view. Clean up only the
+scratch files created for this edit.

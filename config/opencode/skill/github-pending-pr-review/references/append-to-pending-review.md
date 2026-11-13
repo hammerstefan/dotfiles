@@ -1,14 +1,16 @@
 # Append inline comments to a pending review
 
-Use this workflow only when step 2 of `SKILL.md` has routed the skill into
-**append mode**: exactly one `PENDING` review owned by the authenticated
-user exists on the resolved pull request and head SHA. The workflow
-adds new top-level comments to that review through GraphQL and never
-modifies the review's pre-existing comments, summary body, or state.
+Use this workflow only when step 2 of `SKILL.md` routed the skill into
+**append mode**. That mode requires exactly one `PENDING` review owned
+by the authenticated user to exist on the resolved pull request and
+head SHA. The workflow adds new top-level comments to that review
+through GraphQL. It never modifies the review's pre-existing comments,
+summary body, or state.
 
-This is a different capability from editing a single comment's body on a
-session-created review; see [`edit-session-review.md`](./edit-session-review.md)
-for that workflow. Appending is purely additive; body edits change one
+This is a different capability from editing a single comment's body on
+a session-created review. See
+[`edit-session-review.md`](./edit-session-review.md) for that
+workflow. Appending is purely additive. Body edits change one
 existing comment.
 
 ## Auto-detect decision (mirrors step 2)
@@ -26,11 +28,12 @@ Then:
 | --- | --- |
 | 0 | create (skip this doc) |
 | 1 | append (continue) |
-| 2+ | refuse; list each id |
+| 2+ | refuse. List each id. |
 
-Wrong-owner and stale-head-SHA pending reviews are excluded from the
-candidate set and do not, by themselves, trigger refuse mode. Report
-them in the final response so the user knows why they were ignored.
+Wrong-owner and stale-head-SHA pending reviews do not enter the
+candidate set and do not, by themselves, trigger refuse mode. Mention
+them in the final response so the user knows why the workflow skipped
+them.
 
 ## Pre-mutation invariants (mirrors step 5a)
 
@@ -54,17 +57,18 @@ Require all of:
 - the review's `.node_id` is present and well-formed (a string starting
   with `PRR_`)
 
-If any check fails, stop without mutation and report the actual state.
+If any verification fails, stop without mutation and report the
+actual state.
 
 ## Append each comment (mirrors step 5b)
 
 GitHub's REST surface cannot add a comment to an existing pending review.
 The REST endpoint `POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews`
-creates a new review; there is no sibling endpoint that adds a comment to
-an existing one. The older GraphQL mutation `addPullRequestReviewComment`
-was deprecated on 2023-10-01. The skill uses the modern
-`addPullRequestReviewThread` mutation, sending one mutation per appended
-comment.
+creates a new review. There is no sibling endpoint that adds a comment
+to an existing one. GitHub deprecated the older GraphQL mutation
+`addPullRequestReviewComment` on 2023-10-01. The skill uses the modern
+`addPullRequestReviewThread` mutation, sending one mutation per
+appended comment.
 
 The mutation input carries the target review's `node_id` (not the
 numeric `id`), the comment's `path`, `line`, `side`, `body`, and
@@ -99,7 +103,7 @@ query='mutation($input: AddPullRequestReviewThreadInput!) {
 }'
 ```
 
-Then loop over the validated comments. Build each payload with `jq`
+Then loop over the verified comments. Build each payload with `jq`
 using `--arg` and `--argjson`, capture the raw response, and only parse
 after the process exits cleanly:
 
@@ -167,7 +171,7 @@ gh api --hostname "$host" --paginate \
   && jq -s 'add' "$tmpdir/review-comments.pages.json" >"$tmpdir/review-comments.json"
 ```
 
-Re-confirm the PR's `head.sha` and the review's `state`, `commit_id`,
+Re-verify the PR's `head.sha` and the review's `state`, `commit_id`,
 `user.login`, and `pull_request_url` against the values recorded in the
 pre-mutation step. Any drift stops the workflow before running the
 verifier.
@@ -192,8 +196,8 @@ snapshot from step 2) against the remote comments on the same review.
 
 The remote comments are the union of the pull-request-scoped and
 review-scoped endpoints, merged by `verify_review.py`. The unchanged
-check filters the merged remote comments to those whose id appears in
-the snapshot and compares the remaining fields:
+verification filters the merged remote comments to those whose id
+appears in the snapshot and compares the remaining fields:
 
 | field | comparison |
 | --- | --- |
@@ -206,8 +210,8 @@ the snapshot and compares the remaining fields:
 | body | byte-for-byte equality |
 
 A pre-existing comment whose id is missing from the remote view is a
-deletion; a pre-existing comment whose id is present and any other field
-differs is a change. Either is a verification failure.
+deletion. A pre-existing comment whose id is present and any other
+field differs is a change. Either is a verification failure.
 
 Write the result of the comparison as a JSON object:
 
@@ -220,10 +224,10 @@ Write the result of the comparison as a JSON object:
 ```
 
 A failure in either the appended-comment verification or the
-pre-existing-comment unchanged check stops the workflow. The skill
-never deletes the target review, never tries to delete individual
-comments, never retries the failed mutation, and never recreates the
-review. The remote state is the result.
+pre-existing-comment unchanged comparison stops the workflow. The
+skill never deletes the target review, never tries to delete
+individual comments, never retries the failed mutation, and never
+recreates the review. The remote state is the result.
 
 ## Endpoints the append path never calls
 
@@ -235,8 +239,8 @@ review. The remote state is the result.
   (dismiss)
 - `DELETE /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}`
   (delete the target review)
-- `PATCH /repos/{owner}/{repo}/pulls/comments/{comment_id}` (edit a comment;
-  belongs to the edit workflow)
+- `PATCH /repos/{owner}/{repo}/pulls/comments/{comment_id}` (edit a
+  comment. Belongs to the edit workflow.)
 - `PATCH /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}`
   (does not exist for this purpose)
 - GraphQL `addPullRequestReviewComment` (deprecated on 2023-10-01)
@@ -251,7 +255,7 @@ review. The remote state is the result.
   [`edit-session-review.md`](./edit-session-review.md). The append path
   does not edit any pre-existing comment, including one this session
   appended earlier.
-- The bundled scripts `scripts/validate_comments.py`,
+- The skill reuses the bundled scripts `scripts/validate_comments.py`,
   `scripts/anchor_text.py`, `scripts/diff_positions.py`, and
-  `scripts/verify_review.py` are reused unchanged. They have no
-  append-specific flags.
+  `scripts/verify_review.py` unchanged. They have no append-specific
+  flags.
