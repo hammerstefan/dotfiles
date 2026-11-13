@@ -1,10 +1,10 @@
 // OpenCode V2 plugin: review-tools
 //
 // Ports the former V1 custom tools `review_inspect` and
-// `write_review_human_report` (config/opencode/tools/*.ts) to the V2 plugin
-// API. V2 does not run V1 plugin implementations, so these are re-registered
-// here via ctx.tool.transform. Tool names are unchanged so the existing
-// agent permission rules (`action: review_inspect` etc.) keep matching.
+// `write_review_human_report` to the V2 plugin API. V2 does not run V1 plugin
+// implementations, so these are re-registered here via ctx.tool.transform.
+// Tool names are unchanged so the existing agent permission rules
+// (`action: review_inspect` etc.) keep matching.
 //
 // Porting notes versus the V1 files:
 // - zod schemas became JSON Schema; the zod `.refine` safety rules that JSON
