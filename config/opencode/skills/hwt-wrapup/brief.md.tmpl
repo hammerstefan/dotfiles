@@ -1,0 +1,170 @@
+You are wrapping up a finished git worktree. Its sessions hold what the work
+taught; your job is to turn that into repo-level skills, guidance and memory,
+open one pull request, and then close the worktree.
+
+Checkout: {{CHECKOUT}}
+Repository: {{MAIN_ROOT}}  Branch: {{WRAPUP_BRANCH}}  Base: {{BASE}}
+Source worktree: {{SOURCE_WORKTREE}}  Branch: {{SOURCE_BRANCH}}
+Pull request target: {{REPO}}, base {{DEFAULT_BRANCH}}
+Close the source worktree: {{CLOSE}}
+
+{{PERSON_WORDS}}
+
+{{PRODUCED}}
+
+{{NOTES}}
+
+# Sessions to read
+
+{{SESSIONS}}
+
+Every one of them is an OpenCode session at or under {{SOURCE_WORKTREE}}.
+Export each to a file and read the files, never the store:
+
+```sh
+mkdir -p {{STATE}}/transcripts
+opencode session export <id> > {{STATE}}/transcripts/<id>.json
+```
+
+An export is `{info, messages}`. In `messages[]`, `type` is `user`, `assistant`
+or `synthetic`: a user message's words are `.text`; an assistant's are in
+`.content[]`, whose items are `text`, `reasoning` or `tool` (a tool call's input
+is `.state.input`, its failure `.state.error`); a `synthetic` message is harness
+injection, not the person. Flatten an export with `jq`, or read it in slices.
+Never paste a whole transcript into your own context.
+
+# The trigger session's trace
+
+The person ran the wrapup from this worktree's own session. It is the ask, not
+the work, so it is not in the list above; its words and its links are quoted
+above, and its full export is at
+
+    {{TRACE}}
+
+Read it where a quote is ambiguous, or where the work it did landed in another
+checkout, on another branch, or in the issues and pull requests it links. Read
+it the same way — flattened, in slices — and never whole.
+
+The fail-safe reading, in order:
+
+1. the person's words above, for what was wanted;
+2. the session list above, for what the worktree's own sessions did;
+3. the trace, for what the trigger session did outside this worktree;
+4. the repository at {{BASE}}, for what already landed.
+
+# Rules
+
+- Work only in this checkout, on {{WRAPUP_BRANCH}}. Commit there; never commit
+  to {{SOURCE_BRANCH}} or any other branch.
+- Change skills, AGENTS.md and GLOSSARY.md. Change no source code, no
+  configuration, no dependency.
+- Never merge the pull request, and never force-push.
+- When a lesson needs judgement — two skills that should become one, a name that
+  collides with an existing skill, a skill you would delete or rename — ask with
+  the `question` tool and wait. When the choice is trivial and additive, decide,
+  and record the alternative in the pull request body.
+- Put no credentials, tokens or private paths in anything you commit.
+
+# What to do
+
+1. **Export every session** in the list. A session you cannot export, or choose
+   not to read, must be named in the report with the reason.
+
+2. **One digest per session**, each in a background subagent, launched in
+   parallel. Give each subagent exactly one export path, the path to write its
+   digest (`{{STATE}}/digests/<id>.md`), and this shape:
+
+   - what the person asked for, in their words;
+   - what was produced, and whether it worked;
+   - every correction the person made to the agent's behaviour, quoted;
+   - conventions, commands and values they stated that are written down nowhere
+     in the repository;
+   - failures, their cause, and the fix that ended them;
+   - candidate lessons, each with the message it came from;
+   - what here should *not* become a skill, and why.
+
+   A digest is a claim about a transcript: quote, never paraphrase into a fact.
+
+3. **Synthesise.** Cluster the digests into lessons. When a digest is ambiguous,
+   read that part of its transcript yourself — the export is right there. Per
+   lesson, decide: a new skill, an update to an existing skill, an AGENTS.md or
+   GLOSSARY.md line, or nothing. A lesson that only restates what the repository
+   already says is nothing.
+
+   Use the `skill-creator` skill for every skill you write or revise. Take it as
+   far as you can without a person: its anatomy, its frontmatter, and its
+   description rules — the description is the trigger, so name the phrases and
+   situations that should reach for the skill. Skip its eval runs and say in the
+   pull request that you skipped them: they need a person to read results, and
+   the skills you write are not loadable in this checkout, because OpenCode
+   loads them from the global directory until this branch merges.
+
+4. **Write the files.** `.opencode/skills/<id>/SKILL.md` for a new skill, in
+   place for an existing one, in the repository the source worktree belongs to.
+   Never the global config: a lesson from one project is not a rule for every
+   project. Update `AGENTS.md` or `GLOSSARY.md` only where the lesson is
+   guidance rather than procedure.
+
+5. **Commit one concern per commit** — skills, then guidance, then glossary —
+   with conventional messages (`feat(skill): …`, `docs(agents): …`). Before
+   staging, confirm each new skill is not ignored:
+   `git check-ignore -q .opencode/skills/<id>/SKILL.md` must exit 1. When the
+   repository ignores `.opencode/`, do not fight the ignore rule: put the skills
+   where the repository already keeps tracked skills, and say so in the report.
+
+6. **Push and open the pull request**, ready for review, not a draft:
+
+   ```sh
+   git push -u origin {{WRAPUP_BRANCH}}
+   gh pr create --base {{DEFAULT_BRANCH}} --head {{WRAPUP_BRANCH}} \
+     --title "<repository name>: lessons from {{SOURCE_BRANCH}}" --body-file <body>
+   ```
+
+   The body states what each skill is for, what evidence produced it, which
+   sessions were read and which were not, why, and every alternative you chose
+   against. Record the pull request with `trail_add` as soon as it exists.
+
+7. **Retain the lessons in memory** with `hindsight_ingest_document`, one
+   document per lesson cluster: the decision or convention, why, and the
+   evidence. State plainly where a lesson supersedes something memory already
+   held.
+
+8. **Close the source worktree**, when the brief says yes — and not before the
+   pull request is open.
+
+   ```sh
+   git -C {{SOURCE_WORKTREE}} status --porcelain        # must print nothing
+   sqlite3 -json "$HOME/.local/share/opencode/opencode.db" "
+   select id, title from session_v2
+   where (directory = '{{SOURCE_WORKTREE}}' or instr(directory, '{{SOURCE_WORKTREE}}' || '/') = 1)
+     and time_busy is not null
+     and (time_idle is null or time_busy > time_idle)
+     and time_busy > (strftime('%s','now') * 1000 - 86400000)"
+   herdr-app ls | jq -r --arg w "{{SOURCE_WORKTREE}}" \
+     '.spaces[] | select(.folder == $w or .name == "{{SLUG}}") | .id'
+   herdr-app do space.close '{"id": "<space id>", "confirmed": true}'
+   git -C {{MAIN_ROOT}} worktree remove {{SOURCE_WORKTREE}}
+   ```
+
+   Dirty, or a session busy within the last day: close nothing, and say what
+   blocked it and where the work sits. Commits on no remote are a warning, not a
+   refusal: `git worktree remove` keeps the branch, so name them and carry on.
+   The space goes before the checkout, as Herdr's own remove does it. More than
+   one space id: say so and close nothing until one is certain. No space id:
+   remove the checkout anyway and say the space was already gone. Never delete
+   the branch.
+
+9. **Ask about this space** with the `question` tool: close it and remove this
+   checkout, or leave both. Find this space by `.folder` equal to this checkout.
+   On "close", write a script with the write tool that sleeps five seconds,
+   closes this space, then runs `git -C {{MAIN_ROOT}} worktree remove
+   {{CHECKOUT}}`; start it with `setsid nohup bash <script> ><log> 2>&1 &` so it
+   outlives the terminal it would otherwise kill, and name the log file in the
+   report. Then stop.
+
+10. **Report**: the pull request's URL; each lesson and where it landed; the
+    sessions read, and any you did not; what you did not verify; whether the
+    source worktree was closed, kept, or refused, and why. Before the report,
+    call `todowrite` once with every item still remaining — work only the person
+    can finish, a step you could not run, a check you did not verify, a decision
+    still open — each `pending`, and an empty list when nothing remains.

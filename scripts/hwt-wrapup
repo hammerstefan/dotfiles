@@ -1,0 +1,537 @@
+#!/usr/bin/env python3
+"""hwt-wrapup - turn a finished worktree's sessions into repo-level skills in a
+pull request, then close the worktree.
+
+This is the deterministic half of the `hwt-wrapup` skill. It runs from the
+session that lives in the worktree to wrap up, and it does every step that has
+one right answer: the refusal checks, the session list, the brief, the goal,
+the dry run and the spawn.
+
+Why a script: a wrapup is triggered at the end of a long session, and the
+harness re-sends that session's whole transcript on every turn. Measured on
+monitor-agent's spike wrapup, 11 turns of orchestration at a 320k-token context
+cost 3.95M input tokens - more than the entire reflection session that did the
+actual work. Here it is one call that prints a dozen lines.
+
+The brief is rendered from the skill's `brief.md.tmpl` next to it. The parts
+that need judgement (what the work taught, which lesson becomes a skill) are
+left to the reflection session, in a context of its own.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import shutil
+import sqlite3
+import subprocess
+import sys
+from pathlib import Path
+
+EXIT_REFUSED = 3
+EXIT_FAILED = 4
+
+STATE_ROOT = Path("/tmp/opencode")
+DB = Path.home() / ".local/share/opencode/opencode.db"
+
+# The person's words are the cheapest faithful record of what was wanted, so
+# keep them nearly whole; the export is named in the brief for the rest.
+WORD_CAP = 1200
+WORDS_TOTAL_CAP = 15000
+FILES_CAP = 30
+LINKS_CAP = 12
+COMMITS_CAP = 15
+SESSIONS_SHOWN = 20
+
+
+class Refused(Exception):
+    """One refusal check failed. Nothing was made; the reason is the message."""
+
+
+def say(text: str = "") -> None:
+    print(text, flush=True)
+
+
+def warn(text: str) -> None:
+    print(f"wrapup: {text}", file=sys.stderr, flush=True)
+
+
+def run(cmd: list[str], *, cwd: str | None = None, check: bool = True,
+        timeout: int = 180) -> subprocess.CompletedProcess[str]:
+    try:
+        proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                              timeout=timeout)
+    except FileNotFoundError:
+        raise Refused(f"{cmd[0]} is not on PATH")
+    except subprocess.TimeoutExpired:
+        raise Refused(f"{' '.join(cmd[:2])} timed out after {timeout}s")
+    if check and proc.returncode != 0:
+        lines = (proc.stderr or proc.stdout).strip().splitlines()
+        raise Refused(lines[-1] if lines else f"{cmd[0]} exited {proc.returncode}")
+    return proc
+
+
+def human(size: int) -> str:
+    return f"{size / 1024:.0f} KB" if size < 1024 * 1024 else f"{size / 1048576:.1f} MB"
+
+
+def first_worktree(porcelain: str) -> str:
+    for line in porcelain.splitlines():
+        if line.startswith("worktree "):
+            return line[len("worktree "):]
+    return ""
+
+
+def one_line(text: str, cap: int) -> str:
+    text = " ".join(text.split())
+    return text if len(text) <= cap else text[: cap - 1].rstrip() + "\u2026"
+
+
+# --- sessions ------------------------------------------------------------
+
+def session_rows(db: Path, directory: str, trigger: str) -> list[dict]:
+    """The tree of sessions at or under `directory`, minus the trigger's tree.
+
+    `session_v2` is not a public interface; the caller falls back to
+    `opencode session list` when this raises.
+    """
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=10)
+    try:
+        con.row_factory = sqlite3.Row
+        rows = con.execute(
+            """
+            with recursive mine(id) as (
+              select ?
+              union all
+              select s.id from session_v2 s join mine m on s.parent_id = m.id
+            )
+            select s.id, s.parent_id, s.title, s.time_created,
+                   (select count(*) from session_message m
+                     where m.session_id = s.id) as messages,
+                   (select ifnull(sum(length(m.data)), 0) from session_message m
+                     where m.session_id = s.id) as bytes
+            from session_v2 s
+            where (s.directory = ? or instr(s.directory, ? || '/') = 1)
+              and s.id not in (select id from mine)
+            order by s.time_created
+            """,
+            (trigger, directory, directory),
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        con.close()
+
+
+def session_rows_fallback(directory: str) -> list[dict]:
+    """Best effort when the store cannot be read: top-level sessions only."""
+    proc = run(["opencode", "session", "list", "--format", "json", "-n", "1000"],
+               check=True)
+    try:
+        listed = json.loads(proc.stdout or "[]")
+    except json.JSONDecodeError:
+        return []
+    out = []
+    for item in listed:
+        where = item.get("directory") or ""
+        if where != directory and not where.startswith(directory + "/"):
+            continue
+        out.append({
+            "id": item.get("id", ""),
+            "parent_id": None,
+            "title": item.get("title", ""),
+            "time_created": item.get("created", 0),
+            "messages": 0,
+            "bytes": 0,
+        })
+    return out
+
+
+def newest_session(directory: str) -> str:
+    proc = run(["opencode", "session", "list", "--format", "json", "-n", "200"],
+               check=True)
+    try:
+        listed = json.loads(proc.stdout or "[]")
+    except json.JSONDecodeError:
+        listed = []
+    for item in listed:
+        where = item.get("directory") or ""
+        if where == directory or where.startswith(directory + "/"):
+            return item.get("id", "")
+    return ""
+
+
+# --- the trigger session's trace ----------------------------------------
+
+def export_session(session: str, target: Path) -> dict | None:
+    proc = run(["opencode", "session", "export", session], check=False,
+               timeout=300)
+    if proc.returncode != 0:
+        return None
+    try:
+        trace = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return None
+    target.write_text(proc.stdout)
+    return trace
+
+
+def person_words(trace: dict) -> str:
+    """Every message the person typed, in their words, cut but not paraphrased."""
+    chunks: list[str] = []
+    total = 0
+    for message in trace.get("messages", []):
+        if message.get("type") != "user":
+            continue
+        text = (message.get("text") or "").strip()
+        if not text:
+            continue
+        if len(text) > WORD_CAP:
+            text = text[: WORD_CAP - 1].rstrip() + "\u2026"
+        if total + len(text) > WORDS_TOTAL_CAP:
+            chunks.append("(\u2026 further messages are in the trace below)")
+            break
+        total += len(text)
+        chunks.append(text)
+    if not chunks:
+        return ""
+    body = "\n\n---\n\n".join(ch for ch in chunks if ch)
+    return (
+        "# The person's words\n\n"
+        "Every message the person typed in the trigger session, oldest first,\n"
+        "cut at %d characters each. Quotes, not a summary.\n\n"
+        "```text\n%s\n```\n" % (WORD_CAP, body)
+    )
+
+
+def produced(trace: dict, source: str, base: str, branch: str, repo: str) -> str:
+    """What the trigger session made, from its own tool calls and its links."""
+    files: list[str] = []
+    for message in trace.get("messages", []):
+        if message.get("type") != "assistant":
+            continue
+        for item in message.get("content", []) or []:
+            if item.get("type") != "tool" or item.get("name") not in ("write", "edit"):
+                continue
+            path = (item.get("state", {}).get("input") or {}).get("path")
+            if not path or path.startswith("/tmp/"):
+                continue
+            if path not in files:
+                files.append(path)
+
+    raw = json.dumps(trace)
+    links: list[str] = []
+    for url in re.findall(r"https://github\.com/[^\s\"'\\)]+/(?:pull|issues)/\d+",
+                          raw):
+        if url not in links:
+            links.append(url)
+
+    lines = ["# What the trigger session produced", ""]
+    if files:
+        lines.append("Files it wrote (scratch paths removed):")
+        lines += [f"- `{path}`" for path in files[:FILES_CAP]]
+        if len(files) > FILES_CAP:
+            lines.append(f"- (\u2026 {len(files) - FILES_CAP} more)")
+        lines.append("")
+    if links:
+        lines.append("Links it produced or used:")
+        lines += [f"- {url}" for url in links[:LINKS_CAP]]
+        if len(links) > LINKS_CAP:
+            lines.append(f"- (\u2026 {len(links) - LINKS_CAP} more)")
+        lines.append("")
+
+    log = run(["git", "-C", source, "log", "--no-decorate", "--oneline",
+               f"-{COMMITS_CAP}", f"{base}..{branch}"], check=False)
+    commits = [line for line in (log.stdout or "").splitlines() if line.strip()]
+    if commits:
+        lines.append(f"Commits on `{branch}` since `{base}`:")
+        lines += [f"- {one_line(line, 160)}" for line in commits]
+        lines.append("")
+
+    prs = run(["gh", "pr", "list", "--repo", repo, "--head", branch, "--state",
+               "all", "--limit", "10", "--json", "number,title,state,url"],
+              check=False)
+    if prs.returncode == 0:
+        try:
+            found = json.loads(prs.stdout or "[]")
+        except json.JSONDecodeError:
+            found = []
+        if found:
+            lines.append(f"Pull requests for `{branch}`:")
+            lines += [f"- #{pr['number']} {pr['title']} ({pr['state']}) {pr['url']}"
+                      for pr in found]
+            lines.append("")
+
+    if len(lines) == 2:
+        lines.append("Nothing captured from the trigger session; read its trace "
+                     "below to see what it did.")
+        lines.append("")
+    return "\n".join(lines)
+
+
+# --- rendering -----------------------------------------------------------
+
+def template_path() -> Path:
+    candidates = []
+    if os.environ.get("HWT_WRAPUP_TEMPLATE"):
+        candidates.append(Path(os.environ["HWT_WRAPUP_TEMPLATE"]))
+    here = Path(__file__).resolve()
+    candidates.append(here.parent.parent / "config/opencode/skills/hwt-wrapup/brief.md.tmpl")
+    candidates.append(Path.home() / ".config/opencode/skills/hwt-wrapup/brief.md.tmpl")
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    raise Refused("brief.md.tmpl not found; keep it beside the hwt-wrapup skill "
+                  "or name it with HWT_WRAPUP_TEMPLATE")
+
+
+def render(template: str, values: dict[str, str]) -> str:
+    for key, value in values.items():
+        template = template.replace("{{" + key + "}}", value)
+    leftovers = re.findall(r"\{\{[A-Z_]+\}\}", template)
+    if leftovers:
+        raise Refused(f"brief template has unfilled placeholders: {leftovers}")
+    return re.sub(r"\n{3,}", "\n\n", template).rstrip() + "\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="hwt-wrapup",
+        description="Wrap a finished worktree's sessions into repo-level skills "
+                    "in a pull request, then close the worktree.")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="write the brief and print the plan; spawn nothing")
+    parser.add_argument("--keep", action="store_true",
+                        help="wrap up without closing the source worktree")
+    parser.add_argument("--spawn", action="store_true",
+                        help="run hwt and start the reflection session")
+    parser.add_argument("--session", metavar="ID",
+                        help="the trigger session (default: this session)")
+    parser.add_argument("--notes", metavar="FILE",
+                        help="facts the detection cannot see, one short section")
+    parser.add_argument("--state", metavar="DIR",
+                        help="scratch directory (default: /tmp/opencode/"
+                             "hwt-wrapup-<branch slug>)")
+    args = parser.parse_args()
+
+    # 1. The worktree and the repository.
+    try:
+        source = run(["git", "rev-parse", "--show-toplevel"]).stdout.strip()
+    except Refused:
+        raise Refused("not in a git checkout")
+    porcelain = run(["git", "-C", source, "worktree", "list", "--porcelain"]).stdout
+    main_root = first_worktree(porcelain)
+    if not main_root:
+        raise Refused(f"{source} is not in a git repository")
+    if Path(source).resolve() == Path(main_root).resolve():
+        raise Refused("this is the main checkout; a wrapup closes a linked "
+                      "worktree, never the repository itself")
+    branch = run(["git", "-C", source, "rev-parse", "--abbrev-ref", "HEAD"]).stdout.strip()
+    if not branch or branch == "HEAD":
+        raise Refused("this worktree is on a detached HEAD; check out its branch")
+
+    # 2. What the wrapup needs on PATH and on the network.
+    for tool in ("hwt", "opencode", "gh", "jq", "herdr-app"):
+        if not shutil.which(tool):
+            raise Refused(f"{tool} is not on PATH")
+    if run(["gh", "auth", "status"], check=False).returncode != 0:
+        raise Refused("gh is not authenticated for this repository")
+    run(["git", "-C", main_root, "fetch", "origin", "--prune"], timeout=180)
+
+    meta = run(["gh", "repo", "view", "--json", "defaultBranchRef,nameWithOwner"],
+               cwd=main_root).stdout
+    try:
+        info = json.loads(meta)
+        repo = info["nameWithOwner"]
+        default_branch = info["defaultBranchRef"]["name"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        raise Refused(f"cannot read the repository's default branch from gh: {meta!r}")
+
+    base = f"origin/{default_branch}"
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "-", branch).strip("-")
+    if not slug:
+        raise Refused(f"branch {branch!r} has no characters usable in a folder name")
+    wrapup_branch = "wrapup/" + slug
+    wrapup_slug = wrapup_branch.replace("/", "-")
+    if run(["git", "-C", main_root, "check-ref-format", "--branch",
+            wrapup_branch], check=False).returncode != 0:
+        raise Refused(f"{wrapup_branch!r} is not a valid branch name")
+    if run(["git", "-C", main_root, "show-ref", "--verify", "--quiet",
+            f"refs/heads/{wrapup_branch}"], check=False).returncode == 0:
+        raise Refused(f"branch {wrapup_branch} already exists locally; it is "
+                      "someone's work - name it, remove nothing")
+    if run(["git", "ls-remote", "--heads", "origin", wrapup_branch],
+           check=False).stdout.strip():
+        raise Refused(f"branch {wrapup_branch} already exists on origin; it is "
+                      "someone's work - name it, remove nothing")
+
+    # 3. The sessions.
+    trigger = args.session or os.environ.get("OPENCODE_SESSION_ID") or ""
+    if not trigger:
+        trigger = newest_session(source)
+    if not trigger:
+        raise Refused("cannot tell which session is the trigger: set "
+                      "OPENCODE_SESSION_ID or pass --session")
+
+    fallback = False
+    try:
+        sessions = session_rows(DB, source, trigger)
+    except (sqlite3.Error, OSError):
+        sessions = session_rows_fallback(source)
+        fallback = True
+    if not sessions:
+        raise Refused("no session in this worktree is left to read: nothing is "
+                      "closed, so its work keeps its only copy")
+
+    state = Path(args.state) if args.state else STATE_ROOT / f"hwt-wrapup-{slug}"
+    state.mkdir(parents=True, exist_ok=True)
+
+    trace_path = state / "trace.json"
+    trace = export_session(trigger, trace_path)
+    if trace is None:
+        trace_path.unlink(missing_ok=True)
+        warn(f"could not export the trigger session {trigger}; the brief says so")
+
+    checks = run(["git", "-C", source, "status", "--porcelain"], check=False).stdout
+
+    # 4. The brief and the goal.
+    values = {
+        "CHECKOUT": str(Path.home() / ".herdr/worktrees" /
+                        Path(main_root).name / wrapup_slug),
+        "MAIN_ROOT": main_root,
+        "WRAPUP_BRANCH": wrapup_branch,
+        "BASE": base,
+        "SOURCE_WORKTREE": source,
+        "SOURCE_BRANCH": branch,
+        "SLUG": slug,
+        "REPO": repo,
+        "DEFAULT_BRANCH": default_branch,
+        "CLOSE": "no, because the person passed --keep" if args.keep else "yes",
+        "STATE": str(state),
+        "TRACE": str(trace_path) if trace else "(the export failed; see the report)",
+        "SESSIONS": "\n".join(
+            f"- `{row['id']}` \u2014 {one_line(row['title'] or '(untitled)', 90)} "
+            f"\u2014 {'subagent' if row['parent_id'] else 'top-level'} "
+            f"\u2014 {row['messages']} messages, {human(row['bytes'])}"
+            for row in sessions),
+        "PERSON_WORDS": person_words(trace) if trace else "",
+        "PRODUCED": produced(trace, source, base, branch, repo) if trace else "",
+        "NOTES": "",
+    }
+    if args.notes:
+        notes = Path(args.notes)
+        if not notes.is_file():
+            raise Refused(f"--notes {notes} is not a file")
+        text = notes.read_text().rstrip()
+        if not text.lstrip().startswith("#"):
+            text = "# Notes from the trigger\n\n" + text
+        values["NOTES"] = text + "\n"
+    if fallback:
+        values["NOTES"] += (
+            "\n# The session store could not be read\n\n"
+            "The list above came from `opencode session list`, so it holds "
+            "top-level sessions only: child sessions were skipped.\n")
+
+    brief = state / "brief.md"
+    brief.write_text(render(template_path().read_text(), values))
+
+    goal = (f"A pull request is open from branch {wrapup_branch} in {repo}: "
+            f"`gh pr list --repo {repo} --head {wrapup_branch} --state open "
+            "--json number --jq 'length'` prints 1.")
+    if len(goal) >= 4000:
+        raise Refused("the goal is 4000 characters or more, which hwt refuses")
+    (state / "goal.md").write_text(goal + "\n")
+
+    # 5. The plan, the spawn, the summary.
+    model = ""
+    if trace:
+        chosen = (trace.get("info") or {}).get("model") or {}
+        if chosen.get("providerID") and chosen.get("id"):
+            model = f"{chosen['providerID']}/{chosen['id']}"
+            if chosen.get("variant"):
+                model += f"#{chosen['variant']}"
+
+    checkout = values["CHECKOUT"]
+    hwt_args = ["hwt", "-r", source, "-b", base, "--agent", "opencode"]
+    if model:
+        hwt_args += ["--model", model]
+    hwt_args += ["--task-file", str(brief), "--goal-file", str(state / "goal.md"),
+                 wrapup_branch]
+
+    say("wrapup plan")
+    say(f"  source    {source}  (branch {branch}, "
+        f"{'clean' if not checks.strip() else 'DIRTY'})")
+    say(f"  wrapup    {wrapup_branch} at {checkout}")
+    say(f"  target    {repo} -> {default_branch}  (base {base})")
+    say(f"  sessions  {len(sessions)} to read; the trigger session's own tree is "
+        "excluded")
+    for row in sessions[:SESSIONS_SHOWN]:
+        kind = "subagent" if row["parent_id"] else "top-level"
+        say(f"            {row['id']}  {one_line(row['title'] or '(untitled)', 58)}"
+            f"  {kind}  {row['messages']} msgs  {human(row['bytes'])}")
+    if len(sessions) > SESSIONS_SHOWN:
+        say(f"            (\u2026 {len(sessions) - SESSIONS_SHOWN} more)")
+    if trace:
+        say(f"  trace     {trace_path}  ({len(trace.get('messages', []))} msgs, "
+            f"{human(trace_path.stat().st_size)})")
+    else:
+        say("  trace     unavailable")
+    say(f"  brief     {brief}")
+    say(f"  goal      {goal}")
+    say(f"  model     {model or 'the configured default (no model on the trace)'}")
+    if checks.strip():
+        say("  warning   the source worktree has uncommitted changes; the "
+            "reflection session will refuse to close it")
+
+    if args.dry_run:
+        preview = run(hwt_args[:1] + ["-n"] + hwt_args[1:], check=False)
+        for line in (preview.stdout or "").splitlines():
+            # hwt echoes the whole prompt in its herdr line; the brief is on
+            # disk, so keep it out of this session's context.
+            if line.startswith("hwt: herdr"):
+                continue
+            say(f"  hwt       {one_line(line, 160)}")
+        if preview.returncode != 0:
+            raise Refused("the hwt dry run failed; nothing was spawned")
+        say("  next      nothing: --dry-run")
+        return 0
+
+    if not args.spawn:
+        say("  next      run again with --spawn to start the reflection session")
+        return 0
+
+    preview = run(hwt_args[:1] + ["-n"] + hwt_args[1:], check=False)
+    if preview.returncode != 0:
+        lines = (preview.stderr or preview.stdout).strip().splitlines()
+        raise Refused(lines[-1] if lines else "the hwt dry run failed")
+
+    started = run(hwt_args, check=False, timeout=300)
+    if started.returncode != 0:
+        lines = (started.stderr or started.stdout).strip().splitlines()
+        print("\n".join(lines[-5:]), file=sys.stderr)
+        return EXIT_FAILED
+
+    space_id = ""
+    listing = run(["herdr-app", "ls"], check=False)
+    if listing.returncode == 0:
+        try:
+            for space in json.loads(listing.stdout or "{}").get("spaces", []):
+                if space.get("folder") == checkout:
+                    space_id = space.get("id", "")
+                    break
+        except json.JSONDecodeError:
+            pass
+
+    say(f"  space     {space_id or '(not found in herdr-app ls)'}")
+    say(f"  next      the reflection session reads the transcripts, opens the "
+        f"pull request, and {'keeps' if args.keep else 'closes'} {source}")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except Refused as refused:
+        print(f"wrapup: refused: {refused}", file=sys.stderr)
+        sys.exit(EXIT_REFUSED)

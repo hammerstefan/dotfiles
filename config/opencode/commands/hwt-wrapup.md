@@ -2,16 +2,25 @@
 description: Turn a finished worktree's sessions into repo-level skills in a pull request, then close the worktree
 ---
 
-Load the `hwt-wrapup` skill with the skill tool, id `hwt-wrapup`, and follow it.
+Run, from this worktree:
 
-Run it from the session that lives in the worktree to wrap up — the one whose
-work is finished. It reads that worktree's sessions.
+```sh
+hwt-wrapup --spawn $ARGUMENTS
+```
 
-Arguments:
+It does the whole deterministic chain in one call — the refusal checks, the
+session list, the brief and the goal, the dry run, and the spawn of the
+reflection session that reads the transcripts, opens the pull request and closes
+this worktree. Report what it printed, in a few lines, and stop.
 
-$ARGUMENTS
+`--dry-run` plans without spawning; `--keep` leaves this worktree open.
 
-`--dry-run` lists the sessions it would read and the plan, and spawns nothing.
-`--keep` wraps up without closing the worktree. No arguments means the whole
-chain. Anything else is not an argument: say what the two flags are, and do
-nothing.
+If it exits 3 it printed `wrapup: refused: <check>`. Repeat that reason and stop:
+never choose another branch, base or session set to get past it.
+
+If this worktree learned something the script cannot see — work that landed on
+another branch or repository, a decision taken verbally — write it to a short
+file, forty lines at most, and pass `--notes <file>`.
+
+The `hwt-wrapup` skill documents what the reflection session does with the brief;
+load it only when someone asks how a wrapup works.
