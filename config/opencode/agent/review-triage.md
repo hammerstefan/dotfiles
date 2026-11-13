@@ -1,7 +1,7 @@
 ---
 description: Quickly classifies a change and selects the smallest appropriate reviewer council
 mode: subagent
-model: github-copilot/gpt-5.6-luna
+model: github-copilot/gpt-6-luna
 request:
   body:
     temperature: 0

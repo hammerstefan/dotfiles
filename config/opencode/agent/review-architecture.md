@@ -1,7 +1,7 @@
 ---
 description: Reviews changed code for architectural fit, coupling, contracts, and maintainability risks
 mode: subagent
-model: github-copilot/claude-opus-5
+model: github-copilot/claude-opus-5.5
 temperature: 0.2
 permissions:
   - action: "*"

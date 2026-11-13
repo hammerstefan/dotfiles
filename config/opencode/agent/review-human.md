@@ -1,7 +1,7 @@
 ---
 description: Identifies concrete changed areas that deserve special human review because they depend on judgment, low-confidence risk assessment, consequential decisions, domain expertise, or product-environment experience
 mode: subagent
-model: github-copilot/claude-opus-5
+model: github-copilot/claude-opus-5.5
 request:
   body:
     temperature: 0.1

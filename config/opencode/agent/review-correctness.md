@@ -1,7 +1,7 @@
 ---
 description: Reviews changed code for concrete correctness, type, concurrency, and error-handling defects
 mode: subagent
-model: github-copilot/gpt-5.3-codex
+model: github-copilot/gpt-6.1-sol
 temperature: 0.1
 permissions:
   - action: "*"

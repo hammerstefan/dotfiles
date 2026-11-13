@@ -2,7 +2,7 @@
 description: Internal read-only coordinator for Jira ticket readability feedback and proposed text
 mode: subagent
 hidden: true
-model: github-copilot/gpt-5.6-terra
+model: github-copilot/gpt-6.1-terra
 permissions:
   - action: "*"
     resource: "*"

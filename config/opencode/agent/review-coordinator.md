@@ -2,7 +2,7 @@
 description: Internal coordinator for the review-human and review-council commands with deny-by-default tools and validated report persistence
 mode: subagent
 hidden: true
-model: github-copilot/gpt-5.6-terra
+model: github-copilot/gpt-6.1-terra
 request:
   body:
     temperature: 0

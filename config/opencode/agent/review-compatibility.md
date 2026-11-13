@@ -1,7 +1,7 @@
 ---
 description: Reviews changes for API, schema, migration, configuration, rollout, and deployment compatibility
 mode: subagent
-model: github-copilot/claude-sonnet-5
+model: github-copilot/claude-sonnet-5.5
 temperature: 0.1
 permissions:
   - action: "*"

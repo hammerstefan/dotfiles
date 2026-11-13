@@ -1,7 +1,7 @@
 ---
 description: Verifies substantive findings and separate readability suggestions, producing an evidence-based code-review verdict
 mode: subagent
-model: github-copilot/gpt-5.6-sol
+model: github-copilot/gpt-6.1-sol
 request:
   body:
     temperature: 0.1
