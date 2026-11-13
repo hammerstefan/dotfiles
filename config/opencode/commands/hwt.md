@@ -1,5 +1,5 @@
 ---
-description: Hand the ask to a fresh opencode session in its own worktree and Herdr space
+description: Hand the ask to a fresh opencode session in its own worktree and Herdr space, held to a goal
 ---
 
 Load the `hwt` skill with the skill tool, id `hwt`, and follow it.

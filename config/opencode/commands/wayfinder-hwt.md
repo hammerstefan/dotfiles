@@ -114,18 +114,24 @@ For each passable ticket, in order:
 
 1. Read the ticket body, the map's Notes and Decisions so far, and the repository's `AGENTS.md` and every file it points at.
 2. Write the brief to `/tmp/opencode/hwt-prompt-<slug>.md` with the write tool: the skeleton in step 8, every placeholder filled. Put `PENDING: from hwt -n` on its `Checkout:` line.
-3. Dry run from this session's shell:
+3. Write the goal to `/tmp/opencode/hwt-goal-<slug>.md` with the write tool, one line: the ticket's observable end state, naming the command that proves it and what that command prints. The `Done when` section of the brief is the same thing in prose; write the two together so they cannot drift.
+4. Dry run from this session's shell:
 
    ```sh
    hwt -n -r "$repo" --agent opencode ${model:+--model "$model"} \
-       --task-file "/tmp/opencode/hwt-prompt-<slug>.md" "<branch>"
+       --task-file "/tmp/opencode/hwt-prompt-<slug>.md" \
+       --goal-file "/tmp/opencode/hwt-goal-<slug>.md" "<branch>"
    ```
 
-4. Read the dry run. `hwt: repository` must be `$repo`, and `hwt: checkout` and `hwt: herdr space.new` must name this branch. Rewrite the `Checkout:` line with the printed path.
-5. Spawn, with the same command and no `-n`.
-6. A refusal — non-zero exit, or a printed refusal — is recorded in `hwt`'s own words, and the loop continues with the next ticket. Nothing is deleted, no space is closed, no second branch is tried, and `--no-space` is not a fallback.
+5. Read the dry run. `hwt: repository` must be `$repo`, `hwt: checkout` and `hwt: herdr space.new` must name this branch, and `hwt: goal` must read the objective you wrote. Rewrite the `Checkout:` line with the printed path.
+6. Spawn, with the same command and no `-n`.
+7. A refusal — non-zero exit, or a printed refusal — is recorded in `hwt`'s own words, and the loop continues with the next ticket. Nothing is deleted, no space is closed, no second branch is tried, and `--no-space` is not a fallback.
 
-The space is named after the branch, so the branch is the space name.
+The space is named after the branch, so the branch is the space name. The goal
+holds the session to the ticket's end state: a reviewer judges the transcript
+against the objective on every idle turn, and continues the work when it is not
+met yet. A ticket that needs a decision has the session ask for it with the
+`question` tool and wait for the answer.
 
 ## 8. The brief
 
@@ -173,6 +179,13 @@ Repository: <repo>  Branch: <branch>  Base: <base>
 Finish with: what you did, what you found, what you did not verify, and what you need from the person.
 ```
 
+The "Done when" section and the goal say the same thing from two sides: the
+section tells the session what to aim for, the goal tells the reviewer what to
+check. Write them together, in the same words, so they cannot drift. A
+`grilling` ticket has no checkable end state, because its work is a decision
+the person makes: give it the goal that the decision is recorded on the ticket,
+with the person's answer in it, and nothing more.
+
 Step 3 of the brief, by the ticket's `wayfinder:<type>` label:
 
 - `grilling` — work the decision with the person: load the `grilling` and `domain-modeling` skills, ask through the `question` tool, and never answer your own questions.
@@ -186,11 +199,17 @@ A `research` ticket's Rules line reads: "Push `<branch>` and open no pull reques
 
 Give, in a few lines:
 
-- one line per spawned session: `#20 Implement the proxy egress fence — wayfinder/proxy-egress-fence — <checkout> — space wayfinder/proxy-egress-fence — <model, or "configured default"> — <brief path>`
+- one line per spawned session: `#20 Implement the proxy egress fence — wayfinder/proxy-egress-fence — <checkout> — space wayfinder/proxy-egress-fence — <model, or "configured default"> — <brief path> — goal: <objective>`
 - one line per skipped ticket, with its reason
 - `hwt`'s refusal lines verbatim, and which tickets were not attempted
 - the `wayfinder/*` and `research/*` worktrees that were already running, by branch and path
 - the base: `HEAD` of the main checkout, or the `--base` that was passed
 - when anything failed, the exact `/wayfinder-hwt ...` line that retries the remaining tickets
+
+Say that each spawned session is held to its goal: it works until an
+independent reviewer says the objective is met. A ticket that needs a decision
+has the session ask for it in the Questions panel and wait. The person reads a
+session's goal state with `/goal` and resumes it with `/goal resume`, in that
+session's tab.
 
 Then stop. The new sessions own the work: do not start it here, do not write into a new checkout, and do not wait for it.

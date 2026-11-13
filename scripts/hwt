@@ -37,6 +37,9 @@ Options:
                         model, as provider/model or provider/model#variant
   -t, --task <text>     its first message (with --agent; see below)
       --task-file <path> read that message from a file, for a long one
+      --goal <text>     hold the session to an objective, and keep it working
+                        until an independent reviewer says the objective is met
+      --goal-file <path> read that objective from a file
       --argv <json>     start this argv instead, e.g. '["codex","--no-daemon"]'
                         Herdr's own agent arguments; not combined with --task
       --no-space        only create the checkout; leave the window alone
@@ -70,6 +73,15 @@ no --model, so hwt creates the session on opencode's background server with
 that model, and the tab opens it with --session. Without --model opencode
 creates a session on its configured default.
 
+--goal gives the opencode session an objective and keeps it working until that
+objective is met. OpenCode's own /goal command holds the session to it: a
+reviewer judges the transcript against the objective on every idle turn, and
+continues the work when the objective is not met yet. The reviewer trusts only
+evidence it can see, so the objective must name the command to run and what it
+prints, not the end state in your own words. A goal that cannot be met because
+it needs a decision or a credential pauses; the person resumes it in that tab
+with /goal resume. A goal is not durable across an opencode server restart.
+
 Exit status is non-zero if the branch name is invalid, the checkout cannot be
 made, or Herdr rejects the space. An existing checkout is left alone.
 EOF
@@ -91,6 +103,8 @@ argv_json=""
 argv_given=0
 task=""
 task_file=""
+goal=""
+goal_file=""
 open_space=1
 dry_run=0
 
@@ -139,6 +153,16 @@ while [[ $# -gt 0 ]]; do
 	--task-file)
 		[[ $# -ge 2 ]] || die "--task-file needs a path"
 		task_file="$2"
+		shift 2
+		;;
+	--goal)
+		[[ $# -ge 2 ]] || die "--goal needs text"
+		goal="$2"
+		shift 2
+		;;
+	--goal-file)
+		[[ $# -ge 2 ]] || die "--goal-file needs a path"
+		goal_file="$2"
 		shift 2
 		;;
 	--no-space)
@@ -195,6 +219,33 @@ git check-ref-format --branch "$branch" >/dev/null 2>&1 ||
 [[ -z "$task_file" || -n "$agent" ]] ||
 	die "--task-file needs --agent (or write the arguments you want into --argv)"
 
+# A goal is set on an opencode session through opencode's own /goal command, so
+# it needs that agent and nothing else.
+[[ -z "$goal" || -z "$goal_file" ]] || die "--goal and --goal-file cannot be combined"
+[[ -z "$goal" || "$agent" == opencode ]] ||
+	die "--goal applies to --agent opencode only; another agent has no /goal"
+[[ -z "$goal_file" || "$agent" == opencode ]] ||
+	die "--goal-file applies to --agent opencode only; another agent has no /goal"
+[[ -z "$goal" || -z "$argv_json" ]] ||
+	die "--goal and --argv cannot be combined; the goal needs an opencode session"
+[[ -z "$goal_file" || -z "$argv_json" ]] ||
+	die "--goal-file and --argv cannot be combined; the goal needs an opencode session"
+[[ -z "$goal" || $open_space -eq 1 ]] ||
+	die "--goal is set on the session the new space opens; drop --no-space"
+[[ -z "$goal_file" || $open_space -eq 1 ]] ||
+	die "--goal-file is set on the session the new space opens; drop --no-space"
+
+# opencode's goal command caps the objective at 4000 characters and refuses an
+# empty one. Check it here, before a checkout is made.
+if [[ -n "$goal_file" ]]; then
+	[[ -r "$goal_file" ]] || die "cannot read '$goal_file'"
+	goal="$(<"$goal_file")"
+	[[ -n "${goal//[[:space:]]/}" ]] ||
+		die "'$goal_file' is empty; there would be no objective to work toward"
+fi
+[[ ${#goal} -le 4000 ]] ||
+	die "the goal objective is limited to 4000 characters (got ${#goal})"
+
 # A file keeps a multi-paragraph prompt out of the shell's quoting.
 if [[ -n "$task_file" ]]; then
 	[[ -r "$task_file" ]] || die "cannot read '$task_file'"
@@ -239,9 +290,10 @@ if [[ -n "$agent" ]]; then
 	# the checkout exists, and folds its id into the argv as --session. A
 	# private (`--standalone`) server keeps its pending question forms in its
 	# own memory, out of the shared server — and out of the questions panel.
-	if [[ -n "$model" ]]; then
+	# The same session.create gives hwt the id it needs to set a goal on it.
+	if [[ -n "$model" || -n "$goal" ]]; then
 		command -v opencode >/dev/null 2>&1 ||
-			die "--model needs 'opencode' on PATH to create the session"
+			die "--model and --goal need 'opencode' on PATH to create the session"
 	fi
 fi
 
@@ -361,9 +413,16 @@ if [[ $dry_run -eq 1 ]]; then
 		"$([[ $new_branch -eq 1 ]] && printf 'new branch %s from %s' "$branch" "$base" ||
 			printf 'existing branch %s' "$branch")"
 	preview_json="$argv_json"
-	if [[ -n "$model" ]]; then
-		printf 'hwt: session    session.create at %s with %s\n' "$path" "$model"
+	if [[ -n "$model" || -n "$goal" ]]; then
+		if [[ -n "$model" ]]; then
+			printf 'hwt: session    session.create at %s with %s\n' "$path" "$model"
+		else
+			printf 'hwt: session    session.create at %s with the configured default\n' "$path"
+		fi
 		preview_json="$(jq -cn --argjson a "$argv_json" '[$a[0], "--session", "<new>"] + $a[1:]')"
+	fi
+	if [[ -n "$goal" ]]; then
+		printf 'hwt: goal       %s\n' "$goal"
 	fi
 	printf 'hwt: herdr      %s\n' "$([[ -n "$preview_json" ]] &&
 		printf 'space.new --folder %s --argv %s' "$path" "$preview_json" ||
@@ -391,22 +450,30 @@ if ! command -v herdr-app >/dev/null 2>&1 || ! herdr-app status >/dev/null 2>&1;
 	exit 0
 fi
 
-# The model is a session property. Create the session on opencode's background
-# server — never a private one — so every surface sees the same session: the
-# tab opens it with --session, and its first prompt lands on it.
-if [[ -n "$model" ]]; then
-	provider="${model%%/*}"
-	rest="${model#*/}"
-	if [[ "$rest" == *"#"* ]]; then
-		model_id="${rest%%#*}"
-		variant="${rest#*#}"
+# The model and the goal are both session properties. Create the session on
+# opencode's background server — never a private one — so every surface sees the
+# same session: the tab opens it with --session, and its first prompt lands on
+# it. A goal needs that id too, because it is set on the session through
+# opencode's own /goal command, which is not something a prompt can do.
+if [[ -n "$model" || -n "$goal" ]]; then
+	if [[ -n "$model" ]]; then
+		provider="${model%%/*}"
+		rest="${model#*/}"
+		if [[ "$rest" == *"#"* ]]; then
+			model_id="${rest%%#*}"
+			variant="${rest#*#}"
+		else
+			model_id="$rest"
+			variant=""
+		fi
+		session_payload="$(jq -cn --arg p "$provider" --arg i "$model_id" --arg v "$variant" --arg d "$path" '
+			{ model: ({providerID: $p, id: $i} + (if $v == "" then {} else {variant: $v} end)),
+			  location: {directory: $d} }')"
 	else
-		model_id="$rest"
-		variant=""
+		# No model given: let the server apply its configured default, and
+		# keep only what the goal needs, the session and its directory.
+		session_payload="$(jq -cn --arg d "$path" '{ location: {directory: $d} }')"
 	fi
-	session_payload="$(jq -cn --arg p "$provider" --arg i "$model_id" --arg v "$variant" --arg d "$path" '
-		{ model: ({providerID: $p, id: $i} + (if $v == "" then {} else {variant: $v} end)),
-		  location: {directory: $d} }')"
 	if ! session_json="$(opencode api session.create --data "$session_payload" 2>&1)"; then
 		die "worktree created at $path, but the OpenCode session could not be created: $session_json"
 	fi
@@ -414,6 +481,19 @@ if [[ -n "$model" ]]; then
 	[[ -n "$session_id" ]] ||
 		die "worktree created at $path, but the OpenCode session could not be read: $session_json"
 	argv_json="$(jq -c --arg s "$session_id" '[.[0], "--session", $s] + .[1:]' <<<"$argv_json")"
+fi
+
+# Set the goal on the session. This is opencode's own /goal command, reached
+# through the session command API: a prompt that merely starts with "/goal" is
+# read as prose, so the command has to be invoked as one. The reviewer it runs
+# on every idle turn judges the transcript against the objective and continues
+# the work when the objective is not met yet.
+if [[ -n "$goal" ]]; then
+	goal_payload="$(jq -cn --arg t "$goal" '{ name: "goal", text: $t }')"
+	if ! goal_json="$(opencode api session.command --param sessionID="$session_id" \
+		--data "$goal_payload" 2>&1)"; then
+		die "worktree created at $path, but the goal could not be set on session $session_id: $goal_json"
+	fi
 fi
 
 space_args=(do space.new --folder "$path")
