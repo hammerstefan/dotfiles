@@ -8,6 +8,27 @@ Tickets:
 
 $ARGUMENTS
 
+## The wayfinder skill
+
+Load it at the start with the skill tool, id `wayfinder`. It lives at
+`~/.agents/skills/wayfinder/SKILL.md`, and its frontmatter sets
+`disable-model-invocation: true`.
+
+That flag keeps the skill out of the model's skill catalog. It does not appear
+in `<available_skills>`, so a model that checks only its catalog, or only
+`~/.config/opencode/skills`, or only `~/.config/opencode/skill`, or only the
+command directories, will report it missing. Never conclude it is absent from
+those places, and never write into a brief that it is not installed. Check it
+on disk instead:
+
+```sh
+sed -n '1,5p' ~/.agents/skills/wayfinder/SKILL.md
+```
+
+The skill owns the claim, resolve, close, and Decisions-so-far conventions for
+every session this command spawns. Each brief names its path and that flag, so
+the spawned session does not repeat the search.
+
 ## 1. Read the arguments
 
 - Numbers, with or without `#` (`20 21 24`) — those tickets, in that order.
@@ -112,7 +133,7 @@ Empty `$OPENCODE_SESSION_ID`, or an export that fails: run without `--model` and
 
 For each passable ticket, in order:
 
-1. Read the ticket body, the map's Notes and Decisions so far, and the repository's `AGENTS.md` and every file it points at.
+1. Read the ticket body, the map's Notes and Decisions so far, and the repository's `AGENTS.md` and every file it points at. Take the wayfinder skill from the section above, and never write that it is not installed.
 2. Write the brief to `/tmp/opencode/hwt-prompt-<slug>.md` with the write tool: the skeleton in step 8, every placeholder filled. Put `PENDING: from hwt -n` on its `Checkout:` line.
 3. Write the goal to `/tmp/opencode/hwt-goal-<slug>.md` with the write tool, one line: the ticket's observable end state, naming the command that proves it and what that command prints. The `Done when` section of the brief is the same thing in prose; write the two together so they cannot drift.
 4. Dry run from this session's shell:
@@ -155,6 +176,9 @@ Repository: <repo>  Branch: <branch>  Base: <base>
 - <the files that hold the decisions this ticket depends on, by name>
 - The map is <map title> (`#<map>`, <url>); the ticket is <ticket title> (`#<n>`, <url>). Read both with `gh issue view`.
 - <host tooling the ticket needs>
+- The `wayfinder` skill is installed at `~/.agents/skills/wayfinder` with
+  `disable-model-invocation: true`, so it is absent from the skill catalog.
+  Load it with the skill tool, id `wayfinder`.
 
 # What to do
 
