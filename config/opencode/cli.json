@@ -13,9 +13,19 @@
     "view": "unified"
   },
   "session": {
-    "sidebar": "hide",
+    "sidebar": "auto",
     "scrollbar": false,
-    "thinking": "show"
+    "thinking": "show",
+    "verbosity": "low",
+    "grouping": "auto",
+    "image_preview": true,
+    "permissions": "prompt"
   },
-  "animations": true
+  "animations": true,
+  "tabs": {
+    "layout": "horizontal"
+  },
+  "prompt": {
+    "image_preview": true
+  }
 }
