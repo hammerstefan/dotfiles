@@ -52,6 +52,12 @@ permissions:
     resource: "*"
     effect: deny
   - action: external_directory
+    resource: "~/.config/opencode/command/*"
+    effect: allow
+  - action: external_directory
+    resource: "*/config/opencode/command/*"
+    effect: allow
+  - action: external_directory
     resource: "~/.config/opencode/prompt/*"
     effect: allow
   - action: external_directory

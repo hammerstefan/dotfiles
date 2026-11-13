@@ -54,6 +54,12 @@ permissions:
   - action: external_directory
     resource: "*"
     effect: deny
+  - action: external_directory
+    resource: "~/.config/opencode/command/*"
+    effect: allow
+  - action: external_directory
+    resource: "*/config/opencode/command/*"
+    effect: allow
 ---
 
 # Human Review Attention

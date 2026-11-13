@@ -125,6 +125,68 @@ class FeedbackPolicyContracts(unittest.TestCase):
                 self.assertIn(value, criteria)
 
 
+class FeedbackPolicyAccessContracts(unittest.TestCase):
+    """The installed policy sits outside the project, so each role needs an allow."""
+
+    HOME = "/home/example"
+
+    def permissions(self, name):
+        front = yaml.safe_load(
+            (ROOT / f"agent/{name}.md").read_text().split("---", 2)[1]
+        )
+        return front["permissions"]
+
+    def effect(self, rules, action, resource):
+        """Resolve a rule list the way OpenCode does, with the last match winning."""
+        matches = []
+        for rule in rules:
+            pattern = rule["resource"]
+            if pattern == "~" or pattern.startswith("~/"):
+                pattern = self.HOME + pattern[1:]
+            if fnmatch.fnmatchcase(action, rule["action"]) and fnmatch.fnmatchcase(
+                resource, pattern
+            ):
+                matches.append(rule["effect"])
+        return matches[-1] if matches else "ask"
+
+    @unittest.skipIf(yaml is None, "PyYAML validation package unavailable")
+    def test_each_role_may_read_the_installed_feedback_policy(self):
+        for name in ROSTER:
+            with self.subTest(name=name):
+                rules = self.permissions(name)
+                self.assertEqual(
+                    self.effect(
+                        rules,
+                        "external_directory",
+                        f"{self.HOME}/.config/opencode/command/*",
+                    ),
+                    "allow",
+                )
+                self.assertEqual(
+                    self.effect(
+                        rules,
+                        "read",
+                        f"{self.HOME}/.config/opencode/command/review-council.md",
+                    ),
+                    "allow",
+                )
+
+    @unittest.skipIf(yaml is None, "PyYAML validation package unavailable")
+    def test_other_external_paths_stay_denied(self):
+        for name in ROSTER:
+            with self.subTest(name=name):
+                rules = self.permissions(name)
+                for resource in (
+                    f"{self.HOME}/.ssh/*",
+                    f"{self.HOME}/*",
+                    "/tmp/*",
+                ):
+                    self.assertEqual(
+                        self.effect(rules, "external_directory", resource),
+                        "deny",
+                    )
+
+
 class HumanAttentionPersistenceContracts(unittest.TestCase):
     def test_persistence_is_opt_in(self):
         compact = " ".join(COMMAND.read_text().split())
