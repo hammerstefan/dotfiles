@@ -6,7 +6,10 @@
       "models": {
         "~deepseek/deepseek-flash-latest": {
           "variants": [
-            { "id": "fast", "body": { "provider": { "order": ["baseten/fast"] } } }
+            {
+              "id": "fast",
+              "body": { "provider": { "order": ["baseten/fast"] } }
+            }
           ]
         },
         "deepseek-flash-fast": {
@@ -59,26 +62,50 @@
     }
   },
   "lsp": true,
+  "experimental": {
+    "todo": true,
+    "schedules": true,
+    "console_watches": true
+  },
   "permissions": [
     { "action": "codesearch", "resource": "*", "effect": "allow" },
     { "action": "websearch", "resource": "*", "effect": "allow" },
     { "action": "review_inspect", "resource": "*", "effect": "deny" },
-    { "action": "write_review_human_report", "resource": "*", "effect": "deny" },
+    {
+      "action": "write_review_human_report",
+      "resource": "*",
+      "effect": "deny"
+    },
     { "action": "question", "resource": "*", "effect": "allow" },
     { "action": "doom_loop", "resource": "*", "effect": "ask" },
-    { "action": "*", "resource": "~/.config/opencode/command/*", "effect": "ask" },
-    { "action": "read", "resource": "~/.config/opencode/command/*", "effect": "allow" },
-    { "action": "read", "resource": "~/.cache/opencode/packages/*", "effect": "allow" },
-    { "action": "external_directory", "resource": "/tmp/**", "effect": "allow" },
-    { "action": "external_directory", "resource": "~/.config/opencode/command/*", "effect": "allow" }
+    {
+      "action": "*",
+      "resource": "~/.config/opencode/command/*",
+      "effect": "ask"
+    },
+    {
+      "action": "read",
+      "resource": "~/.config/opencode/command/*",
+      "effect": "allow"
+    },
+    {
+      "action": "read",
+      "resource": "~/.cache/opencode/packages/*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/tmp/**",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "~/.config/opencode/command/*",
+      "effect": "allow"
+    }
   ],
-  "plugins": [
-    "./plugins/openspec",
-    "opencode-cockpit@0.11.2"
-  ],
-  "plugin": [
-    "/home/stefan.hammer@canonical.com/.hindsight/coding-agents"
-  ],
+  "plugins": ["./plugins/openspec", "opencode-cockpit@0.11.2"],
+  "plugin": ["/home/stefan.hammer@canonical.com/.hindsight/coding-agents"],
   "formatter": true,
   "mcp": {
     "servers": {

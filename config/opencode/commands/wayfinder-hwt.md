@@ -176,6 +176,8 @@ Repository: <repo>  Branch: <branch>  Base: <base>
 
 # Report
 
+Before the report, call `todowrite` once with every item still remaining — work only the person can finish, a step you could not run, a check you did not verify, a decision still open — one todo each, each one `pending`, and nothing that is already done. That list is how the person sees what is left after this session stops; it replaces any earlier list, so write all of it, and write an empty list when nothing remains rather than an invented todo.
+
 Finish with: what you did, what you found, what you did not verify, and what you need from the person.
 ```
 

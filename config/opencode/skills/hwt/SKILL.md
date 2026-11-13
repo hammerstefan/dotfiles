@@ -113,6 +113,13 @@ test passes, the command prints X>
 
 # Report
 
+Before the report, call `todowrite` once with every item still remaining — work
+only the person can finish, a step you could not run, a check you did not
+verify, a decision still open — one todo each, each one `pending`, and nothing
+that is already done. That list is how the person sees what is left after this
+session stops; it replaces any earlier list, so write all of it, and write an
+empty list when nothing remains rather than an invented todo.
+
 Finish with: what you did, what you found, what you did not verify, and what
 you need from the person.
 ```
@@ -120,6 +127,10 @@ you need from the person.
 The prompt must stand alone: no "as discussed", no "the plan above", no
 reference to a transcript, no secrets or tokens. Name the branch and the
 checkout path, because that is where the session starts.
+
+The todo list is the one part of the report that outlives the message: the
+person finds it in that session's sidebar after the transcript has moved on.
+So the brief asks for it explicitly, and asks for all of it, every time.
 
 ## 3a. Write the goal
 
