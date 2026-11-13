@@ -203,6 +203,49 @@ def check_commit_messages(b: str, s: str):
     return bool(find(b, r"commit message")), evidence(b, r"commit message")
 
 
+def check_conventions_first(b: str, s: str):
+    pattern = r"read the repository's[^.]{0,80}(agents\.md|existing skills)"
+    return bool(find(b, pattern)), evidence(b, pattern)
+
+
+def check_correct_existing(b: str, s: str):
+    pattern = r"instead of repeating"
+    return bool(find(b, pattern)), evidence(b, pattern)
+
+
+def check_check_can_fail(b: str, s: str):
+    return bool(find(b, r"planted defect")), evidence(b, r"planted defect")
+
+
+def check_test_command(b: str, s: str):
+    return bool(find(b, r"test command")), evidence(b, r"test command")
+
+
+def check_counts_before_after(b: str, s: str):
+    pattern = r"before and after"
+    return bool(find(b, pattern) and find(b, r"count")), evidence(b, pattern)
+
+
+def check_no_new_finding(b: str, s: str):
+    pattern = r"add no new finding"
+    return bool(find(b, pattern)), evidence(b, pattern)
+
+
+def check_generic_word(b: str, s: str):
+    pattern = r"generic word"
+    return bool(find(b, pattern) and find(b, r"trigger")), evidence(b, pattern)
+
+
+def check_rename_references(b: str, s: str):
+    ok = find(b, r"rename") and find(b, r"every one")
+    return bool(ok), evidence(b, r"rename")
+
+
+def check_digest_page(b: str, s: str):
+    pattern = r"one page at most"
+    return bool(find(b, pattern)), evidence(b, pattern)
+
+
 CHECKS = {
     (1, 0): (
         "the brief requires the example to be run before it is written",
@@ -248,6 +291,21 @@ CHECKS = {
         "the whole description is capped, not only each sentence",
         check_description_budget,
     ),
+    (10, 0): (
+        "the conventions are read before a rule is written",
+        check_conventions_first,
+    ),
+    (10, 1): ("an existing rule is corrected, not repeated", check_correct_existing),
+    (11, 0): ("a check must fail on a planted defect", check_check_can_fail),
+    (12, 0): ("the repository's test command runs", check_test_command),
+    (13, 0): (
+        "the linter counts are compared before and after",
+        check_counts_before_after,
+    ),
+    (13, 1): ("the change adds no new linter finding", check_no_new_finding),
+    (14, 0): ("a generic description word is not a trigger", check_generic_word),
+    (15, 0): ("a rename updates every reference", check_rename_references),
+    (16, 0): ("a digest is capped at one page", check_digest_page),
 }
 
 

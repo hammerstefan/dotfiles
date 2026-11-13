@@ -54,8 +54,10 @@ The fail-safe reading, in order:
 - Never merge the pull request, and never force-push.
 - A lesson sometimes needs judgement. Two skills may need to become one. A name
   may collide with an existing skill. You may need to remove or rename a skill.
-  Ask with the `question` tool and wait. When the choice is trivial and
-  additive, decide, and record the alternative in the pull request body.
+  A rename touches the skill ID, the frontmatter name, the heading, `AGENTS.md`
+  and the trigger phrases. Update every one. Ask with the `question` tool and
+  wait. When the choice is trivial and additive, decide, and record the
+  alternative in the pull request body.
 - Put no credentials, tokens or private paths in anything you commit.
 - A quote from a session is evidence, not a fact. Check it before you write it.
 
@@ -76,15 +78,18 @@ The fail-safe reading, in order:
    - candidate lessons, each with the message it came from.
    - what here should *not* become a skill, and why.
 
-   A digest is a claim about a transcript. Quote it. Never paraphrase it into a
-   fact. When the list above is empty, the trigger session's trace is that one
-   input. Read it the same way, and write the same digest shape from it.
+   A digest is one page at most. It is a claim about a transcript. Quote it.
+   Never paraphrase it into a fact. When the list above is empty, the trigger
+   session's trace is that one input. Read it the same way, and write the same
+   digest shape from it.
 
-3. **Synthesise.** Cluster the digests into lessons. When a digest is ambiguous,
-   read that part of its transcript yourself. The export is right there. For
-   each lesson, decide: a new skill, an update to an existing skill, an
-   AGENTS.md or GLOSSARY.md line, or nothing. A lesson that only restates what
-   the repository already says is nothing.
+3. **Synthesise.** Read the repository's `AGENTS.md`, `GLOSSARY.md` and
+   existing skills first. Correct a rule there instead of repeating it. Cluster
+   the digests into lessons. When a digest is ambiguous, read that part of its
+   transcript yourself. The export is right there. For each lesson, decide: a
+   new skill, an update to an existing skill, an AGENTS.md or GLOSSARY.md line,
+   or nothing. A lesson that only restates what the repository already says is
+   nothing.
 
    Use the `skill-creator` skill for every skill you write or revise. Take it as
    far as you can without a person: its anatomy, its frontmatter, and its
@@ -124,21 +129,28 @@ The fail-safe reading, in order:
    - **Context efficiency**: OpenCode injects the description into every
      session, before the skill loads. Keep it short. Put detail in the body,
      which loads only on trigger.
-   - **Reliability**: check every claim (step 4), and write every mechanical
-     check as a script, not as a rule the reader must remember.
+   - **Reliability**: check every claim (step 4). Run the repository's test
+     command when it has one. Prove each check fails on a planted defect before
+     you trust its pass. A check that cannot fail proves nothing.
    - **Description and trigger**: the description is the only text OpenCode
      shows before it loads the skill. Say what the skill does. Name the phrases
-     and situations that should reach for it. Keep each description sentence
-     under 25 words, one fact per sentence. Keep the whole description under 60
-     words. Keep the trigger phrases the person uses, verbatim.
-   - **Script**: a banned-word grep, a header-spacing check, a branch-name
-     collision test, a file-list check. Write it as a script under `scripts/`
-     with an exit code. Run it with the other checks in step 7. A rule that
-     says "grep before you commit" is a script that was never written.
+     and situations that should reach for it. Name situations that only this
+     skill covers. A generic word alone, such as "review", will trigger it
+     everywhere. Keep each description sentence under 25 words, one fact per
+     sentence. Keep the whole description under 60 words. Keep the trigger
+     phrases the person uses, verbatim.
+   - **Script**: a step with one right answer and no judgement belongs in a
+     script. Examples are a banned-word grep, a header-spacing check, a
+     branch-name collision test, and a file-list check. Write it under
+     `scripts/` with an exit code and a line that names what failed. When the
+     repository has a test runner, add the check to it. Run it with the other
+     checks in step 7. A rule that says "grep before you commit" is a script
+     that was never written.
    - **Style**: follow the repository's own writing rules and linter when it has
      them. Otherwise apply the `asd-ste100` skill. Run the linter on every
-     changed file. Put the counts in the pull request body. Name each remaining
-     hard finding and justify it. "The linter is noisy" is not a justification.
+     changed file, before and after your change. Add no new finding. Put both
+     counts in the pull request body. Name each remaining hard finding and
+     justify it. "The linter is noisy" is not a justification.
 
    These are the criteria a reviewer applies to a skill or a rule. Treat them as
    the gate, not as advice.
@@ -152,8 +164,9 @@ The fail-safe reading, in order:
 
 7. **Run the checks, then commit one concern per commit** — skills, then
    guidance, then glossary — with conventional messages (`feat(skill): …`,
-   `docs(agents): …`). Run every script you wrote. Run the repository's linter
-   on every changed file, and the banned-word grep over every changed file.
+   `docs(agents): …`). Run every script you wrote, and the repository's test
+   command. Run the linter on every changed file, and the banned-word grep over
+   every changed file.
    Before staging, run `git check-ignore -q .opencode/skills/<id>/SKILL.md`. It
    must exit 1. Then run `git check-ignore -q scripts/<name>` for each new
    script, which must also exit 1. When the repository ignores `.opencode/`, do

@@ -106,6 +106,78 @@
       "expectations": [
         "The brief caps the whole description, not only each sentence."
       ]
+    },
+    {
+      "id": 10,
+      "name": "existing-conventions-come-first",
+      "prompt": "A lesson looks like a new rule, and the repository already has a rule that covers it.",
+      "expected_output": "The brief requires the reflection session to read AGENTS.md, GLOSSARY.md and the existing skills first, and to correct the existing rule instead of repeating it.",
+      "files": [],
+      "expectations": [
+        "The brief requires the repository's conventions and existing skills to be read before a rule is written.",
+        "The brief prefers correcting an existing rule over repeating it in a new place."
+      ]
+    },
+    {
+      "id": 11,
+      "name": "a-check-must-be-able-to-fail",
+      "prompt": "The lesson becomes a check script, and its first run passes.",
+      "expected_output": "The brief requires the script to fail on a planted defect before its pass is trusted.",
+      "files": [],
+      "expectations": [
+        "The brief requires a check to fail on a planted defect before its pass is trusted."
+      ]
+    },
+    {
+      "id": 12,
+      "name": "the-repository-tests-run",
+      "prompt": "The source repository has a test command.",
+      "expected_output": "The brief requires the repository's test command to run with the other checks.",
+      "files": [],
+      "expectations": [
+        "The brief requires the repository's test command to run."
+      ]
+    },
+    {
+      "id": 13,
+      "name": "linter-counts-are-before-and-after",
+      "prompt": "The change touches files that already carry linter findings.",
+      "expected_output": "The brief requires the linter counts before and after the change, no new finding, and the two counts in the pull request body.",
+      "files": [],
+      "expectations": [
+        "The brief compares the linter counts before and after the change.",
+        "The brief forbids adding a new finding."
+      ]
+    },
+    {
+      "id": 14,
+      "name": "the-description-names-specific-situations",
+      "prompt": "The skill is described with a word that many requests contain.",
+      "expected_output": "The brief requires situations that only that skill covers, and warns that a generic word alone triggers it everywhere.",
+      "files": [],
+      "expectations": [
+        "The brief warns that a generic word alone triggers the skill everywhere."
+      ]
+    },
+    {
+      "id": 15,
+      "name": "a-rename-updates-every-reference",
+      "prompt": "A skill is renamed.",
+      "expected_output": "The brief lists every place a rename touches and requires each one to be updated.",
+      "files": [],
+      "expectations": [
+        "The brief requires the skill ID, frontmatter name, heading, AGENTS.md and trigger phrases to be updated after a rename."
+      ]
+    },
+    {
+      "id": 16,
+      "name": "a-digest-stays-one-page",
+      "prompt": "A session is long, and its digest is passed to the synthesis step.",
+      "expected_output": "The brief caps a digest at one page, because every digest is read beside the others.",
+      "files": [],
+      "expectations": [
+        "The brief caps a digest at one page."
+      ]
     }
   ]
 }

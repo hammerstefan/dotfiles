@@ -90,9 +90,11 @@ The brief is a gate, not a wish list. Before the reflection session opens the
 pull request, it must:
 
 - run every example, and name the version and the subcommand behind every claim.
-- write a script for every mechanical check, with an exit code.
-- run the repository's linter on every changed file, and justify each hard
-  finding that remains.
+- read the existing conventions, and correct one there rather than repeating it.
+- write a script for every mechanical check, and prove it fails on a planted
+  defect.
+- run the repository's test command and its linter, before and after the change,
+  and justify each hard finding that remains.
 - review its own change against five criteria: context efficiency, reliability,
   description and trigger, script, style.
 - make the verdict agree with its findings.
