@@ -149,7 +149,36 @@ def session_rows_fallback(directory: str) -> list[dict]:
 
 
 def newest_session(directory: str) -> str:
-    proc = run(["opencode", "session", "list", "--format", "json", "-n", "200"],
+    """The newest session in `directory`.
+
+    Prefer the store: `opencode session list` stops at a page size, so an
+    older worktree can fall off the list while its session is still the one
+    the person wants. The CLI is the fallback when the store cannot be read.
+    """
+    try:
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True, timeout=10)
+    except sqlite3.Error:
+        con = None
+    if con is not None:
+        try:
+            row = con.execute(
+                """
+                select id from session_v2
+                where (directory = ? or instr(directory, ? || '/') = 1)
+                  and parent_id is null
+                order by time_created desc
+                limit 1
+                """,
+                (directory, directory),
+            ).fetchone()
+            if row:
+                return row[0]
+        except sqlite3.Error:
+            pass
+        finally:
+            con.close()
+
+    proc = run(["opencode", "session", "list", "--format", "json", "-n", "1000"],
                check=True)
     try:
         listed = json.loads(proc.stdout or "[]")
