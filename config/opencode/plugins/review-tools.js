@@ -183,7 +183,12 @@ const requestSchema = {
       ["base", "reviewed", "path"],
     ),
     operationBranch("pr_metadata", { number: prNumberSchema }, ["number"]),
-    operationBranch("pr_diff", { number: prNumberSchema }, ["number"]),
+    operationBranch(
+      "pr_diff",
+      { number: prNumberSchema, path: optionalPathSchema },
+      ["number"],
+    ),
+    operationBranch("pr_files", { number: prNumberSchema }, ["number"]),
     operationBranch("pr_discussion", { number: prNumberSchema }, ["number"]),
   ],
 }
@@ -424,7 +429,42 @@ const buildInspectCommand = (value) => {
       ]
       break
     case "pr_diff":
-      command = ["gh", "pr", "diff", String(value.number), "--color=never"]
+      if (value.path) {
+        // The whole-diff output can exceed what a consuming agent sees after
+        // display truncation. Fetching one file's patch through the files API
+        // lets a caller recover a single file's diff without assuming any
+        // revision exists in the local worktree. The path is embedded as a
+        // JSON string literal, which jq accepts unchanged, so no path value
+        // can alter the projection.
+        command = [
+          "gh",
+          "api",
+          "--paginate",
+          "-X",
+          "GET",
+          `repos/{owner}/{repo}/pulls/${value.number}/files`,
+          "-F",
+          "per_page=100",
+          "--jq",
+          `.[] | select(.filename == ${JSON.stringify(value.path)}) | (.patch // "")`,
+        ]
+      } else {
+        command = ["gh", "pr", "diff", String(value.number), "--color=never"]
+      }
+      break
+    case "pr_files":
+      command = [
+        "gh",
+        "api",
+        "--paginate",
+        "-X",
+        "GET",
+        `repos/{owner}/{repo}/pulls/${value.number}/files`,
+        "-F",
+        "per_page=100",
+        "--jq",
+        '.[] | {filename, status, additions, deletions, changes, previous_filename: (.previous_filename // "")}',
+      ]
       break
     case "pr_discussion":
       command = [

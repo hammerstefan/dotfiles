@@ -88,9 +88,11 @@ Call `review_inspect` directly when it is in your tool list. When tools are expo
 - `first_parent`: `revision` (full commit ID; returns the commit ID followed by its parent IDs, none for a root commit).
 - `merge_base`: `left`, `right` (full commit IDs).
 - `range_diff`: `base`, `reviewed` (full commit IDs), `path` (string or `null`).
-- `pr_metadata`, `pr_diff`, `pr_discussion`: `number` (PR number).
+- `pr_files`: `number` (PR number). Lists the PR's changed files with status and change counts.
+- `pr_metadata`, `pr_discussion`: `number` (PR number).
+- `pr_diff`: `number` (PR number) and optional `path` (repository-relative). Without `path` it returns the whole diff. Pass a `path` from `pr_files` to get only that file's diff when the whole diff is too large to read.
 
-Pass `path: null` for no path filter; never omit `path`. Resolve refs with `resolve` before passing them as commit IDs. A `null` result means empty output (for example, a clean `status`), not a failure. Inside `execute`, call only the review tools named in this prompt; do not use `fetch`, other tools, or shell or file access. Read file contents with `read`, `glob`, and `grep`, not through `review_inspect`.
+Pass `path: null` for no path filter and never omit `path` for operations that require it. `pr_diff` is the exception: its `path` is optional and selects one file. Resolve refs with `resolve` before passing them as commit IDs. A `null` result means empty output (for example, a clean `status`), not a failure. Inside `execute`, call only the review tools named in this prompt; do not use `fetch`, other tools, or shell or file access. Read file contents with `read`, `glob`, and `grep`, not through `review_inspect`.
 
 For each candidate finding:
 - Reject findings outside the normalized scope or within exclusions. For diffs,
