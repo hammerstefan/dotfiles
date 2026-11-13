@@ -78,10 +78,11 @@ The fail-safe reading, in order:
    - candidate lessons, each with the message it came from.
    - what here should *not* become a skill, and why.
 
-   A digest is one page at most. It is a claim about a transcript. Quote it.
-   Never paraphrase it into a fact. When the list above is empty, the trigger
-   session's trace is that one input. Read it the same way, and write the same
-   digest shape from it.
+   A digest is a claim about a transcript. Quote it. Never paraphrase it into a
+   fact. When the list above is empty, the trigger session's trace is that one
+   input. Read it the same way, and write the same digest shape from it. Keep
+   every detail that a skill could need: the digest is how the evidence reaches
+   the synthesis.
 
 3. **Synthesise.** Read the repository's `AGENTS.md`, `GLOSSARY.md` and
    existing skills first. Correct a rule there instead of repeating it. Cluster
@@ -127,8 +128,10 @@ The fail-safe reading, in order:
    before the pull request:
 
    - **Context efficiency**: OpenCode injects the description into every
-     session, before the skill loads. Keep it short. Put detail in the body,
-     which loads only on trigger.
+     session, before the skill loads. Keep it short. The body loads on every
+     trigger, so keep it to what the reader needs then. Move long tables,
+     examples and reference material into `references/`, which the skill loads
+     on demand. Link to an existing rule instead of repeating it.
    - **Reliability**: check every claim (step 4). Run the repository's test
      command when it has one. Prove each check fails on a planted defect before
      you trust its pass. A check that cannot fail proves nothing.

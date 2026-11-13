@@ -241,8 +241,13 @@ def check_rename_references(b: str, s: str):
     return bool(ok), evidence(b, r"rename")
 
 
-def check_digest_page(b: str, s: str):
-    pattern = r"one page at most"
+def check_skill_body_lean(b: str, s: str):
+    pattern = r"body loads on every trigger[^.]{0,120}needs then"
+    return bool(find(b, pattern)), evidence(b, pattern)
+
+
+def check_references(b: str, s: str):
+    pattern = r"references/"
     return bool(find(b, pattern)), evidence(b, pattern)
 
 
@@ -305,7 +310,8 @@ CHECKS = {
     (13, 1): ("the change adds no new linter finding", check_no_new_finding),
     (14, 0): ("a generic description word is not a trigger", check_generic_word),
     (15, 0): ("a rename updates every reference", check_rename_references),
-    (16, 0): ("a digest is capped at one page", check_digest_page),
+    (16, 0): ("the skill body holds only what every trigger needs", check_skill_body_lean),
+    (16, 1): ("long reference material moves into references/", check_references),
 }
 
 

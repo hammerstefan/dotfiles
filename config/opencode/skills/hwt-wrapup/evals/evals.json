@@ -171,12 +171,13 @@
     },
     {
       "id": 16,
-      "name": "a-digest-stays-one-page",
-      "prompt": "A session is long, and its digest is passed to the synthesis step.",
-      "expected_output": "The brief caps a digest at one page, because every digest is read beside the others.",
+      "name": "the-skill-body-stays-lean",
+      "prompt": "A lesson becomes a skill with long tables and worked examples.",
+      "expected_output": "The brief keeps the skill body to what is needed on every trigger, and moves long reference material into references/, which loads on demand.",
       "files": [],
       "expectations": [
-        "The brief caps a digest at one page."
+        "The brief keeps the skill body to what the reader needs on every trigger.",
+        "The brief moves long reference material into references/."
       ]
     }
   ]
