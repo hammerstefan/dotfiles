@@ -28,6 +28,14 @@ measurement. A step is measurable only when its message carries a
 `time.streamed` stamp are reported as unmeasured instead of being folded into
 the average.
 
+`model_failover.test.js` covers the retry hook of `plugins/model-failover.js`.
+The decision is a pure function of the failure, the chain, the model list, the
+provider cooldowns and the session's switch budget; the hook wiring is checked
+through a stubbed plugin context that records `session.hook` registrations and
+`session.switchModel` calls. The chain file is read from
+`OPENCODE_CONFIG_DIR`, so the tests point that at a temporary directory and
+never touch the installed configuration.
+
 ## Synthetic ticket evaluations
 
 `mock_ticket_mcp.py` is a local MCP server. It serves only

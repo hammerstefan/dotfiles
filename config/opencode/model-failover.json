@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "chains": [
+    [
+      "minimax-coding-plan/MiniMax-M3.1-Flash",
+      "zai-coding-plan/glm-5.3-flash",
+      "openrouter/deepseek/deepseek-v4.1-flash"
+    ]
+  ],
+  "cooldownMinutes": 30,
+  "rateLimitAttempts": 4,
+  "switchDelayMs": 250
+}
