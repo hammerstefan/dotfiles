@@ -10,6 +10,7 @@ is the final check.
 Usage:
     grade.py                    # grade this skill's template and SKILL.md
     grade.py --brief FILE       # grade a rendered brief instead of the template
+    grade.py --render           # render a fresh brief with scripts/hwt-wrapup and grade it
     grade.py --json             # machine-readable result
     grade.py --verbose          # show the matched text for each pass
 
@@ -21,7 +22,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
@@ -171,9 +174,19 @@ def check_what_ran(b: str, s: str):
 def check_five_criteria(b: str, s: str):
     needed = ["context efficiency", "reliability", "description", "script", "style"]
     missing = [word for word in needed if word not in b]
-    return not missing, "missing: " + ", ".join(
-        missing
-    ) if missing else "all five named"
+    if missing:
+        return False, "missing: " + ", ".join(missing)
+    if not find(b, r"for each criterion"):
+        return False, "the words appear, but not as the self-review criteria"
+    return True, "the self-review names all five"
+
+
+def check_no_unconditional_skip(b: str, s: str):
+    if not find(b, r"run its evals"):
+        return False, "the brief never says to run the evals"
+    if find(b, r"skip (its )?eval"):
+        return False, evidence(b, r"skip (its )?eval")
+    return True, evidence(b, r"run its evals")
 
 
 def check_verdict_agrees(b: str, s: str):
@@ -223,22 +236,91 @@ CHECKS = {
     (6, 0): ("the false 'global directory' claim is gone", check_no_false_claim),
     (6, 1): ("the true reason names session start", check_true_reason),
     (6, 2): ("the brief asks what ran and what did not", check_what_ran),
+    (6, 3): (
+        "the brief never tells the session to skip evals",
+        check_no_unconditional_skip,
+    ),
     (7, 0): ("the self-review names all five criteria", check_five_criteria),
     (7, 1): ("the verdict must agree with the findings", check_verdict_agrees),
     (8, 0): ("a corrected claim is searched for in other copies", check_other_copies),
     (8, 1): ("commit messages are corrected too", check_commit_messages),
-    (9, 0): ("the whole description is capped, not only each sentence", check_description_budget),
+    (9, 0): (
+        "the whole description is capped, not only each sentence",
+        check_description_budget,
+    ),
 }
+
+
+def render_brief(worktree: Path) -> Path:
+    """Render a fresh brief with the repository's hwt-wrapup script."""
+    script = worktree / "scripts/hwt-wrapup"
+    if not script.is_file():
+        for parent in worktree.parents:
+            candidate = parent / "scripts/hwt-wrapup"
+            if candidate.is_file():
+                script = candidate
+                break
+        else:
+            raise FileNotFoundError("scripts/hwt-wrapup not found above the worktree")
+    state = Path(tempfile.mkdtemp(prefix="hwt-wrapup-eval-"))
+    proc = subprocess.run(
+        [sys.executable, str(script), "--dry-run", "--state", str(state)],
+        cwd=worktree,
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError((proc.stderr or proc.stdout).strip())
+    brief = state / "brief.md"
+    if not brief.is_file():
+        raise RuntimeError(f"{brief} was not written")
+    return brief
+
+
+def structural_problems(brief: Path) -> list[str]:
+    """The failures a template-only grade cannot see."""
+    text = brief.read_text(encoding="utf-8")
+    problems = []
+    if "{{" in text or "}}" in text:
+        problems.append("an unfilled placeholder remains")
+    for number in range(1, 14):
+        if f"\n{number}. **" not in text:
+            problems.append(f"step {number} is missing")
+    for heading in ("# Sessions to read", "# Rules", "# What to do"):
+        if heading not in text:
+            problems.append(f"the {heading} heading is missing")
+    return problems
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Grade the hwt-wrapup brief.")
     parser.add_argument("--brief", metavar="FILE", help="grade a rendered brief")
+    parser.add_argument(
+        "--render",
+        action="store_true",
+        help="render a fresh brief with scripts/hwt-wrapup and grade it",
+    )
+    parser.add_argument("--worktree", metavar="DIR", help="worktree to render from")
     parser.add_argument("--json", action="store_true", help="print JSON")
     parser.add_argument("--verbose", action="store_true", help="show matched text")
     args = parser.parse_args()
 
-    brief_path = Path(args.brief) if args.brief else SKILL_DIR / "brief.md.tmpl"
+    if args.render:
+        try:
+            brief_path = render_brief(
+                Path(args.worktree) if args.worktree else Path.cwd()
+            )
+        except (OSError, RuntimeError) as error:
+            print(f"grade: could not render: {error}", file=sys.stderr)
+            return 2
+        problems = structural_problems(brief_path)
+        if problems:
+            print("grade: the rendered brief is not sound:", file=sys.stderr)
+            for problem in problems:
+                print(f"  - {problem}", file=sys.stderr)
+            return 1
+    else:
+        brief_path = Path(args.brief) if args.brief else SKILL_DIR / "brief.md.tmpl"
     skill_path = SKILL_DIR / "SKILL.md"
     for path in (brief_path, skill_path, EVALS):
         if not path.is_file():
@@ -252,10 +334,12 @@ def main() -> int:
     results = []
     passed = 0
     counted = 0
+    unmapped = 0
     for case in cases:
         for index, text in enumerate(case["expectations"]):
             entry = CHECKS.get((case["id"], index))
             if entry is None:
+                unmapped += 1
                 results.append(
                     {
                         "eval": case["id"],
@@ -285,6 +369,7 @@ def main() -> int:
                 {
                     "passed": passed,
                     "counted": counted,
+                    "unmapped": unmapped,
                     "rate": round(passed / counted, 3) if counted else 0,
                     "results": results,
                 },
@@ -294,8 +379,11 @@ def main() -> int:
     else:
         print(
             f"hwt-wrapup evals: {passed}/{counted} expectations pass "
-            f"({round(100 * passed / counted) if counted else 0}%)\n"
+            f"({round(100 * passed / counted) if counted else 0}%)"
         )
+        if unmapped:
+            print(f"{unmapped} expectation(s) have no check; add one to CHECKS.")
+        print()
         current = None
         for row in results:
             if row["eval"] != current:
@@ -308,7 +396,7 @@ def main() -> int:
                     print(f"         {row['evidence']}")
         print()
 
-    return 0 if counted and passed == counted else 1
+    return 0 if counted and not unmapped and passed == counted else 1
 
 
 if __name__ == "__main__":

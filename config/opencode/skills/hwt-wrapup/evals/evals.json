@@ -66,12 +66,13 @@
       "id": 6,
       "name": "a-skipped-eval-has-a-true-reason",
       "prompt": "The reflection session considers skipping the skill-creator eval runs.",
-      "expected_output": "The brief no longer claims that project skills are unloadable before merge, gives the true reason (skills are discovered at session start), and requires the session to say what it ran and what it did not.",
+      "expected_output": "The brief no longer claims that project skills are unloadable before merge, gives the true reason (skills are discovered at session start), and requires the session to say what it ran and what it did not. It never tells the session to skip evals outright.",
       "files": [],
       "expectations": [
         "The brief does not claim that project skills are unloadable before merge or that OpenCode reads skills from the global directory.",
         "The brief gives the true reason a skill may not load in the session that created it: skills are discovered at session start.",
-        "The brief requires the session to say which evals it ran and which it did not."
+        "The brief requires the session to say which evals it ran and which it did not.",
+        "The brief never tells the session to skip its eval runs unconditionally."
       ]
     },
     {
