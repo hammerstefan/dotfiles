@@ -80,6 +80,11 @@ The fail-safe reading, in order:
 3. **Push and open the pull request**, ready for review, not a draft. Write the
    body from the extraction report:
 
+   Before the push, run the extraction's `scripts/check-extraction` in this
+   checkout, with the report and the digests directory. A non-zero exit means
+   the extraction is not ready: correct what it names, then run it again. Open
+   no pull request until it exits 0.
+
    ```sh
    git push -u origin {{WRAPUP_BRANCH}}
    gh pr create --base {{DEFAULT_BRANCH}} --head {{WRAPUP_BRANCH}} \

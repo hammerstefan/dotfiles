@@ -107,6 +107,8 @@ request opens:
 - commit one concern per commit, from the concern map in the extraction report.
 - write the body from that report: its "Checked" section, the linter counts, the
   evals run or not, and the self-review verdict.
+- run the extraction's `scripts/check-extraction` in the checkout before the
+  pull request opens. A non-zero exit blocks it: the extraction is not ready.
 - never merge the pull request, and never force-push.
 - close the source worktree only after the pull request exists, and not while a
   session is busy or the checkout is dirty.
