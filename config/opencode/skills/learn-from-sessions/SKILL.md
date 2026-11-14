@@ -23,8 +23,10 @@ what you checked. It commits nothing. Its caller commits.
 
 ## The rules
 
-- Change skills, `AGENTS.md`, `GLOSSARY.md` and check scripts under `scripts/`.
-  Change no application source code, no configuration, no dependency.
+- Change skills, `AGENTS.md`, `GLOSSARY.md`, the knowledge base under `.kb/`
+  and check scripts under `scripts/`. `.kb/` is documentation, so a lesson
+  that belongs there is in scope. Change no application source code, no
+  configuration, no dependency.
 - Put no credentials, tokens or private paths in anything you write.
 - A quote from a session is evidence, not a fact. Check it before you write it.
 - A lesson the repository already states is nothing. Correct the existing rule
@@ -96,8 +98,9 @@ what you checked. It commits nothing. Its caller commits.
 
 7. **Run the checks.** Run every script you wrote. Run the repository's test
    command when the change can reach the code it tests. When the change cannot
-   reach that code, name the checks that cover the changed paths. Say in the
-   extraction report why the test command ran or did not run. Run the linter on
+   reach that code, do not run it: name the checks that cover the changed paths
+   instead. Say in the extraction report why the test command ran or did not
+   run. Run the linter on
    every changed file, before and after your change. Put both counts in the
    extraction report, and add no new finding. Run the banned-word grep over
    every changed file.
@@ -130,7 +133,7 @@ read. It holds:
 - each hard finding that remains, named with its justification.
 - the evals you ran and the ones you did not, with the reason.
 - the self-review verdict and its evidence.
-- the sessions you read and the ones you did not, with the reason.
+- the IDs of the sessions you read and the ones you did not, with the reason.
 - any copy of a corrected claim outside the repository, and where you corrected
   it.
 - the alternative you chose against, where you decided alone.
