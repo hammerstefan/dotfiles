@@ -26,7 +26,6 @@ import json
 import os
 import re
 import shutil
-import sqlite3
 import subprocess
 import sys
 from pathlib import Path
@@ -35,7 +34,6 @@ EXIT_REFUSED = 3
 EXIT_FAILED = 4
 
 STATE_ROOT = Path("/tmp/opencode")
-DB = Path.home() / ".local/share/opencode/opencode.db"
 
 # The person's words are the cheapest faithful record of what was wanted, so
 # keep them nearly whole; the export is named in the brief for the rest.
@@ -92,120 +90,49 @@ def one_line(text: str, cap: int) -> str:
 
 # --- sessions ------------------------------------------------------------
 
-def session_rows(db: Path, directory: str, trigger: str) -> list[dict]:
-    """The tree of sessions at or under `directory`, minus the trigger's tree.
+def sessions_script() -> Path:
+    """The `learn-from-sessions` script that owns the session-store query."""
+    candidates = []
+    if os.environ.get("LEARN_FROM_SESSIONS_SCRIPT"):
+        candidates.append(Path(os.environ["LEARN_FROM_SESSIONS_SCRIPT"]))
+    here = Path(__file__).resolve()
+    global_config = Path.home() / ".config/opencode"
+    candidates.append(
+        here.parent.parent / "config/opencode/skills/learn-from-sessions/scripts/sessions")
+    candidates.append(global_config / "skills/learn-from-sessions/scripts/sessions")
+    candidates.append(global_config / "skill/learn-from-sessions/scripts/sessions")
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    raise Refused("the learn-from-sessions discovery script is missing; install "
+                  "the skill or set LEARN_FROM_SESSIONS_SCRIPT")
 
-    `session_v2` is not a public interface; the caller falls back to
-    `opencode session list` when this raises.
-    """
-    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=10)
+
+def session_query(*args: str, timeout: int = 180) -> dict:
+    script = sessions_script()
+    proc = run([sys.executable, str(script), *args], timeout=timeout)
     try:
-        con.row_factory = sqlite3.Row
-        rows = con.execute(
-            """
-            with recursive mine(id) as (
-              select ?
-              union all
-              select s.id from session_v2 s join mine m on s.parent_id = m.id
-            )
-            select s.id, s.parent_id, s.title, s.time_created,
-                   (select count(*) from session_message m
-                     where m.session_id = s.id) as messages,
-                   (select ifnull(sum(length(m.data)), 0) from session_message m
-                     where m.session_id = s.id) as bytes
-            from session_v2 s
-            where (s.directory = ? or instr(s.directory, ? || '/') = 1)
-              and s.id not in (select id from mine)
-            order by s.time_created
-            """,
-            (trigger, directory, directory),
-        ).fetchall()
-        return [dict(row) for row in rows]
-    finally:
-        con.close()
-
-
-def session_rows_fallback(directory: str) -> list[dict]:
-    """Best effort when the store cannot be read: top-level sessions only."""
-    proc = run(["opencode", "session", "list", "--format", "json", "-n", "1000"],
-               check=True)
-    try:
-        listed = json.loads(proc.stdout or "[]")
+        return json.loads(proc.stdout or "{}")
     except json.JSONDecodeError:
-        return []
-    out = []
-    for item in listed:
-        where = item.get("directory") or ""
-        if where != directory and not where.startswith(directory + "/"):
-            continue
-        out.append({
-            "id": item.get("id", ""),
-            "parent_id": None,
-            "title": item.get("title", ""),
-            "time_created": item.get("created", 0),
-            "messages": 0,
-            "bytes": 0,
-        })
-    return out
+        raise Refused(f"the sessions script printed no JSON for: {args[0]}")
+
+
+def sessions_for(directory: str, trigger: str) -> tuple[list[dict], bool]:
+    """Every session at or under `directory`, minus the trigger's own tree."""
+    payload = session_query("list", "--directory", directory,
+                            "--exclude-tree", trigger)
+    return payload.get("sessions", []), bool(payload.get("fallback"))
 
 
 def newest_session(directory: str) -> str:
-    """The newest session in `directory`.
-
-    Prefer the store: `opencode session list` stops at a page size, so an
-    older worktree can fall off the list while its session is still the one
-    the person wants. The CLI is the fallback when the store cannot be read.
-    """
-    try:
-        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True, timeout=10)
-    except sqlite3.Error:
-        con = None
-    if con is not None:
-        try:
-            row = con.execute(
-                """
-                select id from session_v2
-                where (directory = ? or instr(directory, ? || '/') = 1)
-                  and parent_id is null
-                order by time_created desc
-                limit 1
-                """,
-                (directory, directory),
-            ).fetchone()
-            if row:
-                return row[0]
-        except sqlite3.Error:
-            pass
-        finally:
-            con.close()
-
-    proc = run(["opencode", "session", "list", "--format", "json", "-n", "1000"],
-               check=True)
-    try:
-        listed = json.loads(proc.stdout or "[]")
-    except json.JSONDecodeError:
-        listed = []
-    for item in listed:
-        where = item.get("directory") or ""
-        if where == directory or where.startswith(directory + "/"):
-            return item.get("id", "")
-    return ""
+    """The newest top-level session in `directory`."""
+    return session_query("list", "--directory", directory).get("newest") or ""
 
 
-def session_directory(db: Path, session: str) -> str | None:
+def session_directory(session: str) -> str | None:
     """Where a session lives, or None when it cannot be read."""
-    try:
-        con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=10)
-    except sqlite3.Error:
-        return None
-    try:
-        row = con.execute("select directory from session_v2 where id = ?",
-                          (session,)).fetchone()
-        return row[0] if row else None
-    except sqlite3.Error:
-        return None
-    finally:
-        con.close()
+    payload = session_query("list", "--session", session)
+    return (payload.get("lookup") or {}).get("directory")
 
 
 def in_worktree(where: str | None, directory: str) -> bool:
@@ -216,16 +143,15 @@ def in_worktree(where: str | None, directory: str) -> bool:
 # --- the trigger session's trace ----------------------------------------
 
 def export_session(session: str, target: Path) -> dict | None:
-    proc = run(["opencode", "session", "export", session], check=False,
-               timeout=300)
+    script = sessions_script()
+    proc = run([sys.executable, str(script), "export", session,
+                "--out", str(target)], check=False, timeout=300)
     if proc.returncode != 0:
         return None
     try:
-        trace = json.loads(proc.stdout)
-    except json.JSONDecodeError:
+        return json.loads(target.read_text())
+    except (OSError, json.JSONDecodeError):
         return None
-    target.write_text(proc.stdout)
-    return trace
 
 
 def person_words(trace: dict) -> str:
@@ -323,7 +249,7 @@ def produced(trace: dict, source: str, base: str, branch: str, repo: str) -> str
 
 # --- rendering -----------------------------------------------------------
 
-def sessions_section(rows: list[dict], source: str, state: Path) -> str:
+def sessions_section(rows: list[dict], source: str) -> str:
     """The sessions a reflection session reads apart from the trigger's trace."""
     if not rows:
         return (
@@ -341,12 +267,8 @@ def sessions_section(rows: list[dict], source: str, state: Path) -> str:
     lines += [
         "",
         f"Every one of them is an OpenCode session at or under {source}.",
-        "Export each to a file and read the files, never the store:",
-        "",
-        "```sh",
-        f"mkdir -p {state}/transcripts",
-        f"opencode session export <id> > {state}/transcripts/<id>.json",
-        "```",
+        "The `learn-from-sessions` skill lists and exports them; hand it this",
+        "list. Never read the store directly.",
     ]
     return "\n".join(lines)
 
@@ -452,12 +374,12 @@ def main() -> int:
     # is it can belong to another checkout: trust it only when it points here.
     trigger = ""
     if args.session:
-        if not in_worktree(session_directory(DB, args.session), source):
+        if not in_worktree(session_directory(args.session), source):
             raise Refused(f"--session {args.session} is not a session in {source}")
         trigger = args.session
     else:
         candidate = os.environ.get("OPENCODE_SESSION_ID") or ""
-        if in_worktree(session_directory(DB, candidate), source):
+        if in_worktree(session_directory(candidate), source):
             trigger = candidate
     if not trigger:
         trigger = newest_session(source)
@@ -466,12 +388,7 @@ def main() -> int:
                       "belongs to this worktree; set OPENCODE_SESSION_ID or "
                       "pass --session")
 
-    fallback = False
-    try:
-        sessions = session_rows(DB, source, trigger)
-    except (sqlite3.Error, OSError):
-        sessions = session_rows_fallback(source)
-        fallback = True
+    sessions, fallback = sessions_for(source, trigger)
 
     state = Path(args.state) if args.state else STATE_ROOT / f"hwt-wrapup-{slug}"
     state.mkdir(parents=True, exist_ok=True)
@@ -509,7 +426,7 @@ def main() -> int:
         "CLOSE": "no, because the person passed --keep" if args.keep else "yes",
         "STATE": str(state),
         "TRACE": str(trace_path) if trace else "(the export failed; see the report)",
-        "SESSIONS": sessions_section(sessions, source, state),
+        "SESSIONS": sessions_section(sessions, source),
         "PERSON_WORDS": person_words(trace) if trace else "",
         "PRODUCED": produced(trace, source, base, branch, repo) if trace else "",
         "NOTES": "",

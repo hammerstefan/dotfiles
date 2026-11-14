@@ -27,4 +27,6 @@ another branch or repository, a decision taken verbally — write it to a short
 file, forty lines at most, and pass `--notes <file>`.
 
 The `hwt-wrapup` skill documents what the reflection session does with the brief;
-load it only when someone asks how a wrapup works.
+load it only when someone asks how a wrapup works. The extraction it runs is the
+`learn-from-sessions` skill, which owns the sessions script, the digests, the
+claim checks and the staged change.

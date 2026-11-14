@@ -1,6 +1,6 @@
 You are wrapping up a finished git worktree. Its sessions hold what the work
-taught. Your job is to turn that into repo-level skills, guidance and memory.
-Then open one pull request and close the worktree.
+taught. The extraction is a skill of its own: load it, follow it, then commit
+what it staged, open one pull request, and close the worktree.
 
 Checkout: {{CHECKOUT}}
 Repository: {{MAIN_ROOT}}  Branch: {{WRAPUP_BRANCH}}  Base: {{BASE}}
@@ -17,13 +17,6 @@ Close the source worktree: {{CLOSE}}
 # Sessions to read
 
 {{SESSIONS}}
-
-An export is `{info, messages}`. In `messages[]`, `type` is `user`, `assistant`
-or `synthetic`. A user message's words are `.text`. An assistant's words are in
-`.content[]`, and its items are `text`, `reasoning` or `tool`. A tool call's
-input is `.state.input`. Its failure is `.state.error`. A `synthetic` message is
-harness injection, not the person. Flatten an export with `jq`, or read it in
-slices. Never paste a whole transcript into your own context.
 
 # The trigger session's trace
 
@@ -49,142 +42,43 @@ The fail-safe reading, in order:
 
 - Work only in this checkout, on {{WRAPUP_BRANCH}}. Commit there. Never commit
   to {{SOURCE_BRANCH}} or any other branch.
-- Change skills, AGENTS.md, GLOSSARY.md and check scripts under `scripts/`.
-  Change no application source code, no configuration, no dependency.
+- Commit one concern per commit, from the concern map in the extraction report:
+  skills, then guidance, then glossary.
 - Never merge the pull request, and never force-push.
-- A lesson sometimes needs judgement. Two skills may need to become one. A name
-  may collide with an existing skill. You may need to remove or rename a skill.
-  A rename touches the skill ID, the frontmatter name, the heading, `AGENTS.md`
-  and the trigger phrases. Update every one. Ask with the `question` tool and
-  wait. When the choice is trivial and additive, decide, and record the
-  alternative in the pull request body.
-- Put no credentials, tokens or private paths in anything you commit.
-- A quote from a session is evidence, not a fact. Check it before you write it.
+- A commit message must not repeat a claim the extraction corrected. When the
+  report names a commit message that does, correct it before the push.
+- When the report names a corrected claim that lives outside this repository,
+  correct it there. Name it in your report.
 
 # What to do
 
-1. **Export every session** in the list. A session you cannot export, or choose
-   not to read, must be named in the report with the reason.
+1. **Run the extraction.** Load the `learn-from-sessions` skill and follow it.
+   Give it the evidence above, this checkout, the branch {{WRAPUP_BRANCH}}, and
+   the state directory
 
-2. **One digest per session**, each in a background subagent, run in parallel.
-   Give each subagent exactly one export path, the path to write its digest
-   (`{{STATE}}/digests/<id>.md`), and this shape:
-   - what the person asked for, in their words.
-   - what was produced, and whether it worked.
-   - every correction the person made to the agent's behaviour, quoted.
-   - conventions, commands and values they stated that are written down nowhere
-     in the repository.
-   - failures, their cause, and the correction that ended them.
-   - candidate lessons, each with the message it came from.
-   - what here should *not* become a skill, and why.
+       {{STATE}}
 
-   A digest is a claim about a transcript. Quote it. Never paraphrase it into a
-   fact. When the list above is empty, the trigger session's trace is that one
-   input. Read it the same way, and write the same digest shape from it. Keep
-   every detail that a skill could need: the digest is how the evidence reaches
-   the synthesis.
+   It writes the files, stages them, and writes `<state>/extraction.md`. Every
+   later step reads that file.
 
-3. **Synthesise.** Read the repository's `AGENTS.md`, `GLOSSARY.md` and
-   existing skills first. Correct a rule there instead of repeating it. Cluster
-   the digests into lessons. When a digest is ambiguous, read that part of its
-   transcript yourself. The export is right there. For each lesson, decide: a
-   new skill, an update to an existing skill, an AGENTS.md or GLOSSARY.md line,
-   or nothing. A lesson that only restates what the repository already says is
-   nothing.
+   If the skill cannot be loaded, write nothing, stage nothing, and report that
+   it is missing. Never improvise an extraction.
 
-   Use the `skill-creator` skill for every skill you write or revise. Take it as
-   far as you can without a person: its anatomy, its frontmatter, and its
-   description rules. Use the `writing-for-agents` skill for the wording of a
-   skill, AGENTS.md or GLOSSARY.md. Run its evals when you can exercise the
-   skill without new infrastructure. Say in the pull request what you ran and
-   what you did not.
-   OpenCode discovers a skill at session start. A session that began before the
-   skill existed cannot load it. That is the true reason to defer an eval. An
-   eval that needs a person to judge the result can also wait. Say so in the
-   pull request. Do not claim that OpenCode ignores project skills.
+2. **Commit one concern per commit.** The extraction staged every changed file
+   and recorded which paths belong to which concern, with a message for each.
+   Commit them in order — skills, then guidance, then glossary — one commit at a
+   time, with the paths and the message from the map:
 
-4. **Check every claim before you write it.** A session quote is evidence, not a
-   fact. The session may have been wrong, and the tool it described may have
-   moved. For each factual claim a skill or guidance file would state:
+   ```sh
+   git commit -m "<the message for this concern>" -- <the paths of this concern>
+   ```
 
-   - Run every example before you write it. Type the command and show its
-     output. Use `git branch <name>` for a branch rule, `--help` and `--version`
-     for a flag, and `find` for a path.
-   - Name the version and the subcommand. "`lxc` has no `-p`" is false on this
-     host. "`lxc exec` refuses `-p` on 6.10.1" is a claim a reader can test. A
-     blanket claim about a binary must be split per subcommand or dropped.
-   - Record the command and its result. The pull request body gets a "Checked"
-     section. It holds one line per claim, with the command, the version and
-     the result.
-   - Search the repository for other copies of the claim: skills, AGENTS.md,
-     the knowledge base. Correct every copy in the same pull request. When a
-     copy lives outside the repository, correct it where it lives and name it
-     in the report. Correct commit messages that repeat the claim before you
-     push. After the push, add a follow-up commit instead.
+   Then `git status --porcelain` must print nothing. A staged file that belongs
+   to no concern in the map is a finding: say so, and do not invent a commit for
+   it.
 
-   A claim you could not check is "not checked". Never state it as a fact.
-
-5. **Write for the review.** Someone will judge five things. Make each one pass
-   before the pull request:
-
-   - **Context efficiency**: OpenCode injects the description into every
-     session, before the skill loads. Keep it short. The body loads on every
-     trigger, so keep it to what the reader needs then. Move long tables,
-     examples and reference material into `references/`, which the skill loads
-     on demand. Link to an existing rule instead of repeating it.
-   - **Reliability**: check every claim (step 4). Run the repository's test
-     command when it has one. Prove each check fails on a planted defect before
-     you trust its pass. A check that cannot fail proves nothing.
-   - **Description and trigger**: the description is the only text OpenCode
-     shows before it loads the skill. Say what the skill does. Name the phrases
-     and situations that should reach for it. Name situations that only this
-     skill covers. A generic word alone, such as "review", will trigger it
-     everywhere. Keep each description sentence under 25 words, one fact per
-     sentence. Keep the whole description under 60 words. Keep the trigger
-     phrases the person uses, verbatim.
-   - **Script**: a step with one right answer and no judgement belongs in a
-     script. Examples are a banned-word grep, a header-spacing check, a
-     branch-name collision test, and a file-list check. Write it under
-     `scripts/` with an exit code and a line that names what failed. When the
-     repository has a test runner, add the check to it. Run it with the other
-     checks in step 7. A rule that says "grep before you commit" is a script
-     that was never written.
-   - **Style**: follow the repository's own writing rules and linter when it has
-     them. Otherwise apply the `asd-ste100` skill. Run the linter on every
-     changed file, before and after your change. Add no new finding. Put both
-     counts in the pull request body. Name each remaining hard finding and
-     justify it. "The linter is noisy" is not a justification.
-
-   These are the criteria a reviewer applies to a skill or a rule. Treat them as
-   the gate, not as advice.
-
-6. **Write the files.** `.opencode/skills/<id>/SKILL.md` for a new skill, in
-   place for an existing one, in the repository the source worktree belongs to.
-   Never the global config. A lesson from one project is not a rule for every
-   project. Put a check script under the repository's `scripts/` directory.
-   Update `AGENTS.md` or `GLOSSARY.md` only where the lesson is guidance rather
-   than procedure.
-
-7. **Run the checks, then commit one concern per commit** — skills, then
-   guidance, then glossary — with conventional messages (`feat(skill): …`,
-   `docs(agents): …`). Run every script you wrote, and the repository's test
-   command. Run the linter on every changed file, and the banned-word grep over
-   every changed file.
-   Before staging, run `git check-ignore -q .opencode/skills/<id>/SKILL.md`. It
-   must exit 1. Then run `git check-ignore -q scripts/<name>` for each new
-   script, which must also exit 1. When the repository ignores `.opencode/`, do
-   not fight the ignore rule. Put the skills where the repository already keeps
-   tracked skills, and say so in the report.
-
-8. **Review your own change** as the reviewer will. Use the
-   `review-agent-instructions` skill for this pass. Read every changed file
-   whole. For each criterion in step 5, state pass or fail with evidence:
-   context efficiency, reliability, description and trigger, script, style.
-   Correct every defect you can. When you leave a finding, name it and say why.
-   The verdict must agree with the findings. "Ready" with an open major finding
-   is not a verdict.
-
-9. **Push and open the pull request**, ready for review, not a draft:
+3. **Push and open the pull request**, ready for review, not a draft. Write the
+   body from the extraction report:
 
    ```sh
    git push -u origin {{WRAPUP_BRANCH}}
@@ -193,60 +87,60 @@ The fail-safe reading, in order:
    ```
 
    The body states what each skill is for and what evidence produced it. It
-   names the sessions you read and the ones you did not, with the reason. It
-   gives every alternative you chose against. It holds the "Checked" section
-   from step 4 and the linter counts. It lists the scripts you ran, the evals
-   you ran or did not run, and the self-review verdict from step 8, with its
-   evidence. Record the pull request with `trail_add` as soon as it exists.
+   names the sessions read and the ones not read, with the reason. It gives
+   every alternative chosen against. It holds the report's "Checked" section
+   verbatim, the linter counts, the scripts and evals run or not run, and the
+   self-review verdict with its evidence. Record the pull request with
+   `trail_add` as soon as it exists.
 
-10. **Retain the lessons in memory** with `hindsight_ingest_document`, one
-    document per lesson cluster: the decision or convention, why, and the
-    evidence. State plainly where a lesson supersedes something memory already
-    held.
+4. **Retain the lessons in memory** with `hindsight_ingest_document`, one
+   document per lesson cluster from the report: the decision or convention, why,
+   and the evidence. State plainly where a lesson supersedes something memory
+   already held.
 
-11. **Close the source worktree**, when the brief says yes, and not before the
-    pull request is open.
+5. **Close the source worktree**, when the brief says yes, and not before the
+   pull request is open.
 
-    ```sh
-    git -C {{SOURCE_WORKTREE}} status --porcelain        # must print nothing
-    sqlite3 -json "$HOME/.local/share/opencode/opencode.db" "
-    select id, title from session_v2
-    where (directory = '{{SOURCE_WORKTREE}}' or instr(directory, '{{SOURCE_WORKTREE}}' || '/') = 1)
-      and time_busy is not null
-      and (time_idle is null or time_busy > time_idle)
-      and time_busy > (strftime('%s','now') * 1000 - 86400000)"
-    herdr-app ls | jq -r --arg w "{{SOURCE_WORKTREE}}" \
-      '.spaces[] | select(.folder == $w or .name == "{{SLUG}}") | .id'
-    herdr-app do space.close '{"id": "<space id>", "confirmed": true}'
-    git -C {{MAIN_ROOT}} worktree remove {{SOURCE_WORKTREE}}
-    ```
+   ```sh
+   git -C {{SOURCE_WORKTREE}} status --porcelain        # must print nothing
+   sqlite3 -json "$HOME/.local/share/opencode/opencode.db" "
+   select id, title from session_v2
+   where (directory = '{{SOURCE_WORKTREE}}' or instr(directory, '{{SOURCE_WORKTREE}}' || '/') = 1)
+     and time_busy is not null
+     and (time_idle is null or time_busy > time_idle)
+     and time_busy > (strftime('%s','now') * 1000 - 86400000)"
+   herdr-app ls | jq -r --arg w "{{SOURCE_WORKTREE}}" \
+     '.spaces[] | select(.folder == $w or .name == "{{SLUG}}") | .id'
+   herdr-app do space.close '{"id": "<space id>", "confirmed": true}'
+   git -C {{MAIN_ROOT}} worktree remove {{SOURCE_WORKTREE}}
+   ```
 
-    Dirty, or a session busy within the last day: close nothing. Say what
-    blocked it and where the work is. Commits on no remote are a warning, not a
-    refusal. `git worktree remove` keeps the branch, so name them and continue.
-    The space goes before the checkout, as Herdr's own remove does it. More
-    than one space id: say so and close nothing until one is certain. No space
-    id: remove the checkout anyway and say the space was already gone. Keep the
-    branch.
+   Dirty, or a session busy within the last day: close nothing. Say what
+   blocked it and where the work is. Commits on no remote are a warning, not a
+   refusal. `git worktree remove` keeps the branch, so name them and continue.
+   The space goes before the checkout, as Herdr's own remove does it. More than
+   one space id: say so and close nothing until one is certain. No space id:
+   remove the checkout anyway and say the space was already gone. Keep the
+   branch.
 
-12. **Ask about this space** with the `question` tool: close it and remove this
-    checkout, or leave both. Find this space by `.folder` equal to this
-    checkout. On "close", write a temporary script outside the repository with
-    the write tool. The script sleeps five seconds, closes this space, then runs
-    `git -C {{MAIN_ROOT}} worktree remove {{CHECKOUT}}`. Start it with
-    `setsid nohup bash <script> ><log> 2>&1 &` so it outlives the terminal it
-    would otherwise kill. Name the log file in the report. Then stop.
+6. **Ask about this space** with the `question` tool: close it and remove this
+   checkout, or leave both. Find this space by `.folder` equal to this checkout.
+   On "close", write a temporary script outside the repository with the write
+   tool. The script sleeps five seconds, closes this space, then runs
+   `git -C {{MAIN_ROOT}} worktree remove {{CHECKOUT}}`. Start it with
+   `setsid nohup bash <script> ><log> 2>&1 &` so it outlives the terminal it
+   would otherwise kill. Name the log file in the report. Then stop.
 
-13. **Report**:
-    - the pull request's URL.
-    - each lesson and where it is written.
-    - the sessions read, and any you did not.
-    - the claims you checked and the ones you did not.
-    - the linter counts and the evals you ran.
-    - any copy you corrected outside this repository.
-    - whether the source worktree was closed, kept, or refused, and why.
+7. **Report**:
+   - the pull request's URL.
+   - each lesson and where it is written.
+   - the sessions read, and any you did not.
+   - the claims checked and the ones you did not.
+   - the linter counts and the evals you ran.
+   - any copy you corrected outside this repository.
+   - whether the source worktree was closed, kept, or refused, and why.
 
-    Before the report, call `todowrite` once with every item still remaining.
-    That list holds work only the person can finish. It holds a step you could
-    not run, a check you did not run, and a decision still open. Mark each item
-    `pending`, and pass an empty list when nothing remains.
+   Before the report, call `todowrite` once with every item still remaining.
+   That list holds work only the person can finish. It holds a step you could
+   not run, a check you did not run, and a decision still open. Mark each item
+   `pending`, and pass an empty list when nothing remains.

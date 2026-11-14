@@ -1,183 +1,90 @@
 {
   "skill_name": "hwt-wrapup",
-  "subject": "The instructions the reflection session reads: brief.md.tmpl and SKILL.md.",
-  "note": "These evals grade the brief, not a whole reflection run. A full run costs a session and a pull request, so the deterministic artifact is graded on every change and a real wrapup is the final check. Each expectation comes from the review of the skills and guidance in PR 62 of monitor-agent (session ses_e295a5760ffeYWj7OxODCSSkyg).",
+  "subject": "The instructions the reflection session reads: brief.md.tmpl and SKILL.md, after the extraction moved to learn-from-sessions.",
+  "note": "These evals grade the brief, not a whole reflection run. The extraction's lessons live in the learn-from-sessions suite; these cover what the wrapup still does after it: the delegation, the commits, the pull request body, the retention and the close. A real wrapup is the final check.",
   "evals": [
     {
       "id": 1,
-      "name": "claims-are-checked-not-inherited",
-      "prompt": "Wrap up this worktree. One session recorded that two branch names collide, and the lesson is about to become a skill.",
-      "expected_output": "The brief requires the reflection session to run every example before it writes it, to record the command and its result in the pull request, and to treat a session quote as evidence rather than as a fact.",
+      "name": "the-extraction-is-delegated-and-never-improvised",
+      "prompt": "The reflection session starts with a brief in a fresh worktree.",
+      "expected_output": "The brief names learn-from-sessions as the extraction, requires it to be loaded before anything is written, and stops with a report when the skill is missing.",
       "files": [],
       "expectations": [
-        "The brief requires the reflection session to run every example a skill states before the commit.",
-        "The brief requires the command and its result to be recorded in the pull request body.",
-        "The brief states that a session quote is evidence, not a fact."
+        "The brief names learn-from-sessions as the extraction.",
+        "The brief requires the skill to be loaded before any file is written.",
+        "The brief stops and reports when the skill cannot be loaded."
       ]
     },
     {
       "id": 2,
-      "name": "tool-facts-name-their-scope",
-      "prompt": "A session says the lxc client has no -p flag, and the lesson becomes an AGENTS.md rule.",
-      "expected_output": "The brief requires every claim about a tool to name the version tested, every claim about a command to name the subcommand tested, and a blanket claim about a binary to be split or dropped.",
+      "name": "one-concern-per-commit-comes-from-the-report",
+      "prompt": "The extraction has staged three concerns and written the extraction report.",
+      "expected_output": "The brief commits one concern at a time from the recorded map, with the recorded message, and requires a clean tree afterwards.",
       "files": [],
       "expectations": [
-        "The brief requires a claim about a tool or command to name the version tested.",
-        "The brief requires a claim about flags or behaviour to name the subcommand tested.",
-        "The brief forbids a blanket claim about a binary and requires it to be split per subcommand or dropped."
+        "The brief commits one concern per commit.",
+        "The paths and the message come from the extraction report.",
+        "The brief requires git status --porcelain to print nothing afterwards."
       ]
     },
     {
       "id": 3,
-      "name": "description-is-the-trigger",
-      "prompt": "The lesson becomes a new skill, and OpenCode will inject its frontmatter description into every session.",
-      "expected_output": "The brief requires each description sentence to stay under 25 words, keeps the person's trigger phrases, and treats the description as the only text OpenCode shows before it loads the skill.",
+      "name": "the-body-carries-what-the-extraction-recorded",
+      "prompt": "The pull request body is written from the extraction report.",
+      "expected_output": "The body carries the Checked section, the linter counts, the evals run or not, and the verdict, each from the report.",
       "files": [],
       "expectations": [
-        "The brief requires every description sentence to stay under 25 words.",
-        "The brief requires the person's trigger phrases to survive the rewrite.",
-        "The brief treats the description as the only text OpenCode shows before it loads the skill."
+        "The brief requires the Checked section in the body.",
+        "The brief requires the linter counts in the body.",
+        "The brief requires the evals run or not in the body.",
+        "The brief requires the self-review verdict in the body."
       ]
     },
     {
       "id": 4,
-      "name": "mechanical-work-becomes-a-script",
-      "prompt": "The lesson is the rule 'grep the changed files for banned words before the commit'.",
-      "expected_output": "The brief requires a mechanical check to become a script with an exit code, and requires that script to run in the check step 7.",
+      "name": "the-pull-request-is-never-merged",
+      "prompt": "The reflection session has opened the pull request.",
+      "expected_output": "The brief forbids merging and force-pushing.",
       "files": [],
       "expectations": [
-        "The brief requires a mechanical check to be a script with an exit code rather than a prose rule.",
-        "The brief requires the script to run with the other checks in step 7."
+        "The brief forbids merging the pull request.",
+        "The brief forbids a force-push."
       ]
     },
     {
       "id": 5,
-      "name": "style-conformance-is-measured",
-      "prompt": "The source repository has a writing guide and a style linter.",
-      "expected_output": "The brief requires the linter to run on every changed file, the counts to appear in the pull request body, and each remaining hard finding to be named and justified.",
+      "name": "the-close-comes-last-and-asks-first",
+      "prompt": "The pull request exists and the source worktree still holds uncommitted changes.",
+      "expected_output": "The brief closes the source worktree only after the pull request is open, refuses while the checkout is dirty or a session is busy, keeps the branch, and asks before closing its own space.",
       "files": [],
       "expectations": [
-        "The brief requires the repository's linter to run on every changed file.",
-        "The brief requires the linter counts in the pull request body.",
-        "The brief requires each remaining hard finding to be named and justified."
+        "The brief closes the source worktree only after the pull request is open.",
+        "The brief closes nothing when the checkout is dirty.",
+        "The brief closes nothing when a session was busy within the last day.",
+        "The brief keeps the branch when it removes the checkout.",
+        "The brief asks before closing its own space."
       ]
     },
     {
       "id": 6,
-      "name": "a-skipped-eval-has-a-true-reason",
-      "prompt": "The reflection session considers skipping the skill-creator eval runs.",
-      "expected_output": "The brief no longer claims that project skills are unloadable before merge, gives the true reason (skills are discovered at session start), and requires the session to say what it ran and what it did not. It never tells the session to skip evals outright.",
+      "name": "the-report-names-what-was-and-was-not-read",
+      "prompt": "The reflection session reports to the person.",
+      "expected_output": "The report names the sessions read and the sessions not read with the reason, and the claims checked and not checked.",
       "files": [],
       "expectations": [
-        "The brief does not claim that project skills are unloadable before merge or that OpenCode reads skills from the global directory.",
-        "The brief gives the true reason a skill may not load in the session that created it: skills are discovered at session start.",
-        "The brief requires the session to say which evals it ran and which it did not.",
-        "The brief never tells the session to skip its eval runs unconditionally."
+        "The report names the sessions read and the ones not read.",
+        "The report names the claims checked and the ones not checked."
       ]
     },
     {
       "id": 7,
-      "name": "the-review-gate-precedes-the-pull-request",
-      "prompt": "Before it opens the pull request, the reflection session reviews what it wrote.",
-      "expected_output": "The brief requires a self-review on the five criteria (context efficiency, reliability, description and trigger, deterministic script, style), and requires the verdict to agree with the findings.",
+      "name": "a-corrected-claim-does-not-survive-in-a-commit-message",
+      "prompt": "A commit message on the wrapup branch repeats a claim the extraction corrected.",
+      "expected_output": "The brief requires a commit message that repeats a corrected claim to be corrected before the push, and a copy outside the repository to be corrected where it lives.",
       "files": [],
       "expectations": [
-        "The brief requires a self-review on context efficiency, reliability, description and trigger quality, scriptability, and style.",
-        "The brief requires the verdict to agree with the findings."
-      ]
-    },
-    {
-      "id": 8,
-      "name": "one-correction-reaches-every-copy",
-      "prompt": "The same false claim appears in a skill, AGENTS.md, and the knowledge base, and in a commit message.",
-      "expected_output": "The brief requires a search for the other copies of a corrected claim, including commit messages, and requires every copy to be corrected in the same pull request.",
-      "files": [],
-      "expectations": [
-        "The brief requires a search for other copies of a corrected claim.",
-        "The brief requires commit messages to be corrected too."
-      ]
-    },
-    {
-      "id": 9,
-      "name": "the-description-budget-is-bounded",
-      "prompt": "The skill description is injected into every session, and the lesson becomes a skill.",
-      "expected_output": "The brief caps the whole description, not only each sentence.",
-      "files": [],
-      "expectations": [
-        "The brief caps the whole description, not only each sentence."
-      ]
-    },
-    {
-      "id": 10,
-      "name": "existing-conventions-come-first",
-      "prompt": "A lesson looks like a new rule, and the repository already has a rule that covers it.",
-      "expected_output": "The brief requires the reflection session to read AGENTS.md, GLOSSARY.md and the existing skills first, and to correct the existing rule instead of repeating it.",
-      "files": [],
-      "expectations": [
-        "The brief requires the repository's conventions and existing skills to be read before a rule is written.",
-        "The brief prefers correcting an existing rule over repeating it in a new place."
-      ]
-    },
-    {
-      "id": 11,
-      "name": "a-check-must-be-able-to-fail",
-      "prompt": "The lesson becomes a check script, and its first run passes.",
-      "expected_output": "The brief requires the script to fail on a planted defect before its pass is trusted.",
-      "files": [],
-      "expectations": [
-        "The brief requires a check to fail on a planted defect before its pass is trusted."
-      ]
-    },
-    {
-      "id": 12,
-      "name": "the-repository-tests-run",
-      "prompt": "The source repository has a test command.",
-      "expected_output": "The brief requires the repository's test command to run with the other checks.",
-      "files": [],
-      "expectations": [
-        "The brief requires the repository's test command to run."
-      ]
-    },
-    {
-      "id": 13,
-      "name": "linter-counts-are-before-and-after",
-      "prompt": "The change touches files that already carry linter findings.",
-      "expected_output": "The brief requires the linter counts before and after the change, no new finding, and the two counts in the pull request body.",
-      "files": [],
-      "expectations": [
-        "The brief compares the linter counts before and after the change.",
-        "The brief forbids adding a new finding."
-      ]
-    },
-    {
-      "id": 14,
-      "name": "the-description-names-specific-situations",
-      "prompt": "The skill is described with a word that many requests contain.",
-      "expected_output": "The brief requires situations that only that skill covers, and warns that a generic word alone triggers it everywhere.",
-      "files": [],
-      "expectations": [
-        "The brief warns that a generic word alone triggers the skill everywhere."
-      ]
-    },
-    {
-      "id": 15,
-      "name": "a-rename-updates-every-reference",
-      "prompt": "A skill is renamed.",
-      "expected_output": "The brief lists every place a rename touches and requires each one to be updated.",
-      "files": [],
-      "expectations": [
-        "The brief requires the skill ID, frontmatter name, heading, AGENTS.md and trigger phrases to be updated after a rename."
-      ]
-    },
-    {
-      "id": 16,
-      "name": "the-skill-body-stays-lean",
-      "prompt": "A lesson becomes a skill with long tables and worked examples.",
-      "expected_output": "The brief keeps the skill body to what is needed on every trigger, and moves long reference material into references/, which loads on demand.",
-      "files": [],
-      "expectations": [
-        "The brief keeps the skill body to what the reader needs on every trigger.",
-        "The brief moves long reference material into references/."
+        "A commit message that repeats a corrected claim is corrected before the push.",
+        "A copy outside the repository is corrected where it lives and named in the report."
       ]
     }
   ]

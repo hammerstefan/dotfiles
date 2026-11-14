@@ -2,10 +2,10 @@
 """Grade the hwt-wrapup brief against the evals in evals.json.
 
 The subject is the instructions the reflection session reads: `brief.md.tmpl`
-and `SKILL.md`. These checks are deterministic, so a change to the wording can
-be measured before it reaches a reflection session. They check that an
-instruction is present, not that a reflection session obeyed it; a real wrapup
-is the final check.
+and `SKILL.md`. The extraction's own lessons moved to the `learn-from-sessions`
+suite when the extraction became a skill, so these checks cover what the wrapup
+still does after it: the delegation, the commits, the pull request body, the
+retention and the close.
 
 Usage:
     grade.py                    # grade this skill's template and SKILL.md
@@ -29,6 +29,14 @@ from pathlib import Path
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 EVALS = Path(__file__).resolve().parent / "evals.json"
+
+STEPS = 7
+HEADINGS = (
+    "# Sessions to read",
+    "# The trigger session's trace",
+    "# Rules",
+    "# What to do",
+)
 
 
 def norm(text: str) -> str:
@@ -58,260 +66,132 @@ def evidence(text: str, pattern: str) -> str:
 
 # Each check is (eval id, expectation index, description, function). A function
 # takes the normalised brief and skill text and returns (passed, evidence).
-def check_run_example(b: str, s: str):
-    run = find(b, r"run (every|each|the) (example|command)")
-    then = find(b, r"(before (you )?(write|commit|stage))|(show (its|the) output)")
-    return bool(run and then), evidence(b, r"run (every|each|the) (example|command)")
+def check_names_skill(b: str, s: str):
+    return bool(find(b, r"learn-from-sessions")), evidence(b, r"learn-from-sessions")
 
 
-def check_command_and_result(b: str, s: str):
-    ok = find(b, r"commands?[^.]{0,200}(result|output)") and find(
-        b, r"pull request body"
-    )
-    return bool(ok), evidence(b, r"commands?[^.]{0,200}(result|output)")
+def check_loaded_before(b: str, s: str):
+    ok = find(b, r"load[^.]{0,80}learn-from-sessions") and find(b, r"write nothing")
+    return bool(ok), evidence(b, r"load[^.]{0,80}learn-from-sessions")
 
 
-def check_quote_is_evidence(b: str, s: str):
-    ok = find(b, r"quote[s]?[^.]{0,80}evidence") and find(
-        b, r"(not a fact|not fact|rather than a fact)"
-    )
-    return bool(ok), evidence(b, r"quote[s]?[^.]{0,80}evidence")
+def check_stops_when_missing(b: str, s: str):
+    ok = find(b, r"cannot be loaded") and find(b, r"write nothing")
+    return bool(ok), evidence(b, r"cannot be loaded")
 
 
-def check_version(b: str, s: str):
-    ok = find(b, r"(name|record|state|give)[^.]{0,60}version") or find(
-        b, r"version[^.]{0,60}(tested|you tested)"
-    )
-    return bool(ok), evidence(b, r"version")
-
-
-def check_subcommand(b: str, s: str):
-    return bool(find(b, r"sub-?command")), evidence(b, r"sub-?command")
-
-
-def check_no_blanket(b: str, s: str):
-    ok = find(b, r"blanket") and find(b, r"(split|drop|per sub-?command)")
-    return bool(ok), evidence(b, r"blanket")
-
-
-def check_word_cap(b: str, s: str):
-    ok = find(b, r"(under|below|at most|fewer than) (twenty-five|25) words") or find(
-        b, r"25-word"
-    )
-    return bool(ok), evidence(b, r"(twenty-five|25) words")
-
-
-def check_trigger_phrases(b: str, s: str):
-    ok = find(b, r"trigger phrase") and find(
-        b, r"(keep|preserve|verbatim|survive|unchanged)"
-    )
-    return bool(ok), evidence(b, r"trigger phrase")
-
-
-def check_description_budget(b: str, s: str):
-    pattern = r"(under|below|at most|fewer than) (sixty|60) words"
+def check_one_concern(b: str, s: str):
+    pattern = r"one concern per commit"
     return bool(find(b, pattern)), evidence(b, pattern)
 
 
-def check_description_is_only_text(b: str, s: str):
-    pattern = r"description[^.]{0,180}(injected|only text|only thing|before it loads)"
+def check_paths_from_report(b: str, s: str):
+    ok = find(b, r"concern map") and find(b, r"extraction report")
+    return bool(ok), evidence(b, r"concern map")
+
+
+def check_clean_tree(b: str, s: str):
+    ok = find(b, r"git status --porcelain") and find(b, r"print nothing")
+    return bool(ok), evidence(b, r"git status --porcelain")
+
+
+def check_checked_section(b: str, s: str):
+    pattern = r"checked[^.]{0,40}section"
     return bool(find(b, pattern)), evidence(b, pattern)
 
 
-def check_script_exit_code(b: str, s: str):
-    ok = all(
-        find(b, p)
-        for p in (
-            r"script",
-            r"exit (code|status)",
-            r"(mechanical|banned.word|grep|header|collision|file list)",
-        )
-    )
-    return bool(ok), evidence(b, r"exit (code|status)")
+def check_linter_counts(b: str, s: str):
+    ok = find(b, r"linter counts") and find(b, r"\bbody\b")
+    return bool(ok), evidence(b, r"linter counts")
 
 
-def check_script_runs_in_verify(b: str, s: str):
-    pattern = r"(run|runs)[^.]{0,80}step 7"
-    return bool(find(b, r"step 7")), evidence(b, pattern)
+def check_evals_in_body(b: str, s: str):
+    pattern = r"evals (run or not|run or not run|you ran)"
+    return bool(find(b, pattern) and find(b, r"\bbody\b")), evidence(b, pattern)
 
 
-def check_linter_on_changes(b: str, s: str):
-    ok = find(b, r"linter") and find(b, r"(every|each|all) changed file")
-    return bool(ok), evidence(b, r"linter")
-
-
-def check_counts_in_body(b: str, s: str):
-    ok = find(b, r"counts?[^.]{0,140}pull request body")
-    return bool(ok), evidence(b, r"counts?[^.]{0,140}pull request body")
-
-
-def check_justify_findings(b: str, s: str):
-    ok = find(b, r"hard finding") and find(b, r"(justif|named and|name it)")
-    return bool(ok), evidence(b, r"hard finding")
-
-
-FALSE_CLAIMS = r"(global directory|not loadable)"
-
-
-def check_no_false_claim(b: str, s: str):
-    match = find(b, FALSE_CLAIMS)
-    return match is None, "" if match is None else sentence_at(b, match.start())
-
-
-def check_true_reason(b: str, s: str):
-    return bool(find(b, r"session start|discovered at session start")), evidence(
-        b, r"session start"
-    )
-
-
-def check_what_ran(b: str, s: str):
-    ok = (
-        find(b, r"what you ran") or find(b, r"which evals") or find(b, r"evals you ran")
-    )
-    return bool(ok), evidence(b, r"(what you ran|which evals|evals you ran)")
-
-
-def check_five_criteria(b: str, s: str):
-    needed = ["context efficiency", "reliability", "description", "script", "style"]
-    missing = [word for word in needed if word not in b]
-    if missing:
-        return False, "missing: " + ", ".join(missing)
-    if not find(b, r"for each criterion"):
-        return False, "the words appear, but not as the self-review criteria"
-    return True, "the self-review names all five"
-
-
-def check_no_unconditional_skip(b: str, s: str):
-    if not find(b, r"run its evals"):
-        return False, "the brief never says to run the evals"
-    if find(b, r"skip (its )?eval"):
-        return False, evidence(b, r"skip (its )?eval")
-    return True, evidence(b, r"run its evals")
-
-
-def check_verdict_agrees(b: str, s: str):
-    ok = find(b, r"verdict") and find(b, r"agree")
+def check_verdict_in_body(b: str, s: str):
+    ok = find(b, r"verdict") and find(b, r"\bbody\b")
     return bool(ok), evidence(b, r"verdict")
 
 
-def check_other_copies(b: str, s: str):
-    ok = find(b, r"other cop(y|ies)") or find(b, r"search the repository")
-    return bool(ok), evidence(b, r"(other cop(y|ies)|search the repository)")
-
-
-def check_commit_messages(b: str, s: str):
-    return bool(find(b, r"commit message")), evidence(b, r"commit message")
-
-
-def check_conventions_first(b: str, s: str):
-    pattern = r"read the repository's[^.]{0,80}(agents\.md|existing skills)"
+def check_never_merge(b: str, s: str):
+    pattern = r"never merge"
     return bool(find(b, pattern)), evidence(b, pattern)
 
 
-def check_correct_existing(b: str, s: str):
-    pattern = r"instead of repeating"
+def check_never_force_push(b: str, s: str):
+    pattern = r"never force-push"
     return bool(find(b, pattern)), evidence(b, pattern)
 
 
-def check_check_can_fail(b: str, s: str):
-    return bool(find(b, r"planted defect")), evidence(b, r"planted defect")
-
-
-def check_test_command(b: str, s: str):
-    return bool(find(b, r"test command")), evidence(b, r"test command")
-
-
-def check_counts_before_after(b: str, s: str):
-    pattern = r"before and after"
-    return bool(find(b, pattern) and find(b, r"count")), evidence(b, pattern)
-
-
-def check_no_new_finding(b: str, s: str):
-    pattern = r"add no new finding"
+def check_close_after_pr(b: str, s: str):
+    pattern = r"not before the pull request is open"
     return bool(find(b, pattern)), evidence(b, pattern)
 
 
-def check_generic_word(b: str, s: str):
-    pattern = r"generic word"
-    return bool(find(b, pattern) and find(b, r"trigger")), evidence(b, pattern)
+def check_dirty(b: str, s: str):
+    ok = find(b, r"dirty") and find(b, r"close nothing")
+    return bool(ok), evidence(b, r"dirty")
 
 
-def check_rename_references(b: str, s: str):
-    ok = find(b, r"rename") and find(b, r"every one")
-    return bool(ok), evidence(b, r"rename")
-
-
-def check_skill_body_lean(b: str, s: str):
-    pattern = r"body loads on every trigger[^.]{0,120}needs then"
+def check_busy(b: str, s: str):
+    pattern = r"busy within the last day"
     return bool(find(b, pattern)), evidence(b, pattern)
 
 
-def check_references(b: str, s: str):
-    pattern = r"references/"
+def check_keeps_branch(b: str, s: str):
+    pattern = r"keeps the branch"
     return bool(find(b, pattern)), evidence(b, pattern)
+
+
+def check_asks_about_space(b: str, s: str):
+    ok = find(b, r"ask about this space") and find(b, r"question")
+    return bool(ok), evidence(b, r"ask about this space")
+
+
+def check_report_sessions(b: str, s: str):
+    ok = find(b, r"sessions read") and find(b, r"any you did not")
+    return bool(ok), evidence(b, r"sessions read")
+
+
+def check_report_claims(b: str, s: str):
+    ok = find(b, r"claims checked") and find(b, r"ones you did not")
+    return bool(ok), evidence(b, r"claims checked")
+
+
+def check_commit_message(b: str, s: str):
+    ok = find(b, r"commit message") and find(b, r"must not repeat")
+    return bool(ok), evidence(b, r"commit message")
+
+
+def check_external_copy(b: str, s: str):
+    ok = find(b, r"outside this repository") and find(b, r"correct it")
+    return bool(ok), evidence(b, r"outside this repository")
 
 
 CHECKS = {
-    (1, 0): (
-        "the brief requires the example to be run before it is written",
-        check_run_example,
-    ),
-    (1, 1): (
-        "the command and result are recorded in the pull request",
-        check_command_and_result,
-    ),
-    (1, 2): ("a session quote is evidence, not a fact", check_quote_is_evidence),
-    (2, 0): ("a tool claim names the version tested", check_version),
-    (2, 1): ("a flag or behaviour claim names the subcommand tested", check_subcommand),
-    (2, 2): ("a blanket claim is split or dropped", check_no_blanket),
-    (3, 0): ("a description sentence stays under 25 words", check_word_cap),
-    (3, 1): ("the person's trigger phrases survive", check_trigger_phrases),
-    (3, 2): (
-        "the description is the only text OpenCode shows",
-        check_description_is_only_text,
-    ),
-    (4, 0): (
-        "a mechanical check becomes a script with an exit code",
-        check_script_exit_code,
-    ),
-    (4, 1): ("the script runs in the verification pass", check_script_runs_in_verify),
-    (5, 0): ("the linter runs on every changed file", check_linter_on_changes),
-    (5, 1): ("the linter counts reach the pull request body", check_counts_in_body),
-    (5, 2): (
-        "each remaining hard finding is named and justified",
-        check_justify_findings,
-    ),
-    (6, 0): ("the false 'global directory' claim is gone", check_no_false_claim),
-    (6, 1): ("the true reason names session start", check_true_reason),
-    (6, 2): ("the brief asks what ran and what did not", check_what_ran),
-    (6, 3): (
-        "the brief never tells the session to skip evals",
-        check_no_unconditional_skip,
-    ),
-    (7, 0): ("the self-review names all five criteria", check_five_criteria),
-    (7, 1): ("the verdict must agree with the findings", check_verdict_agrees),
-    (8, 0): ("a corrected claim is searched for in other copies", check_other_copies),
-    (8, 1): ("commit messages are corrected too", check_commit_messages),
-    (9, 0): (
-        "the whole description is capped, not only each sentence",
-        check_description_budget,
-    ),
-    (10, 0): (
-        "the conventions are read before a rule is written",
-        check_conventions_first,
-    ),
-    (10, 1): ("an existing rule is corrected, not repeated", check_correct_existing),
-    (11, 0): ("a check must fail on a planted defect", check_check_can_fail),
-    (12, 0): ("the repository's test command runs", check_test_command),
-    (13, 0): (
-        "the linter counts are compared before and after",
-        check_counts_before_after,
-    ),
-    (13, 1): ("the change adds no new linter finding", check_no_new_finding),
-    (14, 0): ("a generic description word is not a trigger", check_generic_word),
-    (15, 0): ("a rename updates every reference", check_rename_references),
-    (16, 0): ("the skill body holds only what every trigger needs", check_skill_body_lean),
-    (16, 1): ("long reference material moves into references/", check_references),
+    (1, 0): ("the brief names learn-from-sessions", check_names_skill),
+    (1, 1): ("the skill is loaded before anything is written", check_loaded_before),
+    (1, 2): ("the brief stops when the skill is missing", check_stops_when_missing),
+    (2, 0): ("one concern per commit", check_one_concern),
+    (2, 1): ("the paths and message come from the report", check_paths_from_report),
+    (2, 2): ("the tree is clean after the commits", check_clean_tree),
+    (3, 0): ("the Checked section reaches the body", check_checked_section),
+    (3, 1): ("the linter counts reach the body", check_linter_counts),
+    (3, 2): ("the evals run reach the body", check_evals_in_body),
+    (3, 3): ("the verdict reaches the body", check_verdict_in_body),
+    (4, 0): ("the pull request is never merged", check_never_merge),
+    (4, 1): ("the branch is never force-pushed", check_never_force_push),
+    (5, 0): ("the close comes after the pull request", check_close_after_pr),
+    (5, 1): ("a dirty checkout closes nothing", check_dirty),
+    (5, 2): ("a busy session closes nothing", check_busy),
+    (5, 3): ("the branch is kept", check_keeps_branch),
+    (5, 4): ("the session asks before closing its space", check_asks_about_space),
+    (6, 0): ("the report names the sessions read and not read", check_report_sessions),
+    (6, 1): ("the report names the claims checked and not", check_report_claims),
+    (7, 0): ("a repeating commit message is corrected", check_commit_message),
+    (7, 1): ("an outside copy is corrected where it lives", check_external_copy),
 }
 
 
@@ -347,10 +227,10 @@ def structural_problems(brief: Path) -> list[str]:
     problems = []
     if "{{" in text or "}}" in text:
         problems.append("an unfilled placeholder remains")
-    for number in range(1, 14):
+    for number in range(1, STEPS + 1):
         if f"\n{number}. **" not in text:
             problems.append(f"step {number} is missing")
-    for heading in ("# Sessions to read", "# Rules", "# What to do"):
+    for heading in HEADINGS:
         if heading not in text:
             problems.append(f"the {heading} heading is missing")
     return problems

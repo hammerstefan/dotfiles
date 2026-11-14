@@ -15,10 +15,12 @@ Two actors, and this skill is the first:
 
 - **This session**, in the source worktree, runs `hwt-wrapup` once and reports
   what it decided. It owns no step of its own.
-- **The reflection session**, in a worktree of its own, exports and reads the
-  transcripts. It writes the skills, guidance and memory. It opens the pull
-  request and closes the source worktree. Its whole world is the brief the
-  script writes for it.
+- **The reflection session**, in a worktree of its own, loads the
+  `learn-from-sessions` skill. The skill exports and reads the transcripts,
+  writes the skills and guidance, stages the change, and records what it
+  checked. The session then commits that change, opens the pull request,
+  retains the lessons in memory and closes the source worktree. Its whole world
+  is the brief the script writes for it.
 
 ## Why a script, not a conversation
 
@@ -89,23 +91,30 @@ printed. The person finds it in the sidebar, and the report names it.
 
 ## What the reflection session must satisfy
 
-The brief is a gate, not a wish list. Before the reflection session opens the
-pull request, it must:
+The brief is a gate, not a wish list. It names the `learn-from-sessions` skill
+and stops rather than improvises when that skill is absent.
 
-- run every example, and name the version and the subcommand behind every claim.
-- read the existing conventions, and correct one there rather than repeating it.
-- write a script for every mechanical check, and prove it fails on a planted
-  defect.
-- run the repository's test command and its linter, before and after the change,
-  and justify each hard finding that remains.
-- review its own change with the `review-agent-instructions` skill against five
-  criteria: context efficiency, reliability, description and trigger, script,
-  style.
-- make the verdict agree with its findings.
+The skill holds the extraction's gate. It runs every example, names the version
+and the subcommand, and reads the existing conventions. It writes a script for
+every mechanical check and proves that script fails on a planted defect. It also
+runs the tests and the linter before and after, and reviews the change on the
+five `review-agent-instructions` criteria. The skill's own evals hold those
+lessons.
 
-The gate comes from a review of skills and guidance from an earlier wrapup. That
+The brief's gate covers what happens after the extraction, before the pull
+request opens:
+
+- commit one concern per commit, from the concern map in the extraction report.
+- write the body from that report: its "Checked" section, the linter counts, the
+  evals run or not, and the self-review verdict.
+- never merge the pull request, and never force-push.
+- close the source worktree only after the pull request exists, and not while a
+  session is busy or the checkout is dirty.
+
+The gate came from a review of skills and guidance from an earlier wrapup. That
 review found a false git example, host facts that no longer held, and a blanket
-claim about a tool. `evals/` holds those lessons as assertions.
+claim about a tool. The extraction's evals hold those lessons as assertions. The
+evals here hold the wrapup's own.
 
 ## The files
 
@@ -113,13 +122,17 @@ claim about a tool. `evals/` holds those lessons as assertions.
 - `brief.md.tmpl` — the reflection session's brief, with `{{PLACEHOLDER}}`
   sections the script fills. Change the wording here, never in a generated
   brief. The next wrapup overwrites that file.
-- `evals/evals.json` — the assertions the brief must satisfy, one eval per
-  lesson from that review.
+- `evals/evals.json` — the assertions the brief must satisfy. The brief
+  delegates the extraction and never improvises it. It commits one concern per
+  commit, carries the report in the body, never merges, and closes last.
 - `evals/grade.py` — grades `brief.md.tmpl` and this file against them. Run it
-  after a change to either. `--render` also renders a fresh brief and checks it
-  for unfilled placeholders and missing steps:
+  after a change to either. `--render` also renders a fresh brief, checks it for
+  unfilled placeholders, and counts the steps it declares:
 
   ```sh
   python3 <skill dir>/evals/grade.py
   python3 <skill dir>/evals/grade.py --render --worktree <a worktree>
   ```
+
+The extraction itself is the `learn-from-sessions` skill, with its own
+`references/`, `scripts/sessions` and `evals/`. Change its instructions there.
