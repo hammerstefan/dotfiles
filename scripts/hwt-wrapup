@@ -583,8 +583,8 @@ def main() -> int:
     if args.dry_run:
         preview = run(hwt_args[:1] + ["-n"] + hwt_args[1:], check=False)
         for line in (preview.stdout or "").splitlines():
-            # hwt echoes the whole prompt in its herdr line; the brief is on
-            # disk, so keep it out of this session's context.
+            # The herdr line only restates the space command; the plan above
+            # already names the checkout.
             if line.startswith("hwt: herdr"):
                 continue
             say(f"  hwt       {one_line(line, 160)}")

@@ -66,12 +66,16 @@ at --base. Nothing is deleted: remove a worktree with
 `opencode --prompt <text>`, and `<agent> <text>` for the others. Use
 --argv when an agent wants different arguments than that. --task-file
 reads the same message from a file, for a prompt with several paragraphs
-and quotes in it that no sensible shell line would carry.
+and quotes in it that no sensible shell line would carry. When hwt creates
+the session itself (--model or --goal), the task is sent to that session
+instead, because opencode resubmits a --prompt that shares a command line
+with --session in the first new tab it opens (anomalyco/opencode#63839).
 
 --model pins the model of the opencode session. Its interactive command takes
 no --model, so hwt creates the session on opencode's background server with
-that model, and the tab opens it with --session. Without --model opencode
-creates a session on its configured default.
+that model, and the tab opens it with --session. The --task message is sent to
+that session, so the tab starts with it already there. Without --model
+opencode creates a session on its configured default.
 
 --goal gives the opencode session an objective and keeps it working until that
 objective is met. OpenCode's own /goal command holds the session to it: a
@@ -419,7 +423,14 @@ if [[ $dry_run -eq 1 ]]; then
 		else
 			printf 'hwt: session    session.create at %s with the configured default\n' "$path"
 		fi
-		preview_json="$(jq -cn --argjson a "$argv_json" '[$a[0], "--session", "<new>"] + $a[1:]')"
+		if [[ -n "$task" ]]; then
+			# The task is a message to the session, not an argument that
+			# would ride on the same command line as --session.
+			preview_json="$(jq -cn --argjson a "$argv_json" '[$a[0], "--session", "<new>"]')"
+			printf 'hwt: task       session.prompt on that session, %s characters\n' "${#task}"
+		else
+			preview_json="$(jq -cn --argjson a "$argv_json" '[$a[0], "--session", "<new>"] + $a[1:]')"
+		fi
 	fi
 	if [[ -n "$goal" ]]; then
 		printf 'hwt: goal       %s\n' "$goal"
@@ -452,9 +463,9 @@ fi
 
 # The model and the goal are both session properties. Create the session on
 # opencode's background server — never a private one — so every surface sees the
-# same session: the tab opens it with --session, and its first prompt lands on
-# it. A goal needs that id too, because it is set on the session through
-# opencode's own /goal command, which is not something a prompt can do.
+# same session and the tab opens it with --session. A goal needs that id too,
+# because it is set on the session through opencode's own /goal command, which
+# is not something a prompt can do.
 if [[ -n "$model" || -n "$goal" ]]; then
 	if [[ -n "$model" ]]; then
 		provider="${model%%/*}"
@@ -480,7 +491,15 @@ if [[ -n "$model" || -n "$goal" ]]; then
 	session_id="$(jq -r '.data.id // empty' <<<"$session_json" 2>/dev/null)" || session_id=""
 	[[ -n "$session_id" ]] ||
 		die "worktree created at $path, but the OpenCode session could not be read: $session_json"
-	argv_json="$(jq -c --arg s "$session_id" '[.[0], "--session", $s] + .[1:]' <<<"$argv_json")"
+	# --prompt must not share a command line with --session: opencode 2.3.0
+	# keeps that text past startup and submits it again in the first tab
+	# opened afterwards (anomalyco/opencode#63839), so a stray tab would start
+	# a second agent on the same brief. The task goes to the session below.
+	if [[ -n "$task" ]]; then
+		argv_json="$(jq -c --arg s "$session_id" '[.[0], "--session", $s]' <<<"$argv_json")"
+	else
+		argv_json="$(jq -c --arg s "$session_id" '[.[0], "--session", $s] + .[1:]' <<<"$argv_json")"
+	fi
 fi
 
 # Set the goal on the session. This is opencode's own /goal command, reached
@@ -493,6 +512,19 @@ if [[ -n "$goal" ]]; then
 	if ! goal_json="$(opencode api session.command --param sessionID="$session_id" \
 		--data "$goal_payload" 2>&1)"; then
 		die "worktree created at $path, but the goal could not be set on session $session_id: $goal_json"
+	fi
+fi
+
+# Send the task as the session's first user message, now that the session
+# exists. Nothing is attached yet, so this starts the turn on the server; the
+# tab opens that same session and shows it running. A goal's kickoff is a
+# synthetic notice and not a user message, so this lands as the first one, as
+# it does when the tab submits it.
+if [[ -n "$task" ]]; then
+	task_payload="$(jq -cn --arg t "$task" '{ text: $t }')"
+	if ! task_json="$(opencode api session.prompt --param sessionID="$session_id" \
+		--data "$task_payload" 2>&1)"; then
+		die "worktree created at $path, but the task could not be sent to session $session_id: $task_json"
 	fi
 fi
 

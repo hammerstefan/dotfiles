@@ -190,10 +190,14 @@ and say which default the new session will use instead. `--goal` and
 the configured default and sets the goal on it.
 
 `--model` does not start a private OpenCode server. `hwt` creates the session
-on OpenCode's background server and opens it with `--session`. Never replace
-that with `OPENCODE_CONFIG_CONTENT` or `--standalone`: pending `question`
-forms live in the server's memory, so a private server hides them from every
-other surface, the Questions panel included, while the session sits blocked.
+on OpenCode's background server and opens it with `--session`. The brief is a
+message to that session, sent before the space opens, never an argument on the
+same command line as `--session`: OpenCode resubmits such a `--prompt` in the
+first new tab opened afterwards, which would start a second agent on the same
+brief. Never replace the session with `OPENCODE_CONFIG_CONTENT` or
+`--standalone`: pending `question` forms live in the server's memory, so a
+private server hides them from every other surface, the Questions panel
+included, while the session sits blocked.
 
 The goal is set through OpenCode's own `/goal` command, on the session
 `hwt` created. It cannot be written into the prompt file: a prompt that starts
@@ -205,8 +209,9 @@ the checkout location and the space name must stay the ones Herdr's own
 "New worktree..." produces.
 
 Read the dry run: it prints the repository, the checkout, the session, the
-goal, and the exact `space.new` argv. The repository and checkout lines must
-name the repository and branch you meant, and the goal line must read the
+task, the goal, and the exact `space.new` argv. The repository and checkout
+lines must name the repository and branch you meant, the task line must count
+the characters of the brief you wrote, and the goal line must read the
 objective you wrote. Then run the second line. Use `--agent <kind>` only when
 the person asked for another agent.
 
