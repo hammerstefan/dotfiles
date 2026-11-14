@@ -1,0 +1,83 @@
+{
+  "skill_name": "review-agent-instructions",
+  "evals": [
+    {
+      "id": 1,
+      "name": "vague-description",
+      "prompt": "Review .opencode/skills/cache-cleanup/SKILL.md. Its description is 'Helps with code.'",
+      "expected_output": "A major finding under criterion (c): the description does not say what the skill does or when to use it. The review proposes a description with concrete trigger phrases and a not-ready verdict.",
+      "files": [],
+      "expectations": [
+        "The review names criterion (c) and marks the description as a major finding.",
+        "The review says the description does not name what the skill does.",
+        "The review proposes concrete trigger phrases from the skill's purpose, not a generic word.",
+        "The verdict is not ready, and it agrees with the finding."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "false-git-example",
+      "prompt": "Review this skill. It says `git branch feature/x-probe` cannot exist beside `feature/x`.",
+      "expected_output": "The reviewer runs the example in a scratch repository, finds that the two names coexist, and reports a major reliability finding with the real conflict shape, a name that is a directory prefix of another.",
+      "files": [],
+      "expectations": [
+        "The reviewer runs the git command before judging the claim.",
+        "The review reports that the two branch names coexist.",
+        "The review explains the real conflict shape: a name that is a directory prefix, such as feature/x/probe.",
+        "The finding is major and belongs to reliability."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "bloated-body",
+      "prompt": "Review this skill: its body is 900 lines, including a 400-line table of vendor limits that only one section uses.",
+      "expected_output": "A context-efficiency finding: the body loads on every trigger, so the vendor table moves to references/ and the skill points at it. The review names the cost and the action, not the size alone.",
+      "files": [],
+      "expectations": [
+        "The review names the body size and the 400-line vendor table.",
+        "The review explains that the body loads on every trigger.",
+        "The review recommends moving the vendor table to references/ and pointing at it from the skill.",
+        "The review does not call the size alone a defect without naming what to move."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "prose-check-becomes-a-script",
+      "prompt": "Review this AGENTS.md rule: 'Grep every changed file for banned words before you commit.'",
+      "expected_output": "A criterion (d) finding: the check has one right answer and no judgement, so it becomes a script with an exit code, output that names the failed file, and a place in the repository's test runner when one exists.",
+      "files": [],
+      "expectations": [
+        "The review names criterion (d) and recommends a script.",
+        "The review says the script needs an exit code and output that names the failed file.",
+        "The review says to add the check to the repository's test runner when one exists.",
+        "The review does not delete the rule; it moves the check into an executable."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "linter-counts-and-departures",
+      "prompt": "Review this skill. The linter reports 12 hard findings on the parent and 15 on the branch. The author says the linter is noisy.",
+      "expected_output": "A major criterion (e) finding: the change adds three hard findings. The review reports both counts, requires each remaining finding to be named and justified, and rejects 'the linter is noisy'.",
+      "files": [],
+      "expectations": [
+        "The review reports the before and after counts: 12 and 15.",
+        "The review marks the three new findings as a defect.",
+        "The review requires each remaining finding to be named and justified.",
+        "The review rejects 'the linter is noisy' as a justification."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "clean-skill-ready",
+      "prompt": "Review this skill. It passes the linter, every claim was tested, and its description is 42 words. Its only defect is a two-line table that belongs in references/.",
+      "expected_output": "The review reports a minor context-efficiency finding, no major finding, and a ready verdict, with the minor finding named.",
+      "files": [],
+      "expectations": [
+        "The review finds no major defect.",
+        "The review reports the two-line table as a minor context-efficiency finding.",
+        "The verdict is ready, and it names the minor finding.",
+        "The review does not invent a major finding to justify the review."
+      ]
+    }
+  ]
+}

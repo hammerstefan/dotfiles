@@ -95,8 +95,9 @@ pull request, it must:
   defect.
 - run the repository's test command and its linter, before and after the change,
   and justify each hard finding that remains.
-- review its own change against five criteria: context efficiency, reliability,
-  description and trigger, script, style.
+- review its own change with the `review-agent-instructions` skill against five
+  criteria: context efficiency, reliability, description and trigger, script,
+  style.
 - make the verdict agree with its findings.
 
 The gate comes from a review of skills and guidance from an earlier wrapup. That
