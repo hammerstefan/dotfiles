@@ -1,0 +1,131 @@
+{
+  "created": "2026-11-14",
+  "base": "clusters-v2.md (38 clusters: 23 kept or updated from the 2026-11-13 run, 13 new, 2 gaps found in the old digests)",
+  "selection": "Greedy over new-cluster coverage, one digest per concern, nine digests.",
+  "digests": [
+    {
+      "id": "ses_e25c7a726ffemkgd53YWrTUm02",
+      "concern": "documentation review",
+      "clusters": [
+        "C25",
+        "C14",
+        "C18"
+      ],
+      "why": "The parent of the readability review. It states the group split, the coverage proof against git ls-files, the negative control, and the rule that a child which searched instead of reading is sent back."
+    },
+    {
+      "id": "ses_e25b68d12ffe3XfAGBBJ5TE0P9",
+      "concern": "documentation verification",
+      "clusters": [
+        "C24",
+        "C25",
+        "C27"
+      ],
+      "why": "One of eight verification children, and the one that corrects citations, refuses an unactionable glossary finding, and labels a required approval as a proposed rule."
+    },
+    {
+      "id": "ses_e25afbe31ffe7j4d6XUKNu1fnQ",
+      "concern": "documentation fix",
+      "clusters": [
+        "C26",
+        "C30",
+        "C33"
+      ],
+      "why": "A fix child over the research records. It states the historical-record rule, the do-not-guess rule, the fixed/open report, and the parallel edit boundary."
+    },
+    {
+      "id": "ses_e28783289ffeXXihkFz6Kc9g0d",
+      "concern": "pull request review and rebase",
+      "clusters": [
+        "C8",
+        "C19",
+        "C28",
+        "C36"
+      ],
+      "why": "The PR #74 review. It probes host tool versions, force-pushes with a lease, previews the rebase with git merge-tree, and rejects four quoted outputs that no record holds."
+    },
+    {
+      "id": "ses_e28a815b6ffef5Rh5JYpS1kH2k",
+      "concern": "decision record",
+      "clusters": [
+        "C29"
+      ],
+      "why": "The ADR 0010 fix after a rebase. The person's words are the rule: re-validate the findings, then fix them, and re-run the gate the rebase changed."
+    },
+    {
+      "id": "ses_e28050c89ffe6Av0kFiLl7jMeO",
+      "concern": "wayfinding",
+      "clusters": [
+        "C12",
+        "C21"
+      ],
+      "why": "The frontier spawn session. It states the branch prefix by ticket type, the model switch that must reach every remaining spawn, and the goal for a grilling ticket. Its lessons belong to the global hwt skill, so it also tests whether a model files them in the wrong repository."
+    },
+    {
+      "id": "ses_e2566d3e8ffeXoezjNVxLv37Je",
+      "concern": "fence and tests",
+      "clusters": [
+        "C31"
+      ],
+      "why": "The property-test session. It states the oracle-from-contract rule, the failure proof against pre-fix code, and the separate commit."
+    },
+    {
+      "id": "ses_e2571af5bffeMWFmj71Q1iKsdE",
+      "concern": "service rename",
+      "clusters": [
+        "C32"
+      ],
+      "why": "The rename request. It states the host state a rename strands and the down-then-up order, which retire-a-name does not."
+    },
+    {
+      "id": "ses_e28a683a5ffe16KwNIwHs02TNE",
+      "concern": "ticket close-out",
+      "clusters": [
+        "C34"
+      ],
+      "why": "The nested-LXD wrapup. It states that future work is captured in extant or new tickets when a research ticket closes."
+    }
+  ],
+  "outside_the_bundle": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "C7",
+    "C9",
+    "C10",
+    "C11",
+    "C13",
+    "C14",
+    "C15",
+    "C16",
+    "C17",
+    "C18",
+    "C20",
+    "C22",
+    "C23",
+    "C35",
+    "C37",
+    "C38"
+  ],
+  "covered_clusters": [
+    "C8",
+    "C12",
+    "C19",
+    "C21",
+    "C24",
+    "C25",
+    "C26",
+    "C27",
+    "C28",
+    "C29",
+    "C30",
+    "C31",
+    "C32",
+    "C33",
+    "C34",
+    "C36"
+  ]
+}
