@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+"""List and export the OpenCode sessions of a directory.
+
+`learn-from-sessions` owns this script, and `scripts/hwt-wrapup` calls it, so
+both find sessions the same way.
+
+    sessions list [--directory DIR] [--exclude-tree ID] [--session ID]
+    sessions export ID --out FILE
+
+`list` prints JSON:
+
+    {"directory": ..., "fallback": false, "newest": "ses_...",
+     "sessions": [{"id", "parent_id", "title", "time_created",
+                   "messages", "bytes"}],
+     "lookup": {"id": ..., "directory": ...} | null}
+
+`fallback` is true when the store could not be read and the list came from
+`opencode session list`, which holds top-level sessions only. `newest` is the
+newest top-level session at or under the directory. `lookup` answers where one
+session lives, so a caller can check that it belongs to the directory it was
+given.
+
+Exit 0 on success, 2 on a usage error, 3 when neither the store nor the CLI can
+be read, 4 when an export fails.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sqlite3
+import subprocess
+import sys
+from pathlib import Path
+
+EXIT_USAGE = 2
+EXIT_UNREADABLE = 3
+EXIT_EXPORT = 4
+
+DB = Path(
+    os.environ.get("OPENCODE_DB")
+    or Path.home() / ".local/share/opencode/opencode.db"
+)
+
+
+class Failed(Exception):
+    """A read that nothing can work around. The message is the reason."""
+
+
+def emit(value: dict) -> None:
+    print(json.dumps(value, indent=2), flush=True)
+
+
+def connect() -> sqlite3.Connection | None:
+    """A read-only handle on the store, or None when it cannot be opened."""
+    try:
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True, timeout=10)
+    except sqlite3.Error:
+        return None
+    con.row_factory = sqlite3.Row
+    return con
+
+
+def store_rows(con: sqlite3.Connection, directory: str,
+               exclude_tree: str | None) -> list[dict]:
+    """Every session at or under `directory`, minus the excluded tree."""
+    body = """
+        select s.id, s.parent_id, s.title, s.time_created,
+               (select count(*) from session_message m
+                 where m.session_id = s.id) as messages,
+               (select ifnull(sum(length(m.data)), 0) from session_message m
+                 where m.session_id = s.id) as bytes
+        from session_v2 s
+        where (s.directory = ? or instr(s.directory, ? || '/') = 1)
+    """
+    params: list[str] = [directory, directory]
+    if exclude_tree:
+        body = """
+            with recursive mine(id) as (
+              select ?
+              union all
+              select s.id from session_v2 s join mine m on s.parent_id = m.id
+            )
+        """ + body + " and s.id not in (select id from mine)"
+        params = [exclude_tree] + params
+    body += " order by s.time_created"
+    return [dict(row) for row in con.execute(body, params).fetchall()]
+
+
+def store_newest(con: sqlite3.Connection, directory: str) -> str | None:
+    row = con.execute(
+        """
+        select id from session_v2
+        where (directory = ? or instr(directory, ? || '/') = 1)
+          and parent_id is null
+        order by time_created desc
+        limit 1
+        """,
+        (directory, directory),
+    ).fetchone()
+    return row[0] if row else None
+
+
+def store_where(con: sqlite3.Connection, session: str) -> str | None:
+    row = con.execute("select directory from session_v2 where id = ?",
+                      (session,)).fetchone()
+    return row[0] if row else None
+
+
+def cli_rows() -> list[dict] | None:
+    """The CLI's list, newest first, or None when it cannot be read."""
+    try:
+        proc = subprocess.run(
+            ["opencode", "session", "list", "--format", "json", "-n", "1000"],
+            capture_output=True, text=True, timeout=180,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+    if proc.returncode != 0:
+        return None
+    try:
+        listed = json.loads(proc.stdout or "[]")
+    except json.JSONDecodeError:
+        return None
+    rows = []
+    for item in listed:
+        if not isinstance(item, dict):
+            continue
+        rows.append({
+            "id": item.get("id", ""),
+            "parent_id": None,
+            "title": item.get("title", ""),
+            "time_created": item.get("created", 0),
+            "messages": 0,
+            "bytes": 0,
+            "directory": item.get("directory") or "",
+        })
+    return rows
+
+
+def inside(row_directory: str, directory: str) -> bool:
+    return row_directory == directory or row_directory.startswith(directory + "/")
+
+
+def cmd_list(args: argparse.Namespace) -> int:
+    directory = os.path.abspath(args.directory or ".")
+    payload: dict = {
+        "directory": directory,
+        "fallback": False,
+        "newest": None,
+        "sessions": [],
+        "lookup": None,
+    }
+
+    used_store = False
+    con = connect() if DB.is_file() else None
+    if con is not None:
+        try:
+            payload["sessions"] = store_rows(con, directory, args.exclude_tree)
+            payload["newest"] = store_newest(con, directory)
+            if args.session:
+                payload["lookup"] = {
+                    "id": args.session,
+                    "directory": store_where(con, args.session),
+                }
+            used_store = True
+        except sqlite3.Error:
+            payload["sessions"] = []
+            payload["newest"] = None
+        finally:
+            con.close()
+
+    if not used_store:
+        rows = cli_rows()
+        if rows is None:
+            raise Failed("neither the session store nor `opencode session list` "
+                         "can be read")
+        payload["fallback"] = True
+        listed = [row for row in rows if inside(row["directory"], directory)]
+        payload["sessions"] = [
+            {key: value for key, value in row.items() if key != "directory"}
+            for row in listed
+        ]
+        payload["newest"] = listed[0]["id"] if listed else None
+        if args.session:
+            match = next((row for row in rows if row["id"] == args.session), None)
+            payload["lookup"] = {
+                "id": args.session,
+                "directory": (match or {}).get("directory") or None,
+            }
+
+    emit(payload)
+    return 0
+
+
+def cmd_export(args: argparse.Namespace) -> int:
+    try:
+        proc = subprocess.run(
+            ["opencode", "session", "export", args.session],
+            capture_output=True, text=True, timeout=300,
+        )
+    except FileNotFoundError:
+        raise Failed("opencode is not on PATH")
+    except subprocess.TimeoutExpired:
+        raise Failed("`opencode session export` timed out after 300s")
+    if proc.returncode != 0:
+        lines = (proc.stderr or proc.stdout).strip().splitlines()
+        raise Failed(lines[-1] if lines else
+                     f"`opencode session export` exited {proc.returncode}")
+    try:
+        trace = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        raise Failed("the export is not JSON")
+
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(proc.stdout)
+    emit({
+        "id": args.session,
+        "path": str(out),
+        "messages": len(trace.get("messages", []) or []),
+        "bytes": len(proc.stdout.encode()),
+    })
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="sessions",
+        description="List and export the OpenCode sessions of a directory.",
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    listing = sub.add_parser("list", help="print the sessions of a directory")
+    listing.add_argument("--directory", metavar="DIR",
+                         help="the checkout or worktree (default: this directory)")
+    listing.add_argument("--exclude-tree", metavar="ID",
+                         help="omit this session and its children")
+    listing.add_argument("--session", metavar="ID",
+                         help="also report where this session lives")
+    listing.set_defaults(func=cmd_list)
+
+    export = sub.add_parser("export", help="write one session's export to a file")
+    export.add_argument("session", metavar="ID")
+    export.add_argument("--out", metavar="FILE", required=True,
+                        help="the file to write")
+    export.set_defaults(func=cmd_export)
+
+    args = parser.parse_args()
+    try:
+        return args.func(args)
+    except Failed as failed:
+        print(f"sessions: {failed}", file=sys.stderr)
+        return EXIT_EXPORT if args.command == "export" else EXIT_UNREADABLE
+
+
+if __name__ == "__main__":
+    sys.exit(main())

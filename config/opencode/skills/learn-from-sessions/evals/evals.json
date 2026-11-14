@@ -1,0 +1,209 @@
+{
+  "skill_name": "learn-from-sessions",
+  "subject": "The instructions an extraction reads: SKILL.md, references/, and the review-agent-instructions skill it links for the five criteria.",
+  "note": "These evals grade the instructions, not a whole extraction run. A full run costs a session and a pull request, so the deterministic artifact is graded on every change and a real extraction is the final check. Each expectation comes from the review of the skills and guidance in PR 62 of monitor-agent (session ses_e295a5760ffeYWj7OxODCSSkyg), carried over from the hwt-wrapup suite when the extraction moved here. Evals 3, 9, 14 and 16 grade the linked review-agent-instructions text, because this skill delegates the description budget, the triggers and the lean body instead of restating them. Every other eval grades this skill's own text, so deleting a rule here fails even when the linked skill still states it.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "claims-are-checked-not-inherited",
+      "prompt": "One session recorded that two branch names collide, and the lesson is about to become a skill.",
+      "expected_output": "The instructions require every example to be run before it is written, the command and its result to be recorded in the extraction report, and a session quote to be treated as evidence rather than as a fact.",
+      "files": [],
+      "expectations": [
+        "The instructions require every example to be run before it is written.",
+        "The instructions require the command and its result to be recorded in the extraction report.",
+        "The instructions state that a session quote is evidence, not a fact."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "tool-facts-name-their-scope",
+      "prompt": "A session says the lxc client has no -p flag, and the lesson becomes an AGENTS.md rule.",
+      "expected_output": "A claim about a tool names the version tested, a claim about flags names the subcommand tested, and a blanket claim about a binary is split or dropped.",
+      "files": [],
+      "expectations": [
+        "A claim about a tool or command names the version tested.",
+        "A claim about flags or behaviour names the subcommand tested.",
+        "A blanket claim about a binary is split per subcommand or dropped."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "description-is-the-trigger",
+      "prompt": "The lesson becomes a new skill, and OpenCode will inject its frontmatter description into every session.",
+      "expected_output": "Each description sentence stays under 25 words, the person's trigger phrases survive, and the description is treated as the only text OpenCode shows before it loads the skill.",
+      "files": [],
+      "expectations": [
+        "Each description sentence stays under 25 words.",
+        "The person's trigger phrases survive the rewrite.",
+        "The description is the only text OpenCode shows before it loads the skill."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "mechanical-work-becomes-a-script",
+      "prompt": "The lesson is the rule 'grep the changed files for banned words before the commit'.",
+      "expected_output": "A mechanical check becomes a script with an exit code, and it runs with the other checks.",
+      "files": [],
+      "expectations": [
+        "A mechanical check is a script with an exit code rather than a prose rule.",
+        "The script runs with the other checks."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "style-conformance-is-measured",
+      "prompt": "The repository has a writing guide and a style linter.",
+      "expected_output": "The linter runs on every changed file, its counts reach the extraction report, and each remaining hard finding is named and justified.",
+      "files": [],
+      "expectations": [
+        "The linter runs on every changed file.",
+        "The linter counts reach the extraction report.",
+        "Each remaining hard finding is named and justified."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "a-skipped-eval-has-a-true-reason",
+      "prompt": "The session considers not running the skill-creator evals.",
+      "expected_output": "The instructions never claim that project skills are unloadable before merge, give the true reason (skills are discovered at session start), require the run to say which evals it ran and which it did not, and never tell the session to skip evals outright.",
+      "files": [],
+      "expectations": [
+        "The instructions do not claim that project skills are unloadable before merge or that OpenCode reads skills from the global directory.",
+        "The instructions give the true reason a skill may not load in the session that created it: skills are discovered at session start.",
+        "The instructions require the run to say which evals it ran and which it did not.",
+        "The instructions never tell the session to skip its eval runs unconditionally."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "the-review-gate-precedes-the-stage",
+      "prompt": "Before it stages the change, the extraction reviews what it wrote.",
+      "expected_output": "A self-review on the five criteria (context efficiency, reliability, description and trigger, deterministic script, style), with a verdict that agrees with the findings.",
+      "files": [],
+      "expectations": [
+        "The instructions require a self-review on context efficiency, reliability, description and trigger quality, scriptability, and style.",
+        "The verdict must agree with the findings."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "one-correction-reaches-every-copy",
+      "prompt": "The same false claim appears in a skill, AGENTS.md, and the knowledge base, and in a commit message.",
+      "expected_output": "A search for the other copies of a corrected claim, including commit messages, and every copy corrected in the same change.",
+      "files": [],
+      "expectations": [
+        "The instructions require a search for other copies of a corrected claim.",
+        "A commit message that repeats a corrected claim is named for the caller."
+      ]
+    },
+    {
+      "id": 9,
+      "name": "the-description-budget-is-bounded",
+      "prompt": "The skill description is injected into every session, and the lesson becomes a skill.",
+      "expected_output": "The whole description is capped, not only each sentence.",
+      "files": [],
+      "expectations": [
+        "The whole description is capped, not only each sentence."
+      ]
+    },
+    {
+      "id": 10,
+      "name": "existing-conventions-come-first",
+      "prompt": "A lesson looks like a new rule, and the repository already has a rule that covers it.",
+      "expected_output": "The repository's conventions and existing skills are read before a rule is written, and an existing rule is corrected instead of repeated.",
+      "files": [],
+      "expectations": [
+        "The repository's conventions and existing skills are read before a rule is written.",
+        "An existing rule is corrected rather than repeated in a new place."
+      ]
+    },
+    {
+      "id": 11,
+      "name": "a-check-must-be-able-to-fail",
+      "prompt": "The lesson becomes a check script, and its first run passes.",
+      "expected_output": "The script must fail on a planted defect before its pass is trusted.",
+      "files": [],
+      "expectations": [
+        "A check must fail on a planted defect before its pass is trusted."
+      ]
+    },
+    {
+      "id": 12,
+      "name": "the-repository-tests-run",
+      "prompt": "The source repository has a test command.",
+      "expected_output": "The repository's test command runs with the other checks.",
+      "files": [],
+      "expectations": [
+        "The repository's test command runs."
+      ]
+    },
+    {
+      "id": 13,
+      "name": "linter-counts-are-before-and-after",
+      "prompt": "The change touches files that already carry linter findings.",
+      "expected_output": "The linter counts before and after the change, no new finding, and both counts in the extraction report.",
+      "files": [],
+      "expectations": [
+        "The linter counts are compared before and after the change.",
+        "The change adds no new finding."
+      ]
+    },
+    {
+      "id": 14,
+      "name": "the-description-names-specific-situations",
+      "prompt": "The skill is described with a word that many requests contain.",
+      "expected_output": "Situations that only that skill covers, and a warning that a generic word alone triggers it everywhere.",
+      "files": [],
+      "expectations": [
+        "A generic word alone triggers the skill everywhere."
+      ]
+    },
+    {
+      "id": 15,
+      "name": "a-rename-updates-every-reference",
+      "prompt": "A skill is renamed.",
+      "expected_output": "Every place a rename touches is updated.",
+      "files": [],
+      "expectations": [
+        "The skill ID, frontmatter name, heading, AGENTS.md and trigger phrases are updated after a rename."
+      ]
+    },
+    {
+      "id": 16,
+      "name": "the-skill-body-stays-lean",
+      "prompt": "A lesson becomes a skill with long tables and worked examples.",
+      "expected_output": "The body holds only what the reader needs on every trigger, and long reference material moves into references/, which loads on demand.",
+      "files": [],
+      "expectations": [
+        "The body holds only what the reader needs on every trigger.",
+        "Long reference material moves into references/."
+      ]
+    },
+    {
+      "id": 17,
+      "name": "the-extraction-stages-and-never-commits",
+      "prompt": "The extraction has finished writing its files.",
+      "expected_output": "It stages the change, commits nothing, records which paths belong to which concern, and leaves the branch to its caller.",
+      "files": [],
+      "expectations": [
+        "The extraction stages the change and commits nothing.",
+        "The extraction records which paths belong to which concern.",
+        "The extraction never creates or switches a branch."
+      ]
+    },
+    {
+      "id": 18,
+      "name": "the-report-carries-what-the-caller-needs",
+      "prompt": "Steps after the extraction write a pull request body, memory documents and a report.",
+      "expected_output": "The extraction report holds the concern map, the checked claims, the linter counts, the evals run, the verdict, and the sessions read and not read.",
+      "files": [],
+      "expectations": [
+        "The extraction report holds the concern map with a commit message per concern.",
+        "The extraction report holds a Checked section.",
+        "The extraction report names the sessions read and the ones not read.",
+        "The extraction report holds the self-review verdict."
+      ]
+    }
+  ]
+}
