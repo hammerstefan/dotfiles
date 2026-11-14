@@ -262,6 +262,23 @@ def check_test_command(b: str):
     return bool(find(b, r"test command")), evidence(b, r"test command")
 
 
+def check_test_command_when_relevant(b: str):
+    pattern = r"(test command|test suite|test runner)[^.]{0,140}reach"
+    return bool(find(b, pattern)), evidence(b, pattern)
+
+
+def check_covering_checks_named(b: str):
+    pattern = r"check[s]?[^.]{0,60}cover[^.]{0,60}changed path"
+    return bool(find(b, pattern)), evidence(b, pattern)
+
+
+def check_report_suite_reason(b: str):
+    pattern = r"(\b(why|reason)\b[^.]{0,80}(test command|test suite|test runner)|(test command|test suite|test runner)[^.]{0,80}\b(why|reason)\b)"
+    return bool(find(b, pattern) and find(b, r"extraction report")), evidence(
+        b, pattern
+    )
+
+
 def check_counts_before_after(b: str):
     pattern = r"before and after"
     return bool(find(b, pattern) and find(b, r"count")), evidence(b, pattern)
@@ -397,6 +414,18 @@ CHECKS = {
     (18, 1): ("the report holds a Checked section", check_checked_section),
     (18, 2): ("the report names the sessions read and not read", check_report_sessions),
     (18, 3): ("the report holds the verdict", check_report_verdict),
+    (19, 0): (
+        "the test command runs when the change can reach the code it tests",
+        check_test_command_when_relevant,
+    ),
+    (19, 1): (
+        "the run names the checks that cover the changed paths when the suite cannot",
+        check_covering_checks_named,
+    ),
+    (19, 2): (
+        "the extraction report states why the suite ran or did not run",
+        check_report_suite_reason,
+    ),
 }
 
 

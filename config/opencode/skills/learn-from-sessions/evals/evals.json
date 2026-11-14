@@ -204,6 +204,18 @@
         "The extraction report names the sessions read and the ones not read.",
         "The extraction report holds the self-review verdict."
       ]
+    },
+    {
+      "id": 19,
+      "name": "the-suite-is-named-or-its-absence-is-explained",
+      "prompt": "The extraction changed skills and guidance only, and the repository's test command covers application code.",
+      "expected_output": "The instructions require the repository's test command when the change can reach the code it tests, name the checks that cover the changed paths when it cannot, and require the reason in the extraction report.",
+      "files": [],
+      "expectations": [
+        "The instructions run the repository's test command when the change can reach the code it tests.",
+        "The instructions name the checks that cover the changed paths when the suite cannot.",
+        "The extraction report states why a suite was or was not run."
+      ]
     }
   ]
 }

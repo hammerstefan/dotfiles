@@ -94,17 +94,19 @@ what you checked. It commits nothing. Its caller commits.
    the ignore rule. Put the skills where the repository already keeps tracked
    skills, and say so in the extraction report.
 
-7. **Run the checks.** Run every script you wrote, and the repository's test
-   command. Run the linter on every changed file, before and after your change.
-   Put both counts in the extraction report, and add no new finding. Run the
-   banned-word grep over every changed file.
+7. **Run the checks.** Run every script you wrote. Run the repository's test
+   command when the change can reach the code it tests. When the change cannot
+   reach that code, name the checks that cover the changed paths. Say in the
+   extraction report why the test command ran or did not run. Run the linter on
+   every changed file, before and after your change. Put both counts in the
+   extraction report, and add no new finding. Run the banned-word grep over
+   every changed file.
 
    Prove each check fails on a planted defect before you trust its pass. A check
    that cannot fail proves nothing. A step with one right answer and no
    judgement is a script. It has an exit code and a line that names what failed.
    A banned-word grep, a header-spacing check, a branch-name collision test and
-   a file-list check are scripts. Run it with the other checks. Join the
-   repository's test runner when it has one.
+   a file-list check are scripts. Run it with the other checks.
 
 8. **Review your own change, then stage it.** Use the `review-agent-instructions`
    skill for the pass. Read every changed file whole. For each criterion, state
