@@ -119,6 +119,13 @@ what you checked. It commits nothing. Its caller commits.
 
    Then `git add` every file you changed and write the extraction report.
 
+   Run `scripts/check-extraction --repo <the checkout> --report
+   <state>/extraction.md --digests <state>/digests`. It checks the rules that
+   have one right answer: the write scope, the report's sections, the secret
+   scan, the ignore rule and the session accounting. A non-zero exit means the
+   extraction is not ready. Correct every failing check and run it again. The
+   check reads the report, so run it after the report is written.
+
 ## The extraction report
 
 Write `<state>/extraction.md`. It is the one thing the steps after this skill
@@ -145,4 +152,7 @@ read. It holds:
   digest shape.
 - `references/claims.md` — how to check a claim, scope it, and reach every copy.
 - `scripts/sessions` — `list` and `export` for the sessions of a directory.
+- `scripts/check-extraction` — the mechanical checks the extraction must pass
+  before it is ready. `scripts/checks.py` holds the rules, shared with the
+  evaluation gates.
 - `evals/` — the assertions this skill and its references must satisfy.

@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+"""Check an extraction against the rules `learn-from-sessions` can verify.
+
+The extraction ends by writing `<state>/extraction.md`. Before the change is
+ready, the rules that have one right answer are checked rather than read:
+where the change landed, what the report holds, that nothing secret was
+written, that no new skill is hidden by an ignore rule, and that every session
+is accounted for. `scripts/checks.py` holds them; this script runs them over
+one checkout.
+
+    check-extraction [--repo DIR] [--report FILE] [--digests DIR] [--json]
+
+`--repo` is the checkout (default: this directory). `--report` is the
+extraction report (default: `<repo>/../state/extraction.md`, the state
+directory the skill describes). `--digests` is the directory holding one
+`ses_*.md` per session read; without it, session accounting is skipped rather
+than failed, because a caller may not have the digests at hand.
+
+These are gates 3 to 7 of `evals/gates.py`, with the same labels and the same
+detail lines, so an evaluation verdict and a live verdict can be compared
+directly. Gates 1 and 2 read the evaluation's `meta.json` and have no runtime
+meaning.
+
+`--json` prints the same rows `gates.py --json` prints for one run.
+
+Exit 0 when every check passes, 1 when one fails, 2 on a usage error.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import checks  # noqa: E402  (the sibling module, imported after the path fix)
+
+EXIT_READY = 0
+EXIT_NOT_READY = 1
+EXIT_USAGE = 2
+
+
+def run_checks(
+    repo: Path, report: Path, digests: Path | None
+) -> list[dict]:
+    """Every runtime check's row for one extraction."""
+    rows: list[dict] = []
+
+    def add(label: str, outcome: tuple[bool, str, list[str]]) -> None:
+        passed, detail, findings = outcome
+        rows.append(
+            {"gate": label, "passed": passed, "detail": detail, "findings": findings}
+        )
+
+    add("3 write scope", checks.check_write_scope(repo))
+    add("4 extraction report", checks.check_report(report, str(report)))
+    add("5 no secrets or private paths",
+        checks.check_secrets(repo, report, str(report)))
+    add("6 skills are not ignored", checks.check_not_ignored(repo))
+    if digests is None:
+        rows.append(
+            {
+                "gate": "7 sessions read and not read",
+                "passed": True,
+                "detail": "skipped: no digests directory was given",
+                "findings": [],
+            }
+        )
+    else:
+        add(
+            "7 sessions read and not read",
+            checks.check_sessions_against_digests(report, digests, str(report)),
+        )
+    return rows
+
+
+def print_report(repo: Path, rows: list[dict]) -> None:
+    """One line per check, in the shape `gates.py` prints."""
+    print(f"== {repo}")
+    for row in rows:
+        mark = "PASS" if row["passed"] else "FAIL"
+        print(f"  gate {row['gate']}: {mark} - {row['detail']}")
+        for finding in row["findings"]:
+            print(f"    - {finding}")
+    print()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="check-extraction",
+        description="Check an extraction against the mechanical rules.",
+    )
+    parser.add_argument(
+        "--repo",
+        metavar="DIR",
+        type=Path,
+        default=Path("."),
+        help="the checkout the extraction changed (default: this directory)",
+    )
+    parser.add_argument(
+        "--report",
+        metavar="FILE",
+        type=Path,
+        help="the extraction report (default: <repo>/../state/extraction.md)",
+    )
+    parser.add_argument(
+        "--digests",
+        metavar="DIR",
+        type=Path,
+        help="the directory of ses_*.md digests, one per session read",
+    )
+    parser.add_argument("--json", action="store_true", help="print JSON")
+    args = parser.parse_args()
+
+    repo = args.repo
+    if not repo.is_dir():
+        parser.error(f"{repo} is not a directory")
+    repo = repo.resolve()
+
+    report = args.report or repo.parent / "state" / "extraction.md"
+    if args.digests is not None and not args.digests.is_dir():
+        parser.error(f"{args.digests} is not a directory")
+
+    rows = run_checks(repo, report, args.digests)
+    if args.json:
+        print(json.dumps(rows, indent=2))
+    else:
+        print_report(repo, rows)
+    return EXIT_READY if all(row["passed"] for row in rows) else EXIT_NOT_READY
+
+
+if __name__ == "__main__":
+    sys.exit(main())
