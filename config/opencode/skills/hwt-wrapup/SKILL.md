@@ -84,6 +84,9 @@ space, and what happens next.
 Report that in a few lines, then stop. Do not wait for the reflection session,
 and write nothing into its checkout.
 
+Its space opens behind this session, so the window stays where the plan was
+printed. The person finds it in the sidebar, and the report names it.
+
 ## What the reflection session must satisfy
 
 The brief is a gate, not a wish list. Before the reflection session opens the

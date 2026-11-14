@@ -139,16 +139,18 @@ For each passable ticket, in order:
 4. Dry run from this session's shell:
 
    ```sh
-   hwt -n -r "$repo" --agent opencode ${model:+--model "$model"} \
+   hwt -n -r "$repo" --agent opencode --no-focus ${model:+--model "$model"} \
        --task-file "/tmp/opencode/hwt-prompt-<slug>.md" \
        --goal-file "/tmp/opencode/hwt-goal-<slug>.md" "<branch>"
    ```
 
-5. Read the dry run. `hwt: repository` must be `$repo`, `hwt: checkout` and `hwt: herdr space.new` must name this branch, and `hwt: goal` must read the objective you wrote. Rewrite the `Checkout:` line with the printed path.
-6. Spawn, with the same command and no `-n`.
+5. Read the dry run. `hwt: repository` must be `$repo`, `hwt: checkout` and `hwt: herdr space.new` must name this branch, `hwt: focus` must say it stays on the space it is on now, and `hwt: goal` must read the objective you wrote. Rewrite the `Checkout:` line with the printed path.
+6. Spawn, with the same command and no `-n`; `--no-focus` stays.
 7. A refusal — non-zero exit, or a printed refusal — is recorded in `hwt`'s own words, and the loop continues with the next ticket. Nothing is deleted, no space is closed, no second branch is tried, and `--no-space` is not a fallback.
 
-The space is named after the branch, so the branch is the space name. The goal
+The space is named after the branch, so the branch is the space name. Each
+space opens behind this one, so the window stays here and the person reads this
+report: the new sessions wait in the sidebar, each running its ticket. The goal
 holds the session to the ticket's end state: a reviewer judges the transcript
 against the objective on every idle turn, and continues the work when it is not
 met yet. A ticket that needs a decision has the session ask for it with the

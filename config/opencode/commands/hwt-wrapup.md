@@ -13,6 +13,10 @@ session list, the brief and the goal, the dry run, and the spawn of the
 reflection session that reads the transcripts, opens the pull request and closes
 this worktree. Report what it printed, in a few lines, and stop.
 
+The reflection session gets a space of its own that opens behind this one: the
+window does not move, so the person reads the report where they asked for it
+and finds the new space waiting in the sidebar.
+
 `--dry-run` plans without spawning; `--keep` leaves this worktree open.
 
 If it exits 3 it printed `wrapup: refused: <check>`. Repeat that reason and stop:

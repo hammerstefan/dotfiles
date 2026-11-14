@@ -43,6 +43,7 @@ Options:
       --argv <json>     start this argv instead, e.g. '["codex","--no-daemon"]'
                         Herdr's own agent arguments; not combined with --task
       --no-space        only create the checkout; leave the window alone
+      --no-focus        open the space without taking the window to it
   -n, --dry-run         print the repository, checkout and command; make nothing
   -h, --help            show this text
 
@@ -57,6 +58,13 @@ it is on screen.
 
 The space you point at is not changed: the worktree gets a space of its own,
 named after its branch.
+
+--no-focus opens that space and starts its session, then leaves the Herdr
+window on the space it was on; the new space waits in the sidebar until the
+person selects it. Use it when the space is for work the person will come back
+to later — a review, a plan already reported — and not when they asked to go
+there. Herdr cannot make a space without showing it, so the window is moved for
+the moment the space is made and then put back.
 
 An existing branch is checked out as it is; otherwise the branch is created
 at --base. Nothing is deleted: remove a worktree with
@@ -110,6 +118,7 @@ task_file=""
 goal=""
 goal_file=""
 open_space=1
+move_focus=1
 dry_run=0
 
 while [[ $# -gt 0 ]]; do
@@ -171,6 +180,10 @@ while [[ $# -gt 0 ]]; do
 		;;
 	--no-space)
 		open_space=0
+		shift
+		;;
+	--no-focus)
+		move_focus=0
 		shift
 		;;
 	-n | --dry-run)
@@ -273,6 +286,9 @@ fi
 
 [[ $open_space -eq 1 || -z "$space_want" ]] ||
 	die "--no-space opens nothing, so --space makes no sense with it"
+
+[[ $open_space -eq 1 || $move_focus -eq 1 ]] ||
+	die "--no-space opens nothing, so --no-focus makes no sense with it"
 
 if [[ -n "$agent" ]]; then
 	[[ "$agent" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] ||
@@ -435,6 +451,9 @@ if [[ $dry_run -eq 1 ]]; then
 	if [[ -n "$goal" ]]; then
 		printf 'hwt: goal       %s\n' "$goal"
 	fi
+	if [[ $move_focus -eq 0 ]]; then
+		printf 'hwt: focus      stays on the space it is on now\n'
+	fi
 	printf 'hwt: herdr      %s\n' "$([[ -n "$preview_json" ]] &&
 		printf 'space.new --folder %s --argv %s' "$path" "$preview_json" ||
 		printf 'space.new --folder %s' "$path")"
@@ -528,10 +547,34 @@ if [[ -n "$task" ]]; then
 	fi
 fi
 
+# --no-focus: remember the space the window is on, so it can be given back once
+# the new one exists. Nothing else in this script changes the window.
+prior_space=""
+if [[ $move_focus -eq 0 ]]; then
+	command -v jq >/dev/null 2>&1 || die "required command 'jq' not found on PATH"
+	prior_space="$(herdr-app status 2>/dev/null | jq -r '.space // empty')" ||
+		prior_space=""
+fi
+
 space_args=(do space.new --folder "$path")
 [[ -n "$argv_json" ]] && space_args+=(--argv "$argv_json")
 
-herdr-app "${space_args[@]}" ||
+space_json="$(herdr-app "${space_args[@]}")" ||
 	die "worktree created at $path, but Herdr rejected the space"
+printf '%s\n' "$space_json"
+
+# Give the window back to the space it was on. Only when it is still on the new
+# space: a person who has moved on already chose where to be, and is left there.
+if [[ $move_focus -eq 0 ]]; then
+	new_space="$(jq -r '.space // empty' <<<"$space_json" 2>/dev/null)" ||
+		new_space=""
+	now_space="$(herdr-app status 2>/dev/null | jq -r '.space // empty')" ||
+		now_space=""
+	if [[ -n "$prior_space" &&
+		( -z "$new_space" || -z "$now_space" || "$now_space" == "$new_space" ) ]]; then
+		herdr-app do space.select --id "$prior_space" >/dev/null 2>&1 ||
+			echo "hwt: warning: the space was made, but the window could not be put back where it was" >&2
+	fi
+fi
 
 echo "hwt: $branch -> $path" >&2

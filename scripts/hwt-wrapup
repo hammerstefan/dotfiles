@@ -5,7 +5,8 @@ pull request, then close the worktree.
 This is the deterministic half of the `hwt-wrapup` skill. It runs from the
 session that lives in the worktree to wrap up, and it does every step that has
 one right answer: the refusal checks, the session list, the brief, the goal,
-the dry run and the spawn.
+the dry run and the spawn. The space it starts opens behind this session, so
+the person reads the plan where they asked for it.
 
 Why a script: a wrapup is triggered at the end of a long session, and the
 harness re-sends that session's whole transcript on every turn. Measured on
@@ -383,7 +384,8 @@ def main() -> int:
     parser.add_argument("--keep", action="store_true",
                         help="wrap up without closing the source worktree")
     parser.add_argument("--spawn", action="store_true",
-                        help="run hwt and start the reflection session")
+                        help="run hwt and start the reflection session; its "
+                             "space opens without taking the window")
     parser.add_argument("--session", metavar="ID",
                         help="the trigger session (default: this session)")
     parser.add_argument("--notes", metavar="FILE",
@@ -546,7 +548,10 @@ def main() -> int:
                 model += f"#{chosen['variant']}"
 
     checkout = values["CHECKOUT"]
-    hwt_args = ["hwt", "-r", source, "-b", base, "--agent", "opencode"]
+    # The reflection session's space opens behind the source session: the
+    # person stays where the plan they are reading was printed.
+    hwt_args = ["hwt", "-r", source, "-b", base, "--agent", "opencode",
+                "--no-focus"]
     if model:
         hwt_args += ["--model", model]
     hwt_args += ["--task-file", str(brief), "--goal-file", str(state / "goal.md"),

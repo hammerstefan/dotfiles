@@ -51,3 +51,9 @@ _Avoid_: summary, abstract
 One kind of change in a wrapup's pull request — skills, guidance documents, or
 glossary — each carried by its own commit.
 _Avoid_: topic, section
+
+**Focus**:
+The space, tab and pane the Herdr window shows and gives the keyboard to. A
+space spawned for another session opens behind the one that spawned it, without
+taking the focus.
+_Avoid_: selection, active space
