@@ -15,10 +15,27 @@ The worktree a wrapup reads and then closes.
 _Avoid_: old worktree, target worktree
 
 **Wrapup**:
-The operation that turns the sessions of a source worktree into repo-level
-skills, guidance and memory, opens a pull request, and closes the source
-worktree.
+The operation that closes a source worktree: an extraction over its sessions,
+a pull request, and the close.
 _Avoid_: cleanup, teardown, harvest
+
+**Extraction**:
+The operation that turns session evidence into repository-level knowledge. It
+produces one digest per session, a synthesis against the existing conventions, a
+check of every claim, and a staged change. A wrapup runs one.
+_Avoid_: harvest, mining, distillation
+
+**Staged change**:
+The knowledge an extraction produced in the repository and did not commit,
+grouped into concerns. The extraction commits nothing. Its caller commits.
+_Avoid_: pending change, working tree
+
+**Extraction report**:
+The record an extraction hands to the steps after it. It holds each lesson and
+where it landed, the claims checked, the counts and evals, the self-review
+verdict, and the concerns. A pull request body, a memory document and a wrapup
+report come from it.
+_Avoid_: findings file, summary
 
 **Reflection session**:
 The session a wrapup spawns, in a worktree of its own, to read the transcripts
@@ -43,13 +60,14 @@ future session would otherwise have to learn again.
 _Avoid_: insight, takeaway, learning
 
 **Digest**:
-A structured summary of one worktree session, produced from its transcript, and
-the only input the synthesis reads in full.
+A structured summary of one worktree session, produced by an extraction from
+its transcript, and the only input the synthesis reads in full.
 _Avoid_: summary, abstract
 
 **Concern**:
-One kind of change in a wrapup's pull request — skills, guidance documents, or
-glossary — each carried by its own commit.
+One kind of change in an extraction's staged change, such as skills, guidance or
+glossary. It records the paths that belong to it, so a wrapup can commit each as
+its own commit.
 _Avoid_: topic, section
 
 **Focus**:

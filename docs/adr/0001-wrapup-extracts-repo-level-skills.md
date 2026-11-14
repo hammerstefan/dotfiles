@@ -17,6 +17,9 @@ Closing comes last and only when the pull request exists and no session in the
 worktree is busy, because it is the one irreversible step: uncommitted work in
 that checkout is what a premature close destroys.
 
+The `learn-from-sessions` skill now holds the extraction this describes. See
+ADR 0004.
+
 ## Considered Options
 
 - **Base the branch on the worktree's HEAD.** Rejected: until the feature
