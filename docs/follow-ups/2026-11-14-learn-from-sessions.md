@@ -16,7 +16,7 @@ pushed.
 - [ ] 3. Test whether a same-model second pass replaces the independent critic
 - [ ] 4. Pin the five runs as a golden corpus for the citation check
 - [ ] 5. Give the evaluation artefacts a durable home
-- [ ] 6. Put the critic in the brief template, or record why not
+- [x] 6. Put the critic in the brief template, or record why not
 - [ ] 7. Close the `GH_REPO` edge in the citation check
 
 ## Where things are
@@ -128,14 +128,22 @@ commit the 80 MB of checkouts.
 
 Done when the report can be found from the repository, not from a temp path.
 
-## 6. The critic is in the skill but not in the brief
+## 6. The critic is in the skill but not in the brief — done
 
-`hwt-wrapup/SKILL.md` describes the optional critic; `brief.md.tmpl` does not,
-and the brief is what drives the reflection session. The extraction checker is
-wired into both, the critic into one.
+Resolved 2026-11-14. The brief, both skills and `scripts/hwt-wrapup` now name
+the three models explicitly: `opencode-go/deepseek-v4.1-flash` gathers the
+digests and performs the extraction (`--model` overrides it), and the
+completeness pass takes exactly two critics, `opencode-go/glm-5.3-flash` and
+`opencode-go/minimax-m3.1-flash`.
 
-Add a step to the template or record why it stays out. Done when the two files
-agree and `hwt-wrapup/evals/grade.py --render` still passes.
+The incident that forced it: an earlier wording ("spawn one critic on another
+model") made a reflection session enumerate the agent directory and spawn seven
+critics. Three of them failed in twenty seconds with zero tokens, because their
+agent files name providers this machine does not have. The fix is to name the
+model at the spawn and to take no model from an agent file.
+
+If the models change, change them in the same three places and re-run
+`hwt-wrapup/evals/grade.py --render`.
 
 ## 7. `GH_REPO` and the no-remote rule
 
