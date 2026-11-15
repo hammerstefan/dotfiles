@@ -131,10 +131,12 @@ Done when the report can be found from the repository, not from a temp path.
 ## 6. The critic is in the skill but not in the brief — done
 
 Resolved 2026-11-14. The brief, both skills and `scripts/hwt-wrapup` now name
-the three models explicitly: `opencode-go/deepseek-v4.1-flash` gathers the
-digests and performs the extraction (`--model` overrides it), and the
-completeness pass takes exactly two critics, `opencode-go/glm-5.3-flash` and
-`opencode-go/minimax-m3.1-flash`.
+the three models explicitly, all at high reasoning effort:
+`opencode-go/deepseek-v4.1-flash#high` gathers the digests and performs the
+extraction (`--model` overrides it), and the completeness pass takes exactly two
+critics, `opencode-go/glm-5.3-flash#high` and
+`opencode-go/minimax-m3.1-flash#high`. The `#high` variant was verified on all
+three by a one-line probe: each run recorded `variant: high` and succeeded.
 
 The incident that forced it: an earlier wording ("spawn one critic on another
 model") made a reflection session enumerate the agent directory and spawn seven

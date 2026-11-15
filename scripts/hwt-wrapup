@@ -43,8 +43,9 @@ WORD_CAP = 1200
 # model is a decision rather than an inheritance from the source session. The
 # evaluation that graded this workflow found one flash model fit for the job:
 # `deepseek-v4.1-flash` passed all seven structural gates, and the two models now
-# used as critics each failed one. `--model` overrides it.
-WRAPUP_MODEL = "opencode-go/deepseek-v4.1-flash"
+# used as critics each failed one. All three run at high reasoning effort, which
+# the provider accepts as the `#high` variant. `--model` overrides it.
+WRAPUP_MODEL = "opencode-go/deepseek-v4.1-flash#high"
 WORDS_TOTAL_CAP = 15000
 FILES_CAP = 30
 LINKS_CAP = 12

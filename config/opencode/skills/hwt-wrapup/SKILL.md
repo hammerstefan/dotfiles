@@ -140,10 +140,11 @@ The extraction itself is the `learn-from-sessions` skill, with its own
 `references/`, `scripts/sessions` and `evals/`. Change its instructions there.
 
 The reflection session gathers the digests and performs the extraction on
-`opencode-go/deepseek-v4.1-flash`; `scripts/hwt-wrapup` sets that model, and
+`opencode-go/deepseek-v4.1-flash#high`; `scripts/hwt-wrapup` sets that model, and
 `--model` overrides it. The extraction runs its own completeness pass, then
 takes exactly two critics, each a general-purpose subagent with its model named
-explicitly: `opencode-go/glm-5.3-flash` and `opencode-go/minimax-m3.1-flash`.
+explicitly, including the high reasoning variant:
+`opencode-go/glm-5.3-flash#high` and `opencode-go/minimax-m3.1-flash#high`.
 Each is asked one question, which required lessons the report misses, and the
 extraction accepts or rejects every item with a reason. Spawn no other critic
 and take no model from an agent file: a stale `model:` line names a provider
