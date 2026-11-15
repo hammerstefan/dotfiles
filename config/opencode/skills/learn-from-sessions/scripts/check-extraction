@@ -4,9 +4,10 @@
 The extraction ends by writing `<state>/extraction.md`. Before the change is
 ready, the rules that have one right answer are checked rather than read:
 where the change landed, what the report holds, that nothing secret was
-written, that no new skill is hidden by an ignore rule, and that every session
-is accounted for. `scripts/checks.py` holds them; this script runs them over
-one checkout.
+written, that no new skill is hidden by an ignore rule, that every session is
+accounted for, that every repository citation in the report resolves in the
+checkout, and that the completeness pass is recorded. `scripts/checks.py` holds
+them; this script runs them over one checkout.
 
     check-extraction [--repo DIR] [--report FILE] [--digests DIR] [--json]
 
@@ -18,8 +19,9 @@ than failed, because a caller may not have the digests at hand.
 
 These are gates 3 to 7 of `evals/gates.py`, with the same labels and the same
 detail lines, so an evaluation verdict and a live verdict can be compared
-directly. Gates 1 and 2 read the evaluation's `meta.json` and have no runtime
-meaning.
+directly. The citation check has no counterpart there: the evaluation's gates
+are frozen over runs graded before it existed. Gates 1 and 2 read the
+evaluation's `meta.json` and have no runtime meaning.
 
 `--json` prints the same rows `gates.py --json` prints for one run.
 
@@ -73,6 +75,8 @@ def run_checks(
             "7 sessions read and not read",
             checks.check_sessions_against_digests(report, digests, str(report)),
         )
+    add("8 citation claims", checks.check_claims(repo, report, str(report)))
+    add("9 completeness pass", checks.check_completeness(report, str(report)))
     return rows
 
 

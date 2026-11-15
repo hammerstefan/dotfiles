@@ -119,12 +119,21 @@ what you checked. It commits nothing. Its caller commits.
 
    Then `git add` every file you changed and write the extraction report.
 
+   **Run the completeness pass.** Read the digests again against the report and
+   name every required lesson it does not cover. Add each one, or record why you
+   rejected it. An author misses what a second reader finds: on the measured
+   bundle an independent critic recovered six lessons the extraction had left
+   out. When the caller can spawn one on another model, hand it the digests and
+   the report, apply what survives your own check, and run the check below again
+   after you apply.
+
    Run `scripts/check-extraction --repo <the checkout> --report
    <state>/extraction.md --digests <state>/digests`. It checks the rules that
    have one right answer: the write scope, the report's sections, the secret
-   scan, the ignore rule and the session accounting. A non-zero exit means the
-   extraction is not ready. Correct every failing check and run it again. The
-   check reads the report, so run it after the report is written.
+   scan, the ignore rule, the session accounting, every repository citation the
+   report makes, and that the completeness pass is recorded. A non-zero exit
+   means the extraction is not ready. Correct every failing check and run it
+   again. The check reads the report, so run it after the report is written.
 
 ## The extraction report
 
@@ -139,6 +148,7 @@ read. It holds:
 - the linter counts before and after.
 - each hard finding that remains, named with its justification.
 - the evals you ran and the ones you did not, with the reason.
+- what the completeness pass found, and each lesson it left out with the reason.
 - the self-review verdict and its evidence.
 - the IDs of the sessions you read and the ones you did not, with the reason.
 - any copy of a corrected claim outside the repository, and where you corrected

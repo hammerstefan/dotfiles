@@ -61,6 +61,10 @@ None.
 
 None ran, because this fixture has nothing to run.
 
+## Completeness pass
+
+The digests were read again against this report. No required lesson was left out.
+
 ## Self-review
 
 Verdict: ready. Each criterion passes.
@@ -121,6 +125,7 @@ def make_repo(root: Path) -> Path:
     skill.write_text(
         "---\nname: planted\ndescription: planted\n---\n", encoding="utf-8"
     )
+    (repo / "AGENTS.md").write_text("# Rules\n", encoding="utf-8")
     (root / "state").mkdir()
     (root / "state" / "extraction.md").write_text(REPORT, encoding="utf-8")
     digests = root / "digests"
@@ -158,6 +163,8 @@ def test_clean_fixture_passes_every_check(repo: Path) -> None:
         "5 no secrets or private paths",
         "6 skills are not ignored",
         "7 sessions read and not read",
+        "8 citation claims",
+        "9 completeness pass",
     }
     for gate, row in result.items():
         assert row["passed"], f"{gate}: {row['detail']}"
@@ -274,3 +281,100 @@ def test_a_missing_repo_is_a_usage_error(tmp_path: Path) -> None:
     )
     assert proc.returncode == 2
     assert "is not a directory" in proc.stderr
+
+
+def rewrite_report(repo: Path, old: str, new: str) -> None:
+    report = repo.parent / "state" / "extraction.md"
+    text = report.read_text(encoding="utf-8")
+    assert old in text, f"fixture no longer holds: {old}"
+    report.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+
+def test_claims_fail_on_a_path_the_checkout_does_not_hold(repo: Path) -> None:
+    rewrite_report(
+        repo,
+        "None ran, because this fixture has nothing to run.",
+        "The mechanical gates did run `scripts/measure.py` on the skills.",
+    )
+    proc = run_check(repo, "--digests", str(repo.parent / "digests"), "--json")
+    assert proc.returncode == 1
+    row = rows(proc)["8 citation claims"]
+    assert not row["passed"]
+    assert row["detail"] == "1 citation(s) the checkout does not support"
+    assert "scripts/measure.py" in row["findings"][0]
+    assert "not in the checkout" in row["findings"][0]
+
+
+def test_claims_fail_on_a_line_past_the_end_of_the_file(repo: Path) -> None:
+    rewrite_report(repo, "| a rule | `AGENTS.md` |", "| a rule | `AGENTS.md:900` |")
+    proc = run_check(repo, "--digests", str(repo.parent / "digests"), "--json")
+    assert proc.returncode == 1
+    row = rows(proc)["8 citation claims"]
+    assert not row["passed"]
+    assert "AGENTS.md has 1 line(s)" in row["findings"][0]
+
+
+def test_claims_accept_a_path_the_report_marks_as_new(repo: Path) -> None:
+    rewrite_report(
+        repo,
+        "None ran, because this fixture has nothing to run.",
+        "Add `scripts/new-check.py` and run it with the other checks.",
+    )
+    proc = run_check(repo, "--digests", str(repo.parent / "digests"), "--json")
+    row = rows(proc)["8 citation claims"]
+    assert row["passed"], row["findings"]
+
+
+def test_claims_fail_on_a_remote_command_in_a_checkout_with_no_remote(
+    repo: Path,
+) -> None:
+    rewrite_report(
+        repo,
+        "| git | `git --version` | 2.43.0 | 2.43.0 |",
+        "| git | `git --version` | 2.43.0 | 2.43.0 |\n"
+        "| the pull request fields | `gh pr list --json number` | gh 2.104.0 | "
+        "accepted, `[]` |",
+    )
+    proc = run_check(repo, "--digests", str(repo.parent / "digests"), "--json")
+    assert proc.returncode == 1
+    row = rows(proc)["8 citation claims"]
+    assert not row["passed"]
+    assert "needs a git remote" in row["findings"][0]
+
+
+def test_claims_accept_a_remote_command_that_names_its_repository(repo: Path) -> None:
+    rewrite_report(
+        repo,
+        "| git | `git --version` | 2.43.0 | 2.43.0 |",
+        "| git | `git --version` | 2.43.0 | 2.43.0 |\n"
+        "| the pull request fields | `gh pr list --repo owner/name --json number` "
+        "| gh 2.104.0 | accepted |",
+    )
+    proc = run_check(repo, "--digests", str(repo.parent / "digests"), "--json")
+    row = rows(proc)["8 citation claims"]
+    assert row["passed"], row["findings"]
+
+
+def test_claims_accept_a_skill_written_as_id_over_skill_md(repo: Path) -> None:
+    rewrite_report(
+        repo,
+        "| a rule | `AGENTS.md` |",
+        "| a rule | `planted/SKILL.md` |",
+    )
+    proc = run_check(repo, "--digests", str(repo.parent / "digests"), "--json")
+    row = rows(proc)["8 citation claims"]
+    assert row["passed"], row["findings"]
+
+
+def test_completeness_fails_when_the_report_does_not_record_it(repo: Path) -> None:
+    rewrite_report(
+        repo,
+        "## Completeness pass\n\nThe digests were read again against this report. "
+        "No required lesson was left out.\n\n",
+        "",
+    )
+    proc = run_check(repo, "--digests", str(repo.parent / "digests"), "--json")
+    assert proc.returncode == 1
+    row = rows(proc)["9 completeness pass"]
+    assert not row["passed"]
+    assert row["detail"] == "the report does not record the completeness pass"
