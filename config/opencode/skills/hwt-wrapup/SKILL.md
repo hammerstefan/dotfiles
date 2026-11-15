@@ -139,12 +139,14 @@ evals here hold the wrapup's own.
 The extraction itself is the `learn-from-sessions` skill, with its own
 `references/`, `scripts/sessions` and `evals/`. Change its instructions there.
 
-The extraction runs its own completeness pass. When a second reader is wanted,
-spawn one critic on a different model, give it the nine digests and the
-extraction report, and ask one question: which required lessons does the report
-miss? Hand its list to the extraction session and let that session accept or
-reject each item with a reason. The critic supplies and the writer decides: a
-candidate's Hindsight memory and its guesses about the repository are not
-evidence. On the measured bundle two critics cost 2.6 times the extraction's
-tokens and recovered six lessons it had missed, and two critics agreed on one
-item in eight.
+The reflection session gathers the digests and performs the extraction on
+`opencode-go/deepseek-v4.1-flash`; `scripts/hwt-wrapup` sets that model, and
+`--model` overrides it. The extraction runs its own completeness pass, then
+takes exactly two critics, each a general-purpose subagent with its model named
+explicitly: `opencode-go/glm-5.3-flash` and `opencode-go/minimax-m3.1-flash`.
+Each is asked one question, which required lessons the report misses, and the
+extraction accepts or rejects every item with a reason. Spawn no other critic
+and take no model from an agent file: a stale `model:` line names a provider
+this machine may not reach, and three critics spawned that way failed in twenty
+seconds. On the measured bundle two critics cost 2.6 times the extraction's
+tokens, recovered six lessons it had missed, and agreed on one item in eight.

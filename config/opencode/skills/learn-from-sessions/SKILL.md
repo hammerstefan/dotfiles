@@ -122,10 +122,13 @@ what you checked. It commits nothing. Its caller commits.
    **Run the completeness pass.** Read the digests again against the report and
    name every required lesson it does not cover. Add each one, or record why you
    rejected it. An author misses what a second reader finds: on the measured
-   bundle an independent critic recovered six lessons the extraction had left
-   out. When the caller can spawn one on another model, hand it the digests and
-   the report, apply what survives your own check, and run the check below again
-   after you apply.
+   bundle two critics recovered six lessons the extraction had left out. When
+   the harness can spawn subagents, take exactly two, each a general-purpose
+   agent with its model named explicitly: `opencode-go/glm-5.3-flash` and
+   `opencode-go/minimax-m3.1-flash`. Give each the digests and this report, ask
+   which required lessons the report misses, apply what survives your own check,
+   and run the check below again after you apply. Spawn no other critic, and
+   take no model from an agent file.
 
    Run `scripts/check-extraction --repo <the checkout> --report
    <state>/extraction.md --digests <state>/digests`. It checks the rules that

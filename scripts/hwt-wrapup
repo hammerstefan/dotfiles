@@ -38,6 +38,13 @@ STATE_ROOT = Path("/tmp/opencode")
 # The person's words are the cheapest faithful record of what was wanted, so
 # keep them nearly whole; the export is named in the brief for the rest.
 WORD_CAP = 1200
+
+# The reflection session gathers the digests and performs the extraction, so its
+# model is a decision rather than an inheritance from the source session. The
+# evaluation that graded this workflow found one flash model fit for the job:
+# `deepseek-v4.1-flash` passed all seven structural gates, and the two models now
+# used as critics each failed one. `--model` overrides it.
+WRAPUP_MODEL = "opencode-go/deepseek-v4.1-flash"
 WORDS_TOTAL_CAP = 15000
 FILES_CAP = 30
 LINKS_CAP = 12
@@ -315,6 +322,9 @@ def main() -> int:
     parser.add_argument("--state", metavar="DIR",
                         help="scratch directory (default: /tmp/opencode/"
                              "hwt-wrapup-<branch slug>)")
+    parser.add_argument("--model", metavar="REF",
+                        help="the reflection session's model (default: "
+                             f"{WRAPUP_MODEL})")
     args = parser.parse_args()
 
     # 1. The worktree and the repository.
@@ -456,13 +466,7 @@ def main() -> int:
     (state / "goal.md").write_text(goal + "\n")
 
     # 5. The plan, the spawn, the summary.
-    model = ""
-    if trace:
-        chosen = (trace.get("info") or {}).get("model") or {}
-        if chosen.get("providerID") and chosen.get("id"):
-            model = f"{chosen['providerID']}/{chosen['id']}"
-            if chosen.get("variant"):
-                model += f"#{chosen['variant']}"
+    model = args.model or WRAPUP_MODEL
 
     checkout = values["CHECKOUT"]
     # The reflection session's space opens behind the source session: the
@@ -497,7 +501,7 @@ def main() -> int:
         say("  trace     unavailable")
     say(f"  brief     {brief}")
     say(f"  goal      {goal}")
-    say(f"  model     {model or 'the configured default (no model on the trace)'}")
+    say(f"  model     {model}")
     if checks.strip():
         say("  warning   the source worktree has uncommitted changes; the "
             "reflection session will refuse to close it")

@@ -64,6 +64,13 @@ The fail-safe reading, in order:
    If the skill cannot be loaded, write nothing, stage nothing, and report that
    it is missing. Never improvise an extraction.
 
+   Run the completeness pass yourself. Then take two critics, and no more: a
+   general-purpose subagent with model `opencode-go/glm-5.3-flash`, and one with
+   `opencode-go/minimax-m3.1-flash`. Give each the digests and the extraction
+   report, and ask one question: which required lessons does the report miss?
+   Name each model explicitly and take no model from an agent file: a stale
+   `model:` line may name a provider this machine cannot reach.
+
 2. **Commit one concern per commit.** The extraction staged every changed file
    and recorded which paths belong to which concern, with a message for each.
    Commit them in order — skills, then guidance, then glossary — one commit at a
