@@ -138,3 +138,13 @@ evals here hold the wrapup's own.
 
 The extraction itself is the `learn-from-sessions` skill, with its own
 `references/`, `scripts/sessions` and `evals/`. Change its instructions there.
+
+The extraction runs its own completeness pass. When a second reader is wanted,
+spawn one critic on a different model, give it the nine digests and the
+extraction report, and ask one question: which required lessons does the report
+miss? Hand its list to the extraction session and let that session accept or
+reject each item with a reason. The critic supplies and the writer decides: a
+candidate's Hindsight memory and its guesses about the repository are not
+evidence. On the measured bundle two critics cost 2.6 times the extraction's
+tokens and recovered six lessons it had missed, and two critics agreed on one
+item in eight.
