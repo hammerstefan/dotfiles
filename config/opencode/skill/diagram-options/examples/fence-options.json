@@ -1,0 +1,197 @@
+{
+  "title": "Which layer restores the fence placement",
+  "subtitle": "A decision ticket for the map \"Map: a development workshop that drives the product\".",
+  "question": "Which layer restores the fence placement when the control service kills a lifecycle verb at its timeout: the fence command, the control service, or a longer timeout for a verb that rebuilds a snapshot?",
+  "baseline_note": "these steps are the same in every option",
+  "legend": "The steps before the limit are the same in every option. The shaded band in each diagram holds the steps that the option changes, and the band carries a note that names the change.",
+  "situation": [
+    "The service runs `uv run monitor-agent-egress-fence <verb>` with a limit of 900 seconds. The fence command releases the placement before it rebuilds the workshops and applies the fence after them.",
+    "At the limit the service sends SIGKILL to `uv` and closes the pipe to the fence command.",
+    "The fence command is a child of `uv`, so it survives the kill. It writes its report only after its apply phase, so it reaches that phase.",
+    "The `workshop` command dies of SIGPIPE when it writes to the closed pipe. `workshopd` keeps the rebuild running.",
+    "The apply phase then runs while the workshop is still rebuilding. The agent instance is absent, so the apply faults and the placement stays released.",
+    "Nothing retries the apply. The service discards the output of a verb that times out, so the audit line `refresh 2` does not show what the fence command did."
+  ],
+  "participants": [
+    { "id": "W", "name": "Development workshop" },
+    { "id": "S", "name": "Control service" },
+    { "id": "U", "name": "uv" },
+    { "id": "F", "name": "Fence command" },
+    { "id": "C", "name": "Workshop client" },
+    { "id": "D", "name": "workshopd" },
+    { "id": "P", "name": "Fence placement" }
+  ],
+  "actors": [
+    { "name": "Development workshop", "role": "sends the request." },
+    { "name": "Control service", "role": "runs the verb and holds the limit." },
+    { "name": "uv", "role": "starts the fence command as its own child." },
+    { "name": "Fence command", "role": "releases the placement, runs the workshop command, then applies the fence." },
+    { "name": "Workshop client", "role": "drives workshopd, which rebuilds the instance and runs the SDK install." },
+    { "name": "Fence placement", "role": "is the fence bridge and the fixed address on the instance NIC." }
+  ],
+  "options": [
+    {
+      "id": "option-a-service-applies",
+      "name": "Option A",
+      "headline": "The control service applies the fence after it kills a verb",
+      "restores": "The control service",
+      "changes": "The service runs the apply as a separate command after it kills a verb, and retries it while the workshop rebuilds.",
+      "leaves_open": "A run where the fence command itself is killed outside the service.",
+      "what": "The service runs the fence command's apply as a separate command with its own timeout after a verb times out, and retries that apply while the workshop is still rebuilding.",
+      "window": "The window ends when that apply finishes, which is after the rebuild ends and not before.",
+      "why": [
+        "The service is the layer that kills the verb, so it is the only layer that knows the placement was left released.",
+        "The service needs no new knowledge of the fence. It already runs the apply verb through the same runner.",
+        "The service can write the restore to the audit log, which it cannot do today for a verb that times out."
+      ],
+      "diagram": {
+        "highlight_label": "THIS OPTION ADDS THE RESTORE",
+        "highlight_note_over": "S,P",
+        "prefix": [
+          "W->>S: refresh request",
+          "S->>U: uv run monitor-agent-egress-fence refresh",
+          "U->>F: start the fence command",
+          "F->>P: release the placement",
+          "F->>C: workshop refresh",
+          "C->>D: rebuild the instance and install the SDK",
+          "Note over D: the install takes about 24 minutes",
+          "Note over S: the limit of 900 seconds passes",
+          "S->>U: SIGKILL",
+          "U--xF: the pipe to the fence command closes",
+          "C--xD: the workshop client dies of SIGPIPE",
+          "D->>D: the rebuild continues",
+          "F->>P: the apply phase runs while the agent instance is absent"
+        ],
+        "steps": [
+          "S->>U: uv run monitor-agent-egress-fence apply",
+          "Note over S: the service retries the apply while the workshop rebuilds",
+          "S->>P: the placement is restored"
+        ]
+      }
+    },
+    {
+      "id": "option-b-fence-command-applies",
+      "name": "Option B",
+      "headline": "The fence command applies the fence after the kill",
+      "restores": "The fence command",
+      "changes": "The fence command waits for the rebuild and places the placement itself.",
+      "leaves_open": "A run where the fence command itself is killed.",
+      "what": "The fence command waits for the rebuild to finish and places the placement itself, the way it places the placement after a lifecycle command that fails.",
+      "window": "The window ends when the apply of the fence command finishes.",
+      "why": [
+        "The fence command survives the kill of its parent, so it reaches its apply phase. It writes its report only after that phase.",
+        "The fence command cannot tell that the service killed its parent, and it cannot tell a rebuild that is still running from a rebuild that failed, so its wait has no end that it can name."
+      ],
+      "diagram": {
+        "highlight_label": "THIS OPTION MOVES THE RESTORE INTO THE FENCE COMMAND",
+        "highlight_note_over": "F,P",
+        "prefix": [
+          "W->>S: refresh request",
+          "S->>U: uv run monitor-agent-egress-fence refresh",
+          "U->>F: start the fence command",
+          "F->>P: release the placement",
+          "F->>C: workshop refresh",
+          "C->>D: rebuild the instance and install the SDK",
+          "Note over D: the install takes about 24 minutes",
+          "Note over S: the limit of 900 seconds passes",
+          "S->>U: SIGKILL",
+          "U--xF: the pipe to the fence command closes",
+          "C--xD: the workshop client dies of SIGPIPE",
+          "D->>D: the rebuild continues"
+        ],
+        "steps": [
+          "F->>D: wait for the rebuild to finish",
+          "F->>P: the apply phase places the placement"
+        ]
+      }
+    },
+    {
+      "id": "option-c-longer-timeout",
+      "name": "Option C",
+      "headline": "A longer timeout for a verb that rebuilds a snapshot",
+      "restores": "The fence command, as it is today",
+      "changes": "The value of the limit for a verb that rebuilds a snapshot, so no kill happens.",
+      "leaves_open": "A run that exceeds the new limit, which has the same hole.",
+      "what": "The install of the hermes SDK took about 24 minutes and the limit is 900 seconds, so a longer limit lets the refresh finish inside the limit.",
+      "window": "The ordinary case stays out of the kill, so the fence command's own apply phase places the placement after the rebuild.",
+      "why": [
+        "The 3600 seconds of the conformance suite belong to that suite and do not bound the service on the host.",
+        "The change is to the value of the limit and not to the recovery."
+      ],
+      "diagram": {
+        "highlight_label": "THIS OPTION CHANGES THE LIMIT, SO NO KILL HAPPENS",
+        "highlight_note_over": "S,P",
+        "prefix": [
+          "W->>S: refresh request",
+          "S->>U: uv run monitor-agent-egress-fence refresh",
+          "U->>F: start the fence command",
+          "F->>P: release the placement",
+          "F->>C: workshop refresh",
+          "C->>D: rebuild the instance and install the SDK",
+          "Note over D: the install takes about 24 minutes"
+        ],
+        "steps": [
+          "Note over S: the limit for a rebuilding verb is longer",
+          "D->>D: the rebuild finishes",
+          "C-->>F: the workshop command returns",
+          "F->>P: the apply phase places the placement"
+        ]
+      }
+    },
+    {
+      "id": "option-d-both",
+      "name": "Option D",
+      "headline": "The service applies the fence, and the timeout for a rebuilding verb grows",
+      "restores": "The control service",
+      "changes": "The value of the limit, and the apply the service runs after it kills a verb.",
+      "leaves_open": "A run where the fence command itself is killed outside the service.",
+      "what": "The service applies the fence after it kills a verb, and a verb that rebuilds a snapshot gets a longer limit, so the ordinary case never reaches a kill.",
+      "window": "The window ends when the apply of the service finishes, in the case where a verb reached the limit.",
+      "why": [
+        "The service covers the kill, and the longer limit keeps the common case out of the hole.",
+        "Two changes in two layers, and the value of the new limit is a separate decision."
+      ],
+      "diagram": {
+        "highlight_note_over": "S,P",
+        "prefix": [
+          "W->>S: refresh request",
+          "S->>U: uv run monitor-agent-egress-fence refresh",
+          "U->>F: start the fence command",
+          "F->>P: release the placement",
+          "F->>C: workshop refresh",
+          "C->>D: rebuild the instance and install the SDK",
+          "Note over D: the install takes about 24 minutes"
+        ],
+        "bands": [
+          {
+            "highlight_label": "THIS OPTION CHANGES THE LIMIT, SO NO KILL HAPPENS",
+            "highlight_note_over": "S,P",
+            "steps": [
+              "Note over S: the limit for a rebuilding verb is longer",
+              "D->>D: the rebuild finishes",
+              "C-->>F: the workshop command returns",
+              "F->>P: the apply phase places the placement"
+            ]
+          },
+          {
+            "highlight_label": "AND THE SERVICE RESTORES THE PLACEMENT WHEN THE LIMIT IS REACHED",
+            "highlight_note_over": "S,P",
+            "steps": [
+              "S->>U: uv run monitor-agent-egress-fence apply",
+              "Note over S: the service retries the apply while the workshop rebuilds",
+              "S->>P: the placement is restored"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "answer": {
+    "summary": "The control service restores the fence placement. It runs the fence command's apply as a separate command after a verb times out, and retries that apply while the workshop is still rebuilding. The fence command changes nothing.",
+    "detail": "The value of the timeout for a verb that rebuilds a snapshot is a separate decision, and it is compatible with this answer."
+  },
+  "not_verified": [
+    "What the fence command did after the timeout on 2026-11-15. The record of that run does not hold it.",
+    "The step where the apply phase ran while the agent instance was absent is the reading that fits the record, not a measurement."
+  ]
+}
