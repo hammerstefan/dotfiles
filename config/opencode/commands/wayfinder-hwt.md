@@ -140,21 +140,25 @@ For each passable ticket, in order:
 
    ```sh
    hwt -n -r "$repo" --agent opencode --no-focus ${model:+--model "$model"} \
+       --space-name '#<map>:<n> <words>' \
        --task-file "/tmp/opencode/hwt-prompt-<slug>.md" \
        --goal-file "/tmp/opencode/hwt-goal-<slug>.md" "<branch>"
    ```
 
-5. Read the dry run. `hwt: repository` must be `$repo`, `hwt: checkout` and `hwt: herdr space.new` must name this branch, `hwt: focus` must say it stays on the space it is on now, and `hwt: goal` must read the objective you wrote. Rewrite the `Checkout:` line with the printed path.
+5. Read the dry run. `hwt: repository` must be `$repo`, `hwt: checkout` must name this branch, `hwt: herdr space.new` must carry `--name '#<map>:<n> <words>'` and a `--folder` naming this branch, `hwt: focus` must say it stays on the space it is on now, and `hwt: goal` must read the objective you wrote. Rewrite the `Checkout:` line with the printed path.
 6. Spawn, with the same command and no `-n`; `--no-focus` stays.
 7. A refusal — non-zero exit, or a printed refusal — is recorded in `hwt`'s own words, and the loop continues with the next ticket. Nothing is deleted, no space is closed, no second branch is tried, and `--no-space` is not a fallback.
 
-The space is named after the branch, so the branch is the space name. Each
-space opens behind this one, so the window stays here and the person reads this
-report: the new sessions wait in the sidebar, each running its ticket. The goal
-holds the session to the ticket's end state: a reviewer judges the transcript
-against the objective on every idle turn, and continues the work when it is not
-met yet. A ticket that needs a decision has the session ask for it with the
-`question` tool and wait for the answer.
+The space is named `#<map>:<n> <words>` — the map and ticket numbers, then the
+slug's first three words, hyphenated: ticket 102 of map 44, "Implement the
+proxy egress fence", opens space `#44:102 proxy-egress-fence`. `<words>` in the
+command above is that hyphenated tail. The branch and the checkout keep the
+slug alone. Each space opens behind this one, so the window stays here and the
+person reads this report: the new sessions wait in the sidebar, each running
+its ticket. The goal holds the session to the ticket's end state: a reviewer
+judges the transcript against the objective on every idle turn, and continues
+the work when it is not met yet. A ticket that needs a decision has the session
+ask for it with the `question` tool and wait for the answer.
 
 ## 8. The brief
 
@@ -227,7 +231,7 @@ A `research` ticket's Rules line reads: "Push `<branch>` and open no pull reques
 
 Give, in a few lines:
 
-- one line per spawned session: `#20 Implement the proxy egress fence — wayfinder/proxy-egress-fence — <checkout> — space wayfinder/proxy-egress-fence — <model, or "configured default"> — <brief path> — goal: <objective>`
+- one line per spawned session: `#20 Implement the proxy egress fence — wayfinder/proxy-egress-fence — <checkout> — space #<map>:<n> proxy-egress-fence — <model, or "configured default"> — <brief path> — goal: <objective>`
 - one line per skipped ticket, with its reason
 - `hwt`'s refusal lines verbatim, and which tickets were not attempted
 - the `wayfinder/*` and `research/*` worktrees that were already running, by branch and path

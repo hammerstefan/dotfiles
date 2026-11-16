@@ -44,6 +44,8 @@ Options:
                         Herdr's own agent arguments; not combined with --task
       --no-space        only create the checkout; leave the window alone
       --no-focus        open the space without taking the window to it
+      --space-name <n>  name the new Herdr space this instead of after the
+                        branch; the branch and its checkout keep their names
   -n, --dry-run         print the repository, checkout and command; make nothing
   -h, --help            show this text
 
@@ -57,7 +59,7 @@ this if it is in that space, else that space's pane with the keyboard while
 it is on screen.
 
 The space you point at is not changed: the worktree gets a space of its own,
-named after its branch.
+named after its branch, or the name --space-name gives it.
 
 --no-focus opens that space and starts its session, then leaves the Herdr
 window on the space it was on; the new space waits in the sidebar until the
@@ -109,6 +111,7 @@ branch=""
 repo=""
 base="HEAD"
 space_want=""
+space_name=""
 agent=""
 model=""
 argv_json=""
@@ -185,6 +188,11 @@ while [[ $# -gt 0 ]]; do
 	--no-focus)
 		move_focus=0
 		shift
+		;;
+	--space-name)
+		[[ $# -ge 2 ]] || die "--space-name needs a name"
+		space_name="$2"
+		shift 2
 		;;
 	-n | --dry-run)
 		dry_run=1
@@ -281,6 +289,9 @@ fi
 
 [[ -z "$model" || $open_space -eq 1 ]] ||
 	die "--model is set on the session the new space opens; drop --no-space"
+
+[[ -z "$space_name" || $open_space -eq 1 ]] ||
+	die "--space-name is set on the session the new space opens; drop --no-space"
 
 [[ -z "$repo" || -z "$space_want" ]] || die "--repo and --space cannot be combined"
 
@@ -454,9 +465,15 @@ if [[ $dry_run -eq 1 ]]; then
 	if [[ $move_focus -eq 0 ]]; then
 		printf 'hwt: focus      stays on the space it is on now\n'
 	fi
-	printf 'hwt: herdr      %s\n' "$([[ -n "$preview_json" ]] &&
-		printf 'space.new --folder %s --argv %s' "$path" "$preview_json" ||
-		printf 'space.new --folder %s' "$path")"
+	space_cmd="space.new"
+	if [[ -n "$space_name" ]]; then
+		space_cmd+=" --name '$space_name'"
+	fi
+	argv_part=""
+	if [[ -n "$preview_json" ]]; then
+		argv_part="$(printf ' --argv %s' "$preview_json")"
+	fi
+	printf 'hwt: herdr      %s --folder %s%s\n' "$space_cmd" "$path" "$argv_part"
 	exit 0
 fi
 
@@ -557,6 +574,7 @@ if [[ $move_focus -eq 0 ]]; then
 fi
 
 space_args=(do space.new --folder "$path")
+[[ -n "$space_name" ]] && space_args+=(--name "$space_name")
 [[ -n "$argv_json" ]] && space_args+=(--argv "$argv_json")
 
 space_json="$(herdr-app "${space_args[@]}")" ||

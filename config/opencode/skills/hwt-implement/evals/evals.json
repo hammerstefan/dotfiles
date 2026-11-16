@@ -1,0 +1,51 @@
+{
+  "skill_name": "hwt-implement",
+  "evals": [
+    {
+      "id": 1,
+      "name": "two-issues-plan-only",
+      "prompt": "Plan worktree sessions for #111 and #115 in this repo, but stop at the dry run so I can read the briefs before anything is made.",
+      "expected_output": "The session runs the plan verb, reports the derived branches and the contested monitor_agent/conformance/runner.py, renders both briefs without spawning a worktree or a space, and names the dry-run lines it checked.",
+      "files": [],
+      "expectations": [
+        "No branch, worktree or Herdr space is created.",
+        "The report names the contested file and which session would own it.",
+        "The manifest path or the brief paths are given."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "autonomous-single-issue",
+      "prompt": "/hwt-implement 115 autonomous",
+      "expected_output": "One session is spawned on a feat/ branch from origin/main when the checkout is on another branch, its brief carries the autonomous decision-log path under the run directory, and the goal is a command whose expected output is stated.",
+      "files": [],
+      "expectations": [
+        "The brief contains a decision log path with a real run directory, not a placeholder.",
+        "The goal names a command and what it prints.",
+        "The report names the base and why it was chosen."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "malformed-ask-refused",
+      "prompt": "/hwt-implement frontier #102",
+      "expected_output": "The session says an issue-number list was expected, reports what it was given, and spawns nothing.",
+      "files": [],
+      "expectations": [
+        "Nothing is spawned.",
+        "The reply names what was given and the shape it accepts."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "closed-issue-skipped",
+      "prompt": "Spawn implementation sessions for #102 and #115.",
+      "expected_output": "#102 is reported as closed and skipped, #115 is planned or spawned, and the run does not invent a substitute ticket.",
+      "files": [],
+      "expectations": [
+        "The report says #102 is closed and was skipped.",
+        "#115 is handled, and no other ticket is claimed in #102's place."
+      ]
+    }
+  ]
+}
