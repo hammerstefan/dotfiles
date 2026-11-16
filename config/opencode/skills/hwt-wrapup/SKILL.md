@@ -109,7 +109,8 @@ request opens:
   evals run or not, and the self-review verdict.
 - run the extraction's `scripts/check-extraction` in the checkout before the
   pull request opens. A non-zero exit blocks it: the extraction is not ready.
-- never merge the pull request, and never force-push.
+- never merge the pull request, and never force-push, unless the person chose
+  the merge option in the last question.
 - close the source worktree only after the pull request exists, and not while a
   session is busy or the checkout is dirty.
 
@@ -126,7 +127,8 @@ evals here hold the wrapup's own.
   brief. The next wrapup overwrites that file.
 - `evals/evals.json` — the assertions the brief must satisfy. The brief
   delegates the extraction and never improvises it. It commits one concern per
-  commit, carries the report in the body, never merges, and closes last.
+  commit, carries the report in the body, merges only when the person asks for
+  it, and closes last.
 - `evals/grade.py` — grades `brief.md.tmpl` and this file against them. Run it
   after a change to either. `--render` also renders a fresh brief, checks it for
   unfilled placeholders, and counts the steps it declares:

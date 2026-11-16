@@ -44,7 +44,8 @@ The fail-safe reading, in order:
   to {{SOURCE_BRANCH}} or any other branch.
 - Commit one concern per commit, from the concern map in the extraction report:
   skills, then guidance, then glossary.
-- Never merge the pull request, and never force-push.
+- Never merge the pull request and never force-push, unless the person chose
+  the merge option in the last question.
 - A commit message must not repeat a claim the extraction corrected. When the
   report names a commit message that does, correct it before the push.
 - When the report names a corrected claim that lives outside this repository,
@@ -136,15 +137,88 @@ The fail-safe reading, in order:
    remove the checkout anyway and say the space was already gone. Keep the
    branch.
 
-6. **Ask about this space** with the `question` tool: close it and remove this
-   checkout, or leave both. Find this space by `.folder` equal to this checkout.
-   On "close", write a temporary script outside the repository with the write
-   tool. The script sleeps five seconds, closes this space, then runs
-   `git -C {{MAIN_ROOT}} worktree remove {{CHECKOUT}}`. Start it with
-   `setsid nohup bash <script> ><log> 2>&1 &` so it outlives the terminal it
-   would otherwise kill. Name the log file in the report. Then stop.
+6. **Ask about this space** with the `question` tool. Name the pull request and
+   this checkout in the question. Offer three options, with these labels:
 
-7. **Report**:
+   - "Close both": close this space and remove this checkout. The pull request
+     stays open for review.
+   - "Rebase pr, merge, then close both": rebase the pull request onto the
+     base branch, merge it, then close this space and remove this checkout.
+   - "Leave both open": keep the space and the checkout. The branch can still
+     be edited here if the pull request needs a change during review.
+
+   Find this space by `.folder` equal to this checkout.
+
+7. **Merge the pull request**, when the answer was "Rebase pr, merge, then
+   close both". This is the only merge and the only force-push this brief does.
+
+   Fetch the base in a call of its own, and stop when the fetch fails:
+
+   ```sh
+   git -C {{CHECKOUT}} fetch origin
+   ```
+
+   Read the base tip again immediately before the replay, and replay onto it.
+   Worktrees share the common repository's remote-tracking refs, so another
+   session's fetch can move the ref without a fetch here:
+
+   ```sh
+   git -C {{CHECKOUT}} rev-parse --verify 'origin/{{DEFAULT_BRANCH}}^{commit}'
+   git -C {{CHECKOUT}} -c rerere.enabled=false rebase origin/{{DEFAULT_BRANCH}}
+   ```
+
+   A recorded `rerere` resolution applies without showing a conflict, so turn it
+   off. A conflict in prose: keep the base branch's newer framing and add this
+   branch's facts to it. A conflict in code or a test is not this brief's to
+   settle: `git -C {{CHECKOUT}} rebase --abort`, leave the pull request open,
+   and report the paths that conflicted.
+
+   The replay moved the files the report and the pull request body cite, so
+   check them again before the push. Run the extraction's
+   `scripts/check-extraction` in this checkout: it resolves the report's
+   citations against the files the replay moved. Correct what it names, in the
+   report and in the pull request body:
+
+   ```sh
+   gh pr edit --repo {{REPO}} <the pull request number> --body-file <body>
+   ```
+
+   Run the check again. A check that still fails: merge nothing and report it.
+
+   Push the rebased branch with a lease on the head the remote holds. A push
+   that lost a race then fails instead of overwriting the other commit:
+
+   ```sh
+   remote_head=$(git -C {{CHECKOUT}} ls-remote origin refs/heads/{{WRAPUP_BRANCH}} | cut -f1)
+   git -C {{CHECKOUT}} push --force-with-lease=refs/heads/{{WRAPUP_BRANCH}}:$remote_head \
+     origin {{WRAPUP_BRANCH}}
+   ```
+
+   Then merge it the way this repository merges. A merge commit when the base
+   branch's history holds merge commits, a rebase when it does not:
+
+   ```sh
+   if git -C {{CHECKOUT}} log --merges --oneline -1 origin/{{DEFAULT_BRANCH}} | grep -q .; then
+     gh pr merge --repo {{REPO}} {{WRAPUP_BRANCH}} --merge
+   else
+     gh pr merge --repo {{REPO}} {{WRAPUP_BRANCH}} --rebase
+   fi
+   ```
+
+   Never pass `--admin` and never pass `--delete-branch`. A merge the
+   repository refuses: merge nothing more, leave the pull request open, and
+   report what it said. Read the state back with
+   `gh pr view --repo {{REPO}} {{WRAPUP_BRANCH}} --json state,mergeCommit` and
+   name the merge commit in the report.
+
+8. **Close this space and remove this checkout**, when the answer was "Close
+   both" or "Rebase, merge, then close both". Write a temporary script outside
+   the repository with the write tool. The script sleeps five seconds, closes
+   this space, then runs `git -C {{MAIN_ROOT}} worktree remove {{CHECKOUT}}`.
+   Start it with `setsid nohup bash <script> ><log> 2>&1 &` so it outlives the
+   terminal it would otherwise kill. Name the log file in the report. Then stop.
+
+9. **Report**:
    - the pull request's URL.
    - each lesson and where it is written.
    - the sessions read, and any you did not.
@@ -152,6 +226,7 @@ The fail-safe reading, in order:
    - the linter counts and the evals you ran.
    - any copy you corrected outside this repository.
    - whether the source worktree was closed, kept, or refused, and why.
+   - whether the pull request was merged, and the merge commit when it was.
 
    Before the report, call `todowrite` once with every item still remaining.
    That list holds work only the person can finish. It holds a step you could

@@ -1,7 +1,7 @@
 {
   "skill_name": "hwt-wrapup",
   "subject": "The instructions the reflection session reads: brief.md.tmpl and SKILL.md, after the extraction moved to learn-from-sessions.",
-  "note": "These evals grade the brief, not a whole reflection run. The extraction's lessons live in the learn-from-sessions suite; these cover what the wrapup still does after it: the delegation, the commits, the pull request body, the retention and the close. A real wrapup is the final check.",
+  "note": "These evals grade the brief, not a whole reflection run. The extraction's lessons live in the learn-from-sessions suite; these cover what the wrapup still does after it: the delegation, the commits, the pull request body, the retention, the merge on request, and the close. A real wrapup is the final check.",
   "evals": [
     {
       "id": 1,
@@ -42,13 +42,13 @@
     },
     {
       "id": 4,
-      "name": "the-pull-request-is-never-merged",
+      "name": "the-pull-request-is-merged-only-on-request",
       "prompt": "The reflection session has opened the pull request.",
-      "expected_output": "The brief forbids merging and force-pushing.",
+      "expected_output": "The brief forbids merging and force-pushing unless the person chose the merge option.",
       "files": [],
       "expectations": [
-        "The brief forbids merging the pull request.",
-        "The brief forbids a force-push."
+        "The brief forbids merging the pull request unless the person chose the merge option.",
+        "The brief forbids a force-push unless the person chose the merge option."
       ]
     },
     {
@@ -85,6 +85,21 @@
       "expectations": [
         "A commit message that repeats a corrected claim is corrected before the push.",
         "A copy outside the repository is corrected where it lives and named in the report."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "the-merge-option-rebases-merges-and-closes",
+      "prompt": "The person chose the option that rebases the pull request, merges it, and closes both.",
+      "expected_output": "The brief offers the merge option, rebases the branch onto the base branch, pushes it with a lease, merges it, and closes both.",
+      "files": [],
+      "expectations": [
+        "The final question offers an option that rebases the pull request, merges it, and closes both.",
+        "The brief rebases the branch onto the base branch before it merges.",
+        "The brief pushes the rebased branch with a lease on the head the remote holds.",
+        "The brief closes both after the merge.",
+        "The brief leaves the pull request open and unmerged when the rebase conflicts.",
+        "The brief never passes --admin and never passes --delete-branch."
       ]
     }
   ]

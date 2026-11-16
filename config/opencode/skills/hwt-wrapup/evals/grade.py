@@ -30,7 +30,7 @@ from pathlib import Path
 SKILL_DIR = Path(__file__).resolve().parent.parent
 EVALS = Path(__file__).resolve().parent / "evals.json"
 
-STEPS = 7
+STEPS = 9
 HEADINGS = (
     "# Sessions to read",
     "# The trigger session's trace",
@@ -116,13 +116,13 @@ def check_verdict_in_body(b: str, s: str):
 
 
 def check_never_merge(b: str, s: str):
-    pattern = r"never merge"
-    return bool(find(b, pattern)), evidence(b, pattern)
+    pattern = r"never merge the pull request and never force-push, unless"
+    return bool(find(b, pattern)), evidence(b, r"never merge the pull request")
 
 
 def check_never_force_push(b: str, s: str):
-    pattern = r"never force-push"
-    return bool(find(b, pattern)), evidence(b, pattern)
+    pattern = r"never force-push, unless the person chose"
+    return bool(find(b, pattern)), evidence(b, r"never force-push")
 
 
 def check_close_after_pr(b: str, s: str):
@@ -170,6 +170,40 @@ def check_external_copy(b: str, s: str):
     return bool(ok), evidence(b, r"outside this repository")
 
 
+def check_merge_option(b: str, s: str):
+    ok = find(b, r"rebase the pull request onto the base") and find(b, r"merge it")
+    return bool(ok), evidence(b, r"rebase the pull request onto the base")
+
+
+def check_rebase_before_merge(b: str, s: str):
+    # The rendered brief names the base branch; the template names the
+    # placeholder. Both count.
+    ok = find(b, r"rebase origin/") and find(b, r"gh pr merge")
+    return bool(ok), evidence(b, r"rebase origin/")
+
+
+def check_lease_push(b: str, s: str):
+    ok = find(b, r"--force-with-lease=refs/heads") and find(b, r"ls-remote")
+    return bool(ok), evidence(b, r"--force-with-lease=refs/heads")
+
+
+def check_closes_after_merge(b: str, s: str):
+    ok = find(b, r"close this space and remove this checkout\*\*") and find(
+        b, r"when the answer was"
+    )
+    return bool(ok), evidence(b, r"close this space and remove this checkout")
+
+
+def check_conflict_leaves_pr_open(b: str, s: str):
+    ok = find(b, r"rebase --abort") and find(b, r"leave the pull request open")
+    return bool(ok), evidence(b, r"rebase --abort")
+
+
+def check_no_admin_no_delete(b: str, s: str):
+    ok = find(b, r"never pass `--admin`") and find(b, r"never pass `--delete-branch`")
+    return bool(ok), evidence(b, r"never pass `--admin`")
+
+
 CHECKS = {
     (1, 0): ("the brief names learn-from-sessions", check_names_skill),
     (1, 1): ("the skill is loaded before anything is written", check_loaded_before),
@@ -192,6 +226,12 @@ CHECKS = {
     (6, 1): ("the report names the claims checked and not", check_report_claims),
     (7, 0): ("a repeating commit message is corrected", check_commit_message),
     (7, 1): ("an outside copy is corrected where it lives", check_external_copy),
+    (8, 0): ("the question offers the merge option", check_merge_option),
+    (8, 1): ("the branch is rebased before the merge", check_rebase_before_merge),
+    (8, 2): ("the rebased branch is pushed with a lease", check_lease_push),
+    (8, 3): ("both are closed after the merge", check_closes_after_merge),
+    (8, 4): ("a conflict leaves the pull request open", check_conflict_leaves_pr_open),
+    (8, 5): ("no --admin and no --delete-branch", check_no_admin_no_delete),
 }
 
 

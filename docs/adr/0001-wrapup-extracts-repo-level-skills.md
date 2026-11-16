@@ -18,7 +18,8 @@ worktree is busy, because it is the one irreversible step: uncommitted work in
 that checkout is what a premature close destroys.
 
 The `learn-from-sessions` skill now holds the extraction this describes. See
-ADR 0004.
+ADR 0004. The person can also ask the wrapup to merge the pull request before
+it closes. See ADR 0005.
 
 ## Considered Options
 

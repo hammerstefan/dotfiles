@@ -459,9 +459,13 @@ def main() -> int:
     brief = state / "brief.md"
     brief.write_text(render(template_path().read_text(), values))
 
-    goal = (f"A pull request is open from branch {wrapup_branch} in {repo}: "
-            f"`gh pr list --repo {repo} --head {wrapup_branch} --state open "
-            "--json number --jq 'length'` prints 1.")
+    # The goal must hold before and after the merge option. A pull request the
+    # person asked to merge leaves the "open" state, so a goal that asks for
+    # "open" alone sends the session back forever.
+    goal = (f"A pull request from branch {wrapup_branch} in {repo} is open or "
+            f"merged: `gh pr list --repo {repo} --head {wrapup_branch} --state "
+            "all --json number,state --jq '[.[] | select(.state == \"OPEN\" or "
+            ".state == \"MERGED\")] | length'` prints 1.")
     if len(goal) >= 4000:
         raise Refused("the goal is 4000 characters or more, which hwt refuses")
     (state / "goal.md").write_text(goal + "\n")
