@@ -104,7 +104,7 @@ Render a PNG and read it:
 mmdc --input diagrams/<name>.mmd --output /tmp/<name>.png --backgroundColor white
 ```
 
-Then read `/tmp/<name>.png` with the read tool. Check that:
+Then look at `/tmp/<name>.png`. Check that:
 
 - no label overlaps another label or a line
 - no text is cut off at the edge of the diagram
@@ -134,7 +134,7 @@ break a naive pipeline, and the script handles all three:
    rejects them in every other family.
 
 The script caches the last successful fetch under
-`~/.cache/opencode/diagram/`. It uses the cache only when the fetch fails,
+`~/.cache/diagram/`. It uses the cache only when the fetch fails,
 and it says so when it does. A cached theme can be older than the current one.
 
 ## Known limits

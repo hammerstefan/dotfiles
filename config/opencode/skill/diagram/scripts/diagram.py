@@ -130,7 +130,7 @@ def cache_dir() -> Path:
     """Return the directory that holds the last successful fetch."""
     base = os.environ.get("XDG_CACHE_HOME")
     root = Path(base) if base else Path.home() / ".cache"
-    return root / "opencode" / "diagram"
+    return root / "diagram"
 
 
 def fetch_artifact(name: str, use_cache: bool = True) -> tuple[str, bool]:
