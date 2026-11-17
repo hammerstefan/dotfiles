@@ -48,7 +48,7 @@ from typing import Any
 # here moves the skill into another directory tree, and a relative path from
 # the output directory then climbs past the filesystem root. The result is a
 # script reference that a browser cannot load.
-SKILL_ROOT = Path(__file__).resolve().parent.parent
+SKILL_ROOT = Path(__file__).absolute().parent.parent
 VENDOR_DIR = SKILL_ROOT / "vendor"
 
 BRAND_KIT_REPO = "canonical/mermaid-brand-kit"
@@ -1027,12 +1027,24 @@ def write_html(output_path: Path, source: str, title: str, script_path: str) -> 
 
 
 def relative_script_path(output_path: Path) -> str:
-    """Return the path from the HTML file to the vendored Mermaid script."""
+    """Return the path from the HTML file to the vendored Mermaid script.
+
+    A relative path keeps the page self-contained inside the home directory.
+    A path with more parent segments than the output directory has levels
+    climbs past the filesystem root and then re-enters it, so the browser
+    cannot load the script. The script falls back to a file URI in that case.
+    """
     script = VENDOR_DIR / "mermaid.min.js"
     try:
-        return os.path.relpath(script, output_path.parent).replace(os.sep, "/")
+        relative = os.path.relpath(script, output_path.parent)
     except ValueError:
         return script.as_uri()
+    relative = relative.replace(os.sep, "/")
+    if relative.startswith("../"):
+        depth = len(Path(output_path.parent).resolve().parts)
+        if relative.count("../") > depth:
+            return script.as_uri()
+    return relative
 
 
 # ---------------------------------------------------------------------------

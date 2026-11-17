@@ -345,6 +345,17 @@ class HtmlTest(unittest.TestCase):
         found = diagram.find_off_brand_colors(html)
         self.assertEqual(found, {})
 
+    def test_the_script_path_reaches_the_vendored_script(self):
+        with tempfile.TemporaryDirectory() as work:
+            output = Path(work) / "diagrams" / "page.html"
+            output.parent.mkdir(parents=True)
+            path = diagram.relative_script_path(output)
+            self.assertFalse(path.startswith("file://"))
+            self.assertTrue(
+                (output.parent / path).resolve().is_file(),
+                f"the script path {path} does not reach the vendored script",
+            )
+
     def test_the_page_waits_for_the_diagram_before_the_first_fit(self):
         html = diagram.HTML_TEMPLATE.format(
             title="t",
