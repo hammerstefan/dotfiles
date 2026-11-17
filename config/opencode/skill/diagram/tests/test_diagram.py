@@ -292,6 +292,70 @@ class SourceTest(unittest.TestCase):
         self.assertNotIn("classDef leaf", source)
 
 
+class HtmlTest(unittest.TestCase):
+    """Tests for the HTML page and its view controls."""
+
+    def test_the_page_has_a_zoom_toolbar(self):
+        html = diagram.HTML_TEMPLATE.format(
+            title="t",
+            background=diagram.BRAND_WHITE,
+            source="flowchart LR\n  a --> b",
+            script="vendor/mermaid.min.js",
+        )
+        for control in ("zoom-in", "zoom-out", "zoom-fit", "zoom-reset"):
+            self.assertIn(f'id="{control}"', html)
+
+    def test_the_page_reports_the_zoom_level(self):
+        html = diagram.HTML_TEMPLATE.format(
+            title="t",
+            background=diagram.BRAND_WHITE,
+            source="flowchart LR\n  a --> b",
+            script="vendor/mermaid.min.js",
+        )
+        self.assertIn('id="zoom-level"', html)
+
+    def test_the_page_does_not_cap_the_diagram_width(self):
+        html = diagram.HTML_TEMPLATE.format(
+            title="t",
+            background=diagram.BRAND_WHITE,
+            source="flowchart LR\n  a --> b",
+            script="vendor/mermaid.min.js",
+        )
+        self.assertNotIn("max-width: 100%", html)
+        self.assertIn("max-width: none", html)
+
+    def test_the_page_scrolls_and_pans(self):
+        html = diagram.HTML_TEMPLATE.format(
+            title="t",
+            background=diagram.BRAND_WHITE,
+            source="flowchart LR\n  a --> b",
+            script="vendor/mermaid.min.js",
+        )
+        self.assertIn("overflow: hidden", html)
+        self.assertIn("wheel", html)
+        self.assertIn("mousemove", html)
+
+    def test_the_page_chrome_uses_only_brand_colours(self):
+        html = diagram.HTML_TEMPLATE.format(
+            title="t",
+            background=diagram.BRAND_WHITE,
+            source="flowchart LR\n  a --> b",
+            script="vendor/mermaid.min.js",
+        )
+        found = diagram.find_off_brand_colors(html)
+        self.assertEqual(found, {})
+
+    def test_the_page_waits_for_the_diagram_before_the_first_fit(self):
+        html = diagram.HTML_TEMPLATE.format(
+            title="t",
+            background=diagram.BRAND_WHITE,
+            source="flowchart LR\n  a --> b",
+            script="vendor/mermaid.min.js",
+        )
+        self.assertIn("fitWhenReady", html)
+        self.assertIn("diagramSize", html)
+
+
 class ChromeTest(unittest.TestCase):
     def test_it_prefers_the_puppeteer_cache_over_a_system_browser(self):
         found = diagram.find_chrome()
@@ -418,6 +482,8 @@ class RenderTest(unittest.TestCase):
             html = (root / "out" / "flow.html").read_text(encoding="utf-8")
             self.assertIn("mermaid.initialize", html)
             self.assertIn("mermaid.min.js", html)
+            self.assertIn('id="zoom-fit"', html)
+            self.assertIn('id="zoom-in"', html)
 
     def test_it_renders_a_c4_diagram_without_off_brand_colours(self):
         with tempfile.TemporaryDirectory() as work:

@@ -44,6 +44,10 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+# The skill root keeps the path as the caller reached it. Resolving the path
+# here moves the skill into another directory tree, and a relative path from
+# the output directory then climbs past the filesystem root. The result is a
+# script reference that a browser cannot load.
 SKILL_ROOT = Path(__file__).resolve().parent.parent
 VENDOR_DIR = SKILL_ROOT / "vendor"
 
@@ -773,15 +777,237 @@ HTML_TEMPLATE = """<!doctype html>
 <style>
   html, body {{ margin: 0; padding: 24px; background: {background}; }}
   body {{ font-family: "Ubuntu Sans", trebuchet ms, verdana, arial, sans-serif; }}
-  .mermaid svg {{ max-width: 100%; height: auto; }}
+  .toolbar {{
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 0 0 12px;
+    padding: 8px;
+    background: {background};
+    border: 1px solid #000000;
+  }}
+  .toolbar button {{
+    min-width: 34px;
+    padding: 4px 8px;
+    font: inherit;
+    color: #000000;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    cursor: pointer;
+  }}
+  .toolbar button:hover {{ background: #F3F3F3; }}
+  .toolbar .level {{
+    min-width: 64px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }}
+  .toolbar .hint {{ margin-left: auto; color: #666666; font-size: 14px; }}
+  .viewport {{
+    overflow: hidden;
+    width: 100%;
+    height: calc(100vh - 104px);
+    cursor: grab;
+    border: 1px solid #D9D9D9;
+  }}
+  .viewport.panning {{ cursor: grabbing; }}
+  .canvas {{
+    position: relative;
+    width: max-content;
+    transform-origin: 0 0;
+  }}
+  .mermaid svg {{ max-width: none; height: auto; display: block; }}
 </style>
 </head>
 <body>
-<div class="mermaid">
+<div class="toolbar">
+  <button type="button" id="zoom-out" title="Zoom out">&#8722;</button>
+  <span class="level" id="zoom-level">100%</span>
+  <button type="button" id="zoom-in" title="Zoom in">+</button>
+  <button type="button" id="zoom-fit" title="Fit the diagram to the window">Fit</button>
+  <button type="button" id="zoom-reset" title="Reset the zoom to 100%">Reset</button>
+  <span class="hint">Drag to pan. Ctrl and scroll to zoom.</span>
+</div>
+<div class="viewport" id="viewport">
+  <div class="canvas" id="canvas">
+    <div class="mermaid">
 {source}
+    </div>
+  </div>
 </div>
 <script src="{script}"></script>
-<script>mermaid.initialize({{ startOnLoad: true }});</script>
+<script>
+  mermaid.initialize({{ startOnLoad: true }});
+
+  (function () {{
+    var viewport = document.getElementById("viewport");
+    var canvas = document.getElementById("canvas");
+    var level = document.getElementById("zoom-level");
+    var MIN = 0.1;
+    var MAX = 8;
+    var scale = 1;
+    var x = 0;
+    var y = 0;
+    var dragging = false;
+    var startX = 0;
+    var startY = 0;
+    var originX = 0;
+    var originY = 0;
+
+    function clamp(value) {{
+      return Math.min(MAX, Math.max(MIN, value));
+    }}
+
+    function apply() {{
+      canvas.style.transform =
+        "translate(" + x + "px, " + y + "px) scale(" + scale + ")";
+      level.textContent = Math.round(scale * 100) + "%";
+    }}
+
+    function zoomAt(factor, clientX, clientY) {{
+      var rect = viewport.getBoundingClientRect();
+      var pointerX = clientX - rect.left;
+      var pointerY = clientY - rect.top;
+      var next = clamp(scale * factor);
+      if (next === scale) {{
+        return;
+      }}
+      var ratio = next / scale;
+      x = pointerX - (pointerX - x) * ratio;
+      y = pointerY - (pointerY - y) * ratio;
+      scale = next;
+      apply();
+    }}
+
+    function svg() {{
+      return canvas.querySelector("svg");
+    }}
+
+    function diagramSize() {{
+      var diagram = svg();
+      if (!diagram) {{
+        return null;
+      }}
+      var box = diagram.viewBox.baseVal;
+      var width = box && box.width ? box.width : 0;
+      var height = box && box.height ? box.height : 0;
+      if (!width || !height) {{
+        return null;
+      }}
+      // Mermaid creates the SVG element before it lays the diagram out. The
+      // element then holds a placeholder viewBox that does not match its own
+      // width and height attributes. The fit waits until the two agree, so
+      // that it measures the diagram and not the placeholder.
+      var declaredWidth = parseFloat(diagram.getAttribute("width"));
+      var declaredHeight = parseFloat(diagram.getAttribute("height"));
+      if (!declaredWidth || !declaredHeight) {{
+        return null;
+      }}
+      if (Math.abs(declaredWidth - width) > 1 ||
+          Math.abs(declaredHeight - height) > 1) {{
+        return null;
+      }}
+      return {{ width: width, height: height }};
+    }}
+
+    function fit() {{
+      var size = diagramSize();
+      if (!size) {{
+        return false;
+      }}
+      var available = viewport.clientWidth - 24;
+      var availableHeight = viewport.clientHeight - 24;
+      scale = clamp(Math.min(available / size.width, availableHeight / size.height));
+      x = (viewport.clientWidth - size.width * scale) / 2;
+      y = (viewport.clientHeight - size.height * scale) / 2;
+      apply();
+      return true;
+    }}
+
+    function fitWhenReady(attempt) {{
+      if (fit()) {{
+        return;
+      }}
+      if (attempt > 40) {{
+        return;
+      }}
+      window.setTimeout(function () {{
+        fitWhenReady(attempt + 1);
+      }}, 100);
+    }}
+
+    document.getElementById("zoom-in").addEventListener("click", function () {{
+      var rect = viewport.getBoundingClientRect();
+      zoomAt(1.2, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    }});
+
+    document.getElementById("zoom-out").addEventListener("click", function () {{
+      var rect = viewport.getBoundingClientRect();
+      zoomAt(1 / 1.2, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    }});
+
+    document.getElementById("zoom-fit").addEventListener("click", function () {{
+      fitWhenReady(0);
+    }});
+    document.getElementById("zoom-reset").addEventListener("click", function () {{
+      scale = 1;
+      x = 0;
+      y = 0;
+      apply();
+    }});
+
+    viewport.addEventListener("wheel", function (event) {{
+      if (!event.ctrlKey) {{
+        return;
+      }}
+      event.preventDefault();
+      zoomAt(event.deltaY < 0 ? 1.1 : 1 / 1.1, event.clientX, event.clientY);
+    }}, {{ passive: false }});
+
+    viewport.addEventListener("mousedown", function (event) {{
+      if (event.button !== 0) {{
+        return;
+      }}
+      dragging = true;
+      startX = event.clientX;
+      startY = event.clientY;
+      originX = x;
+      originY = y;
+      viewport.classList.add("panning");
+      event.preventDefault();
+    }});
+
+    window.addEventListener("mousemove", function (event) {{
+      if (!dragging) {{
+        return;
+      }}
+      x = originX + event.clientX - startX;
+      y = originY + event.clientY - startY;
+      apply();
+    }});
+
+    window.addEventListener("mouseup", function () {{
+      dragging = false;
+      viewport.classList.remove("panning");
+    }});
+
+    window.addEventListener("resize", function () {{
+      if (scale === 1 && x === 0 && y === 0) {{
+        fitWhenReady(0);
+      }}
+    }});
+
+    if (document.readyState === "complete") {{
+      fitWhenReady(0);
+    }} else {{
+      window.addEventListener("load", function () {{
+        fitWhenReady(0);
+      }});
+    }}
+  }})();
+</script>
 </body>
 </html>
 """
