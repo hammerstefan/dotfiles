@@ -336,7 +336,8 @@
   "experimental": {
     "todo": true,
     "schedules": true,
-    "console_watches": true
+    "console_watches": true,
+    "subagent_depth": 2
   },
   "permissions": [
     { "action": "codesearch", "resource": "*", "effect": "allow" },
@@ -375,9 +376,15 @@
       "effect": "allow"
     }
   ],
+  "policies": [
+    { "action": "provider.use", "resource": "opencode", "effect": "deny" }
+  ],
   "plugins": ["./plugins/openspec", "opencode-cockpit@0.11.2"],
   "plugin": ["/home/stefan.hammer@canonical.com/.hindsight/coding-agents"],
   "formatter": true,
+  "websearch": {
+    "provider": "exa"
+  },
   "mcp": {
     "servers": {
       "with-context": {
