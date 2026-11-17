@@ -2,7 +2,7 @@
 //
 // When a provider cannot serve a request, move the session to the next model
 // in a configured chain instead of stopping the turn. Built for coding-plan
-// quotas: minimax-coding-plan -> zai-coding-plan -> openrouter deepseek flash.
+// quotas: minimax-coding-plan -> zai-coding-plan -> opencode-go deepseek flash.
 //
 // Why the `retry` hook and not `experimental.model.resolve`:
 // - `experimental.model.resolve` runs before every request and is the natural
