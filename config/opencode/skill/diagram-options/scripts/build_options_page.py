@@ -28,9 +28,19 @@ import time
 from pathlib import Path
 from typing import Any
 
-# The diagram skill renders with the Canonical brand theme. The skill is
-# global, and the path holds the skill in its installed place.
-DIAGRAM_SCRIPT = Path.home() / ".config/opencode/skill/diagram/scripts/diagram.py"
+# The diagram skill renders with the Canonical brand theme. The skill sits
+# next to this one in the installed skill directory, and it also sits in the
+# global skill directory. The search takes the sibling first, so the skill
+# works from any install place, such as a copy in a repository.
+SKILL_ROOT = Path(__file__).absolute().parent.parent
+DIAGRAM_SCRIPT_CANDIDATES = (
+    SKILL_ROOT.parent / "diagram" / "scripts" / "diagram.py",
+    Path.home() / ".config/opencode/skill/diagram/scripts/diagram.py",
+)
+DIAGRAM_SCRIPT = next(
+    (path for path in DIAGRAM_SCRIPT_CANDIDATES if path.is_file()),
+    DIAGRAM_SCRIPT_CANDIDATES[0],
+)
 
 # The default parent of the output directory. The files are temporary, and
 # the user's home is the place a browser can read.
