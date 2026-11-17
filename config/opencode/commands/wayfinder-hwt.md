@@ -135,7 +135,7 @@ For each passable ticket, in order:
 
 1. Read the ticket body, the map's Notes and Decisions so far, and the repository's `AGENTS.md` and every file it points at. Take the wayfinder skill from the section above, and never write that it is not installed.
 2. Write the brief to `/tmp/opencode/hwt-prompt-<slug>.md` with the write tool: the skeleton in step 8, every placeholder filled. Put `PENDING: from hwt -n` on its `Checkout:` line.
-3. Write the goal to `/tmp/opencode/hwt-goal-<slug>.md` with the write tool, one line: the ticket's observable end state, naming the command that proves it and what that command prints. The `Done when` section of the brief is the same thing in prose; write the two together so they cannot drift.
+3. Write the goal to `/tmp/opencode/hwt-goal-<slug>.md` with the write tool, one line: the ticket's observable end state, naming the command that proves it and what that command prints, and including the pull request check `gh pr view <branch> --json state --jq .state` printing `OPEN` or `MERGED`. The `Done when` section of the brief is the same thing in prose; write the two together so they cannot drift.
 4. Dry run from this session's shell:
 
    ```sh
@@ -191,18 +191,21 @@ Repository: <repo>  Branch: <branch>  Base: <base>
 1. Load the `wayfinder` skill with the skill tool, id `wayfinder`, then read this ticket's `wayfinder:<type>` label.
 2. Claim the ticket: `gh issue edit <n> --add-assignee @me`. This is the first write.
 3. <the type's method, one line per step>
-4. Record the resolution on the ticket, close it, and append the context pointer to the map's Decisions so far.
+4. Push `<branch>` and open one pull request whose body names the map and the ticket; a `research` ticket pushes and opens none. Merge it only as the repository's tracker law states.
+5. Record the resolution on the ticket with its pull request URL, close it, and append the context pointer to the map's Decisions so far.
 
 # Rules
 
 - Read `AGENTS.md` and every file it points at before editing.
 - <the repository rules this work must obey>
-- Commit on `<branch>`. Do not push, merge, rebase, or touch other branches.
+- Commit on `<branch>`. Pushing `<branch>`, opening one pull request for it, and merging that pull request as the repository's tracker law states are this brief's only exceptions to "do not push, merge, or rebase". Never force-push, and never touch another branch.
 - Ask before <the step in this repository that destroys state or spends money>.
 
 # Done when
 
-<the observable end state, including the closed ticket and the map line that names it>
+<the observable end state, including the closed ticket, the map line that names
+it, and the pull request for `<branch>` that `gh pr view <branch> --json state
+--jq .state` proves by printing `OPEN` or `MERGED`>
 
 # Report
 
@@ -216,7 +219,8 @@ section tells the session what to aim for, the goal tells the reviewer what to
 check. Write them together, in the same words, so they cannot drift. A
 `grilling` ticket has no checkable end state, because its work is a decision
 the person makes: give it the goal that the decision is recorded on the ticket,
-with the person's answer in it, and nothing more.
+with the person's answer in it, and that the pull request for `<branch>` is
+open. Nothing else.
 
 Step 3 of the brief, by the ticket's `wayfinder:<type>` label:
 
@@ -225,7 +229,10 @@ Step 3 of the brief, by the ticket's `wayfinder:<type>` label:
 - `research` — load the `research` skill, investigate against primary sources, and write the findings file where the repository keeps such notes, citing each claim.
 - `task` — deliver what the ticket names and verify it on this host; hand the person a precise checklist for what only they can do.
 
-A `research` ticket's Rules line reads: "Push `<branch>` and open no pull request. It is a throwaway record." The other three read: "Do not push."
+A `research` ticket's Rules line reads: "Push `<branch>` and open no pull
+request for it; it is a throwaway record, and the repository's tracker law
+carries the findings to `main`." The other three take the push and
+pull-request rule in the Rules block above.
 
 ## 9. Report
 

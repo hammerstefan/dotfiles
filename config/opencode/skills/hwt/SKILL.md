@@ -100,7 +100,10 @@ conversation and from what you read>
 - Read <AGENTS.md and the files it points at> before editing.
 - <the rules that apply to this work: spike laws, the requirements process,
   commit message form, no production code for a probe>
-- Commit on <branch>; do not push, merge, rebase, or touch other branches.
+- Commit on <branch>. When the work leaves an artifact the repository keeps,
+  pushing <branch> and opening one pull request for it are this brief's only
+  exceptions to "do not push, merge, or rebase"; the repository's tracker law
+  decides the merge. Never force-push, and never touch another branch.
 - Ask before <the expensive or destructive step this work could reach>.
 - When you need a decision, a credential, or a value only the person has, ask
   for it with the `question` tool and wait for the answer. Do not guess it, and
@@ -109,7 +112,8 @@ conversation and from what you read>
 # Done when
 
 <the observable end state: the README states the question and verdict, the
-test passes, the command prints X>
+test passes, the command prints X, and the pull request is open when the work
+leaves an artifact the repository keeps>
 
 # Report
 
@@ -146,6 +150,7 @@ that names the command and what it prints:
 
 - good — "`pytest tests/test_health.py` passes and prints `3 passed`"
 - good — "`README.md` has a section `## Verdict`, and `grep -c '^## Verdict' README.md` prints `1`"
+- good — "`gh pr view <branch> --json state --jq .state` prints `OPEN` or `MERGED`"
 - bad — "the health check is implemented"
 - bad — "the work is complete"
 
