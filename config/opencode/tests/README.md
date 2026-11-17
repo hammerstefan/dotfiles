@@ -36,6 +36,14 @@ through a stubbed plugin context that records `session.hook` registrations and
 `OPENCODE_CONFIG_DIR`, so the tests point that at a temporary directory and
 never touch the installed configuration.
 
+`new_prompt.test.js` covers the `/new-prompt` TUI plugin in `new-prompt/tui.js`.
+The plugin registers a slash command that keeps the text typed after it,
+creates a session, runs the named command in that session, and focuses the
+session. The tests stub the TUI plugin context and assert the calls the plugin
+makes: the command runs in the new session, an unknown command is rejected
+before any session exists, a session that never received its prompt is
+removed, and the plugin navigates to the session when tabs are disabled.
+
 ## Synthetic ticket evaluations
 
 `mock_ticket_mcp.py` is a local MCP server. It serves only

@@ -5,7 +5,8 @@
   },
   "plugins": [
     "./herdr-tui-session.js",
-    "./herdr-opencode"
+    "./herdr-opencode",
+    "./new-prompt"
   ],
   "diffs": {
     "wrap": "word",
