@@ -1,23 +1,20 @@
 Prioritize retrieval-led reasoning over pretrained-knowledge-led reasoning.
 
-## OpenSpec Workflow (mandatory across all projects)
+## Skills
 
-For any project that uses OpenSpec, all standard OpenSpec work **must**
-be done through the OpenSpec skills defined in the project's
-`.opencode/skills/openspec-*/` (or the equivalent project skill set).
-Do not perform OpenSpec operations ad-hoc. The following operations
-have dedicated skills and must be invoked via the `skill` tool:
+Repository-specific workflows are in `.opencode/skills/<id>/SKILL.md`. General
+skills are in `~/.agents/skills`. Load a skill with the `skill` tool when the
+request matches its task. `implement` works a spec or a ticket set,
+`code-review` reviews a change, `tdd` builds test-first, and
+`write-a-property-test` writes the invariant over generated input.
 
-- `openspec-new-change` — starting a new change (artifact workflow)
-- `openspec-propose` — full proposal (design + specs + tasks) in one step
-- `openspec-continue-change` — progressing an existing change
-- `openspec-apply-change` — implementing tasks from a change
-- `openspec-sync-specs` — syncing delta specs to main specs
-- `openspec-archive-change` — finalizing and archiving a change
+## OpenSpec Workflow
 
-Before performing any of the above, load the corresponding skill
-(`skill` tool with the skill name) and follow its instructions. This
-ensures artifacts (`proposal.md`, `tasks.md`, specs, etc.) are
-produced consistently and stay in sync.
-
-If a project does not use OpenSpec, this rule does not apply.
+A project uses OpenSpec when it holds an `openspec/` directory or an
+`.opencode/skills/openspec-*` skill, or the equivalent project skill set. In
+such a project, standard OpenSpec work goes through those skills. Load the skill
+that names the operation and follow it. The operations are
+`openspec-new-change`, `openspec-propose`, `openspec-continue-change`,
+`openspec-apply-change`, `openspec-sync-specs`, and `openspec-archive-change`.
+Do not perform an OpenSpec operation by hand. In a project without those files,
+this rule does not apply.
