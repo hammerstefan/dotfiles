@@ -1,0 +1,246 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright 2026 Canonical Ltd.
+
+- description: User wants ruff installed against the project via an in-project SDK
+  vars:
+    user: |
+      Add a `ruff` install to my workshop. I want it project-scoped (not a Store SDK), and committed to the repo so my colleagues get it on next launch. The base already has `uv` available.
+  assert:
+    - type: contains
+      value: .workshop/ruff
+    - type: contains
+      value: setup-project
+    - type: contains-any
+      value:
+        - "chmod +x"
+        - executable
+    - type: contains-any
+      value:
+        - "project-ruff"
+        - "name: project-"
+    - type: contains
+      value: workshop refresh
+    - type: llm-rubric
+      value: |
+        The response describes writing `.workshop/ruff/sdk.yaml` containing
+        `name: ruff` with NO `hooks:` key (an in-project `sdk.yaml` has no
+        such field — fail the rubric if the emitted `sdk.yaml` includes a
+        `hooks:` list or map), plus a hook script at
+        `.workshop/ruff/hooks/setup-project` that installs ruff (typically
+        via `uv tool install ruff`) and is discovered automatically by
+        filename. It explicitly notes the executable bit (`chmod +x`) and
+        references the SDK as `project-ruff` in the workshop definition's
+        `sdks:` list. It recommends `workshop refresh` (ideally with
+        `--wait-on-error` on first install) to apply.
+
+- description: User asks about setup-base for system packages on every workshop
+  vars:
+    user: |
+      I want every workshop on `ubuntu@24.04` that uses my custom SDK to come with `build-essential` and `pkg-config` baked in at the OS level — not reinstalled per project. Which hook do I use, and what's the catch?
+  assert:
+    - type: contains
+      value: setup-base
+    - type: contains-any
+      value:
+        - root
+        - "as root"
+    - type: contains-any
+      value:
+        - "does not re-run"
+        - "doesn't re-run"
+        - "won't re-run"
+        - "remove"
+        - "recreate"
+    - type: llm-rubric
+      value: |
+        The response identifies `setup-base` as the right hook (runs
+        once per (base, SDK) combination, as `root`, before the SDK is
+        mounted into a workshop). It warns that `workshop refresh` does
+        NOT re-run `setup-base` — picking up an edit to `setup-base`
+        requires recreating the workshop (`workshop remove` then
+        `workshop launch`).
+
+- description: User reports a hook script that isn't running
+  vars:
+    user: |
+      I added a `hooks/setup-project` script under my in-project SDK, but `workshop refresh` claims success and the tool isn't installed. The hook seems to be skipped entirely. It's mode 644 — is that the problem?
+  assert:
+    - type: contains-any
+      value:
+        - "workshop tasks"
+        - "project-"
+        - filename
+    - type: llm-rubric
+      value: |
+        The response does NOT blame the 0644 mode. Workshop runs hooks with
+        bash rather than exec'ing them, so a hook without `+x` still runs;
+        `chmod +x` is house style, not a fix for this symptom. It steers the
+        user to the causes that DO silently skip a hook: the SDK not listed
+        in the definition's `sdks:` as `project-<name>`, a directory name
+        that doesn't match `name:` in sdk.yaml, a filename outside the five
+        recognized hook names, or a refresh that had no work to apply. It
+        points at `workshop tasks <ID>` to see what actually ran. Claiming
+        the missing executable bit is the cause is a FAIL. It MAY note that
+        bash is the interpreter regardless of shebang, and that `+x` does
+        matter for SDKs later packed with `sdkcraft`, but that is optional —
+        correctly ruling the mode out and redirecting to the real causes
+        satisfies the rubric on its own.
+
+- description: User asks where hooks go in sdk.yaml
+  vars:
+    user: |
+      Can I just put my hook's bash script directly inside `sdk.yaml` under a `hooks:` key, like a YAML literal block? It would be tidier than a separate file.
+  assert:
+    - type: not-contains
+      value: "hooks: |"
+    - type: contains
+      value: hooks/
+    - type: contains-any
+      value:
+        - "separate file"
+        - "separate executable"
+        - "executable script"
+        - "executable file"
+        - "hook script"
+        - "unknown field"
+        - "inline hooks"
+        - rejected
+        - discovered
+        - "lives elsewhere"
+    - type: llm-rubric
+      value: |
+        The response explains that in-project SDK hooks are NOT inline
+        YAML scripts, and that an in-project `sdk.yaml` has NO `hooks:` key
+        at all — validation rejects one, so adding it fails (since 0.9.9 the
+        error is `only the "sketch" SDK supports inline hooks`; earlier
+        releases reported an unknown field — either account is correct).
+        The actual scripts live in a sibling `hooks/` directory as
+        executable files, discovered automatically by filename. It does not
+        present a `hooks:` list or map as valid in-project `sdk.yaml`
+        syntax. (It MAY note that a sketch SDK's `sdk.yaml` is the one place
+        an inline `hooks:` map is accepted — that is correct and a bonus,
+        not required.)
+
+- description: Minimal in-project sdk.yaml contents
+  vars:
+    user: |
+      What is the absolute minimum I need in `.workshop/mytools/sdk.yaml` for an in-project SDK that runs a single setup-project step?
+  assert:
+    - type: contains
+      value: "name:"
+    - type: contains-any
+      value:
+        - setup-project
+        - hooks/
+    - type: llm-rubric
+      value: |
+        The response states that `name:` is the ONLY required key in an
+        in-project `sdk.yaml` (here `name: mytools`), and that the
+        setup-project step is NOT declared in YAML — it is an executable
+        file at `.workshop/mytools/hooks/setup-project`, discovered by
+        filename. Any example `sdk.yaml` it shows contains no `hooks:` key.
+        Fail if it claims a `hooks:` list/map is required or shown in the
+        minimal file.
+
+- description: Publisher metadata in an in-project sdk.yaml (0.9.9)
+  vars:
+    user: |
+      Can I put `website:` and `source-code:` in my in-project SDK's `.workshop/tools/sdk.yaml`? I'm on Workshop 0.9.9, and I remember those keys being rejected.
+  assert:
+    - type: llm-rubric
+      value: |
+        The response says yes for 0.9.9: an in-project `sdk.yaml` accepts
+        the publisher metadata fields `contact`, `issues`, `source-code` and
+        `website`, and Workshop ignores them (they change nothing about how
+        the SDK runs). It confirms the user's memory was right for 0.9.8 and
+        earlier, which rejected those fields in an in-project `sdk.yaml` —
+        adding that leaving them out keeps the SDK working on older hosts is
+        a plus, not required. It does NOT claim they are rejected on 0.9.9,
+        and does NOT suggest adding a `hooks:` key or any other field outside
+        the documented set.
+
+- description: User asks how to update an existing in-project SDK's setup-project
+  vars:
+    user: |
+      I've already got an in-project SDK with a `setup-project` hook installed. I want to change what it installs — what's the loop for iterating?
+  assert:
+    - type: contains
+      value: workshop refresh
+    - type: contains-any
+      value:
+        - "--wait-on-error"
+        - "wait-on-error"
+    - type: contains-any
+      value:
+        - "workshop tasks"
+        - "workshop changes"
+    - type: llm-rubric
+      value: |
+        The response describes editing the hook script in place and
+        running `workshop refresh` to re-run `setup-project`. It
+        recommends `--wait-on-error` for live debugging if the hook
+        might fail, and points the user at `workshop changes` /
+        `workshop tasks <ID>` for inspecting hook stdout/stderr after
+        a failure.
+
+- description: Reporting SDK health from a check-health hook (correct statuses)
+  vars:
+    user: |
+      In my in-project SDK's `check-health` hook, how do I tell Workshop the SDK is healthy, and how do I signal it's still starting up and should be retried?
+  assert:
+    - type: contains
+      value: set-health
+    - type: contains-any
+      value:
+        - okay
+        - waiting
+    - type: llm-rubric
+      value: |
+        The response uses `workshopctl set-health` with the real statuses:
+        `okay` (healthy → Ready), `waiting` (still starting — Workshop retries),
+        and/or `error`. For `waiting`/`error` it includes a short positional
+        message; `okay` takes none. It does NOT use `Ready`, `Pending`, or
+        `Error` as the STATUS argument, and does NOT prescribe a `--reason`
+        flag in a command (an optional `--code=<code>` on error is
+        acceptable). Explicitly NOTING that no `--reason` flag exists — the
+        skill itself says so — is correct and must not be penalized.
+
+- description: Persisting SDK state across a refresh (save-state / restore-state)
+  vars:
+    user: |
+      My in-project SDK keeps a small cache directory that gets wiped whenever I refresh the workshop to a new SDK revision. Which hooks preserve it, and when do they actually run?
+  assert:
+    - type: contains-any
+      value:
+        - save-state
+        - restore-state
+    - type: contains
+      value: SDK_STATE_DIR
+    - type: llm-rubric
+      value: |
+        The response uses `save-state` (copies into `$SDK_STATE_DIR` from the
+        OLD revision) and `restore-state` (reads it back on the NEW revision),
+        and makes clear they run DURING an applied `workshop refresh` — NOT on
+        workshop stop/start. It does NOT claim they fire on stop/start, and does
+        NOT invent a `setup-sdk` hook.
+
+- description: User asks for the full list of SDK hooks and their privilege
+  vars:
+    user: |
+      What lifecycle hooks can an in-project SDK define, and which one runs as the workshop user versus root?
+  assert:
+    - type: contains
+      value: setup-project
+    - type: contains
+      value: setup-base
+    # No blunt `not-contains: setup-sdk` here: the skill emphatically states
+    # "there is no setup-sdk hook", so a correct answer often names it precisely
+    # to exclude it (mention-vs-prescription, cf. BASELINE assertion fixes 2/3/7).
+    # The llm-rubric below carries the real guard.
+    - type: llm-rubric
+      value: |
+        The response lists exactly the five real hooks — `setup-base`,
+        `setup-project`, `check-health`, `save-state`, `restore-state` — and
+        does NOT present a `setup-sdk` hook as real (naming it only to exclude
+        it is fine). It correctly notes `setup-project` runs as the `workshop`
+        user while the others run as `root`.

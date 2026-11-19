@@ -1,0 +1,200 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Copyright 2026 Canonical Ltd. -->
+
+<overview>
+What Workshop can and cannot express, and how to turn that into an honest
+feasibility verdict for a repo. Load this before proposing anything. Every
+construct in a proposal must map to a row in `<envelope>`; every detected need
+that maps to nothing becomes a GAP in the verdict, never a silent omission.
+The full definition-file anatomy lives in
+`../use-workshop/references/definition-file.md` — this file is the
+onboarding-decision view of the same facts.
+</overview>
+
+<envelope>
+The complete expressive surface of a workshop definition:
+
+| Construct | Limits | Onboarding use |
+|-----------|--------|----------------|
+| `name` | `^[a-z](?:-?[a-z0-9])*$`, max 40 chars; must match filename in `.workshop/<name>.yaml` layout | Default `dev` |
+| `base` | Exactly one of `ubuntu@22.04`, `ubuntu@24.04`, `ubuntu@26.04` (`ubuntu@20.04` is deprecated since 0.9.7 — still accepted in 0.9.8, but warns on every launch/refresh, and removal is announced without a date) | Match the repo's CI runner / docs; default `ubuntu@24.04`; never propose `20.04` |
+| `runtime` | `lxd-container` (default; omit the key) or `lxd-vm` (experimental). 0.9.8 renamed it from `confinement:` (silently ignored on 0.9.8, rejected as an unknown field since 0.9.9) — never emit either key. Onboarding always emits a container — see `<not_in_envelope>` | Omit |
+| `sdks` | Store SDKs by name (+ snap-style `channel`), in-project SDKs as `project-<name>`, try SDKs as `try-<name>`, implicit `system` | Toolchains and runtimes |
+| `sdks[].plugs` / `sdks[].slots` | Graft interface endpoints onto any listed SDK (incl. `system`) | Tunnels for dev servers; desktop/gpu/device access |
+| `connections` | Explicit plug↔slot wiring when auto-connect isn't enough | venv sharing, cross-SDK content |
+| `actions` | Named bash scripts (`errexit`+`pipefail`; args as `"$@"`); parsed at `workshop run` time, no refresh needed | The repo's build/test/lint/serve commands |
+| Interfaces | `tunnel` (ports/sockets; system-SDK plugs can't use ports 1–1023), `mount`, `gpu`, `camera`, `desktop`, `ssh-agent`, `custom-device`, `secret` (0.9.8+) | Host resources |
+| Credentials | A `secret` slot under `system` (keyring lookup attributes only) for an SDK that declares a `secret` plug; **always** connected by the user with `workshop connect`, never by `connections:`; needs a desktop keyring session. Or no wiring at all: `workshop run --env NAME` filled from the host's store per run | Only when the dev loop needs an API key/token; never values, never in actions |
+| In-project SDK | `.workshop/<name>/sdk.yaml` + `hooks/` scripts (`setup-base`, `setup-project`, `check-health`, `save-state`, `restore-state`; `+x` is house style — Workshop runs hooks with bash regardless) | Repo-specific apt packages and setup |
+| Project mount | Host project directory appears at `/project/` inside the workshop | All actions run against it |
+</envelope>
+
+<not_in_envelope>
+Things a proposal must NEVER contain, because Workshop cannot express them:
+
+- **No git-URL or path SDK source.** SDKs come from the Store (by name), from
+  the project (`project-<name>` at `.workshop/<name>/`), or from a local
+  sdkcraft try area (`try-<name>`). You cannot point `sdks:` at a GitHub repo
+  or arbitrary directory. To use a recipe from another repo, vendor it as an
+  in-project SDK.
+- **No workshop-level `env:`, `services:`, `hooks:`, `mounts:`, or `packages:`
+  keys.** The top-level keys are `name`, `base`, `runtime`, `sdks`,
+  `connections`, `actions` — nothing else. Environment setup and daemons belong to SDKs;
+  mounts are interface endpoints.
+- **No secret values, and no invented lookups.** A proposal never contains
+  an API key or token, a placeholder that looks like one, a `--env NAME=<value>`
+  line, or keyring attributes the user hasn't chosen — and never claims a
+  `secret` connection was made or verified. The skill cannot store the value
+  or connect the plug; it names the variable and hands the user those two
+  steps.
+- **No non-Ubuntu bases.** No Alpine, Fedora, Debian, or arbitrary images.
+- **No non-Linux toolchains.** Workshops are Ubuntu LXD instances: no macOS
+  (Xcode/iOS), Windows (MSVC/.NET Framework), or BSD-only builds.
+- **No `runtime: lxd-vm` in a generated definition** (nor the 0.9.7
+  spelling, `confinement: virtual-machine`). The VM runtime is experimental,
+  needs a host-level snap opt-in this skill must never perform, and on LXD
+  `6/stable` refuses any definition that declares SDKs — which every
+  onboarded definition does; lifting that needs a host-wide, one-way switch
+  to LXD `6/candidate`. Even then a VM supports only `mount` and `secret`
+  interfaces, so any tunnel, GPU, desktop, or device wiring the repo needs is
+  skipped. If the user asks for
+  a VM, say this plainly and offer the container definition instead; do not
+  emit the key. If the motive is containing a coding agent, say also that a
+  VM leaves `/project` (with `.git`) writable and the network open. For your
+  own reading, the model lives in the sibling skill file
+  `../use-workshop/references/runtime.md` — that is a SKILL file, not a docs
+  page, so never hand its path to the user or splice it onto the docs base
+  URL. The citable upstream page is
+  `how-to/customize-workshops/use-virtual-machines.md`.
+- **No invented SDK names or channels.** An SDK exists when `sdk find`/
+  `sdk info` says so (or the catalog lists it, tagged unverified). A channel
+  exists when `sdk info` lists it.
+- **No unmarked install routes inside hooks.** Note how this differs from the
+  rule above. An SDK name is checkable, so a guess never enters `sdks:` —
+  verify or fall back. A hook's install command has nothing to check against,
+  and the hook must install *something*, so the rule is not "never write it"
+  but "never write it unmarked". `apt-get install <pkg>`, `snap install
+  <name>`, `add-apt-repository <ppa>`, or a release download URL is a claim
+  about the world, evidenced by the repo (a package list, a CI step, a
+  documented install command, a lockfile) or else a guess. The plausible guess
+  is the dangerous one: it survives review and dies at launch. Write the best
+  candidate, tag it inline (`# UNVERIFIED: <what> — no install evidence in the
+  repo`), and list it under `Unverified:` in the verdict alongside
+  catalog-sourced SDKs.
+- **No privileged ports on system-SDK tunnel plugs.** Host side of a tunnel
+  must use port ≥ 1024; remap (80 → 8080) and say so.
+- **No guaranteed host-device passthrough beyond the interfaces.** Only what
+  `gpu`, `camera`, `desktop`, `ssh-agent`, `custom-device` (by `subsystem`/
+  `vendorid`/`productid`) and `mount` cover.
+- **No nested virtualization guarantees.** VM-based tooling (KVM-dependent
+  emulators, nested hypervisors) is outside what a container-confined
+  definition can promise, and the VM runtime is out of envelope (above).
+  Docker inside the workshop IS available — via the Store `docker-ce` SDK, not by
+  hand-installing dockerd.
+</not_in_envelope>
+
+<feasibility_rubric>
+Classify the repo AFTER the analysis pass, BEFORE generating anything.
+
+**FULL** — every element of the primary developer loop (build, test, lint,
+run/debug entry points found in the analysis) maps to an envelope construct.
+Packaging pipelines (snapcraft, release jobs) may still be listed as
+out-of-loop notes without blocking FULL — scope is the *inner dev loop*.
+
+**PARTIAL** — the primary build + test loop maps, but at least one detected
+element does not. Every unmapped element MUST appear as:
+
+```
+GAP: <need> — <why it cannot map> — <workaround, or "none">
+```
+
+PARTIAL requires the user to acknowledge the gaps before you generate.
+
+**Low-confidence PARTIAL** — the repo runs on Ubuntu, but the MAJORITY of the
+primary loop lands in GAPs (Store/reference SDKs and CI evidence cover little
+of the stack). The test is RUN vs AUTOMATE: Workshop being unable to INSTALL
+a toolchain (manual or licensed installer, no apt/Store/download path) is not
+infeasibility — the stack still runs on Ubuntu, so a workshop is still useful
+as a plain environment even when its setup can't be automated. Do not stretch
+this to INFEASIBLE, and do not generate a definition full of unproven claims.
+State that confidence is low and OFFER the **minimal workshop fallback**:
+base + implicit `system` SDK + the project mount, zero toolchain claims (copy
+`../use-workshop/templates/workshop-minimal.yaml`); the developer installs
+the unmappable pieces manually inside it. The offer is a decision question
+and carries a recommendation like any other; if the user declines, end the
+run as for INFEASIBLE — report, docs pointers, nothing generated.
+
+**INFEASIBLE** — the primary loop itself cannot RUN inside an Ubuntu LXD
+container (non-Linux toolchain, unsupported OS dependency, mandatory hardware
+with no interface). Reserve it for cannot-run; "Workshop cannot automate the
+setup" is the low-confidence PARTIAL above, never INFEASIBLE. Deliver the
+verdict, the reasons, and docs pointers.
+Generate NOTHING — a definition that cannot build the project is worse than no
+definition. Do not soften the verdict to be helpful.
+</feasibility_rubric>
+
+<verdict_format>
+Emit exactly this block before any generation step:
+
+```
+## Feasibility: FULL | PARTIAL | INFEASIBLE
+
+Covered:
+- <need> → <construct> (<evidence file>)
+- ...
+
+Gaps:                          # omit section when FULL
+- GAP: <need> — <why> — <workaround|none>
+
+Unverified:                    # omit when everything was confirmed live
+- <sdk>/<channel> — proposed from catalog; confirm with `sdk info <sdk>`
+- <install command> in <hook> — no install evidence in the repo; confirm before launch
+
+Fallback offered:              # only for low-confidence PARTIAL
+- minimal workshop (base + project mount only) — accepted | declined
+```
+</verdict_format>
+
+<worked_examples>
+1. **Go CLI with Makefile-driven docs and lint** → FULL. `go.mod` → `go` SDK
+   (channel from the `go` directive); `docs/Makefile` targets → actions
+   wrapping `make -C docs/`; golangci-lint config → `lint` action; Sphinx
+   preview port → tunnel pair. Snapcraft packaging noted out-of-loop.
+2. **TypeScript VS Code extension** → FULL. `package.json` → `node` SDK
+   (channel from `engines.node`); npm scripts → actions; Electron test host
+   needs X libraries → in-project SDK with `setup-base` (apt list from the CI
+   workflow) + `desktop` plug; headless variant via `xvfb-run` action.
+3. **Web app with Postgres in docker-compose** → PARTIAL (typically). App
+   build/test/serve map (SDK + actions + tunnel); the database maps via the
+   Store `docker-ce` SDK running compose inside the workshop — but if the repo
+   needs a macOS-only E2E driver, that is `GAP: <driver> — macOS-only — none`.
+4. **iOS application** → INFEASIBLE. Xcode toolchain cannot run in an Ubuntu
+   container. No definition generated.
+5. **Firmware repo needing a proprietary vendor IDE** → INFEASIBLE unless the
+   vendor ships a Linux CLI toolchain (then re-evaluate: compile may be FULL
+   with flashing as a `custom-device` plug or a GAP).
+6. **Linux-only proprietary toolchain installed by hand** (licensed
+   installer, no apt package, no Store SDK, no scriptable download) →
+   low-confidence PARTIAL, not INFEASIBLE: the stack runs on Ubuntu. Offer
+   the minimal workshop fallback — base + project mount, the developer
+   installs the toolchain inside — or a `mount` plug if every developer
+   keeps it at a consistent host path.
+7. **Tool the repo depends on but never installs** (scripts invoke it and
+   reference `/snap/<tool>/current/bin/...`, but no package list, CI step, or
+   README command installs it) → PARTIAL. The need is proven, the install
+   route is not. Write the best candidate into `setup-base` with an inline
+   `# UNVERIFIED:` tag, list it under `Unverified:`, and raise a GAP naming
+   what would settle it (upstream install docs, a release asset). A confident
+   `snap install <tool>` for a snap that does not exist is the failure this
+   example exists to prevent — it passes review and dies at launch.
+</worked_examples>
+
+<source_docs>
+- `reference/definition-files/workshop-definition.md`
+- `reference/definition-files/schema.json`
+- `explanation/interfaces/tunnel-interface.md`
+- `explanation/interfaces/custom-device-interface.md`
+- `explanation/interfaces/secret-interface.md` (secret slots on `system` only, never auto-connected)
+- `explanation/sdks/concepts.md`
+- `explanation/workshops/projects.md`
+</source_docs>

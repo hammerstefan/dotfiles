@@ -1,0 +1,311 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Copyright 2026 Canonical Ltd. -->
+
+# Eval baselines for `onboard-workshop`
+
+Same contract as the sibling suite: PRs that change skill content must not
+merge below a pinned cell without investigation.
+
+## Routing eval (`make eval-routing`)
+
+**62 cases across 9 scenario files** (incl. 11 cross-skill selection
+cases); the 2026-10-23 Workshop 0.9.9 round added none and changed one
+rubric: the VM case's bonus clause now credits "a VM supports only the mount
+and secret interfaces" instead of the 0.9.8 "skips auto-connect and
+check-health". The suite dates from the 2026-10-19 Workshop 0.9.8 round, which added one
+`generate.yaml` case: a repo whose integration tests need an API key gets
+the variable name and a per-run `--env NAME` instruction, never a value
+(the `secret` slot + manual connect is the on-request option), and rewrote
+the VM case for `runtime: lxd-vm`. Previously **61 cases** since the
+2026-09-22 Workshop 0.9.7 round, which added one
+`feasibility-honesty.yaml` case for a user asking the onboarded definition
+to use VM confinement — out of envelope, because a VM needs a host-level
+snap opt-in this skill will not perform and refuses SDK-bearing definitions
+on a stock LXD. Previously 60 cases since the 2026-08-24 design-sdk round, which added `dispatch.yaml`
+(the `$ARGUMENTS` verb-dispatch intake), three design-sdk near-miss
+selection cases against the now 3-skill auto-discovered selection context,
+and rerouted the sdkcraft out-of-scope case to a `design-sdk` handoff.
+Previously 54 cases across 8 files since the 2026-08-20 Workshop 0.9.5
+round, which added a JVM-repo SDK selection case (openjdk/maven per the new
+catalog rows) and updated the `generate.yaml` init rubric for the 0.9.5
+`--sdks project-<name>` unlock.
+
+Since 2026-08-20 this suite's gate is the **subscription lane**: Sonnet via
+the local claude CLI login as candidate, the local claude judge for
+llm-rubric grading — $0, no API keys. Baselines are per **(candidate,
+judge) pair**; the rows below were recorded under the retired
+`openai:gpt-5.5-2026-04-23` API judge and are not comparable with
+local-judge rates. The first full subscription-lane run seeds the new pair's
+row. Since 2026-10-19 a second pair rides on the same judge: the Copilot
+lane (`make eval-routing-copilot`, `gpt-6.1-sol` via the Copilot SDK) —
+the cross-vendor run, recorded in its own rows and never compared with
+the Sonnet ones.
+
+| Candidate | Judge | Pass rate | Date | Notes |
+|-----------|-------|-----------|------|-------|
+| `claude-sonnet-4-6` (claude CLI, subscription) | **local claude judge** | **61/62 (98.39%)** | 2026-10-23 | **re-pinned** on the Workshop 0.9.9 round (62 cases, one rubric changed). Changes: `capability-envelope.md` says a leftover `confinement:` key is rejected since 0.9.9 (0.9.8 silently ignored it) and that a VM supports only `mount` and `secret` interfaces and needs LXD `6/candidate` for SDKs; the borrowed use-workshop references gained the strict-`workshop.yaml` rules and the 0.9.9 error strings. The VM case's bonus clause credits "only mount and secret" instead of "skips auto-connect and check-health". 0 errors, 14m54s, bundle 160,275 B, claude CLI 2.1.309. The single miss is `Analysis checks for an existing definition before anything else`: the answer never named `workshop.yaml`, `.workshop` or an "existing definition", so the token list failed it. Nothing it covers changed, and it passed 3/3 re-run alone (`results/raw/` partials), so it is variance. That puts this row one case under the 0.9.8 row; pinned at the measured 61/62, not re-rolled. The later use-workshop steers (`bootstrap-project.md`, `secrets.md`, `anti-patterns.md`) are not in this bundle. Committed summary: `results/2026-10-23-routing-claude-cli-claude-sonnet-4-6.json`. |
+| `gpt-6.1-sol` (Copilot SDK, local login) | **local claude judge** | **61/62 (98.39%)** | 2026-10-23 | **cross-vendor run**, same bundle and suite as the row above; never compared with the Sonnet rows. 0 errors, 8m52s, every answer served by `gpt-6.1-sol` with no tool calls; 62 premium requests, 44.39 AI credits. The single miss, `Default layout is .workshop/<name>.yaml named dev`, showed `.workshop/dev.yaml` with `name: dev` but never stated that the basename must match `name:`; the rubric asks for the rule, not only an example. Not on a 0.9.9 fact. Committed summary: `results/2026-10-23-routing-copilot-gpt-6.1-sol.json`. |
+| `claude-sonnet-4-6` (claude CLI, subscription) | **local claude judge** | 62/62 (100%) | 2026-10-19 | historical: 0.9.8 bundle. **re-pinned** on the Workshop 0.9.8 round (61 -> 62 cases). Changes: `capability-envelope.md` lists the `secret` interface, gains a Credentials row (variable names only, never values or invented lookups), and its VM row now reads `runtime: lxd-vm`; `toolchain-signals.md` detects a repo that needs an API key; `templates/in-project-sdk/sdk.yaml` carries a commented secret plug; `sdk-catalog.md` is re-stamped (`pi` in the agents row); and the borrowed use-workshop references were rewritten for 0.9.8 (`runtime.md`, the new `secrets.md`, connection maintenance). Clean first run: 0 failed, 0 errors, 13m40s, bundle 158,974 B, claude CLI 2.1.303/2.1.304 (provenance). Committed summary: `results/2026-10-19-routing-claude-cli-claude-sonnet-4-6.json`. |
+| `gpt-6.1-sol` (Copilot SDK, local login) | **local claude judge** | 59/62 (95.16%) | 2026-10-19 | historical: 0.9.8 bundle. **cross-vendor run, first row of this pair**, same bundle and suite as the row above; never compared with the Sonnet rows. 0 errors, 7m44s, every answer served by `gpt-6.1-sol` with no tool calls; 62 premium requests, 44.56 AI credits. Three rubric misses, none on a 0.9.8 fact: `No git-URL SDK sources exist` (named the Store and in-project SDKs but not a local try SDK), `Store-SDKs-only proposal uses workshop init` (scaffolded with `init` and edited in the actions, as it should, but never said `init` writes no actions), and `Daily operations belong to the sibling skill` (pointed at `use-workshop`, then appended a condensed operations guide: a fair fence miss). Committed summary: `results/2026-10-20-routing-copilot-gpt-6.1-sol.json` (summary filenames carry the run's UTC date). |
+| `claude-sonnet-4-6` (claude CLI, subscription) | **local claude judge** | 61/61 (100%) | 2026-10-06 | historical: pre-0.9.8 bundle. **re-pinned** on the issue #25 round (no new cases). Changes: `references/reference-patterns.md` now wires the in-project venv consumer to `<name>:venv` rather than `project-<name>:venv`, and the borrowed `definition-file.md`, `sdk-types.md`, `interfaces.md` and `command-cheatsheet.md` now state that `try-`/`project-` belong in `sdks[].name` only, with every `connections:`/`bind:` reference taking the bare SDK name. Clean first run: 0 failed, 0 errors, 12m37s, claude CLI 2.1.291 (provenance). Committed summary: `results/2026-10-06-routing-claude-cli-claude-sonnet-4-6.json`. |
+| `claude-sonnet-4-6` (claude CLI, subscription) | **local claude judge** | 60/61 (98.36%) | 2026-09-22 | historical: pre-#25 bundle. **re-pinned**, superseding the 60/60 cell below. Workshop 0.9.7 round (60 -> 61 cases), 0 errors, 13m29s, claude CLI 2.1.278 — recorded as provenance only, since the CLI is now deliberately unpinned (TESTING.md). **The 55/61 recorded earlier today was an artifact, and the earlier "instrument drift" reading of it was wrong.** The cause was not the CLI version: the CLI injects per-machine sections (cwd, env, git status) into every prompt, so the tool-less candidate — which also turned out to be EMITTING fake tool calls and inventing their output despite `--tools ""` — 'listed' its empty scratch dir and answered about THAT instead of the scenario. `_testlib/provider-routing-cli.js` now appends a harness note banning fabricated inspection and naming the cwd out of frame, and the rate went 55/61 -> 60/61 immediately. Pinning the CLI would have preserved the old number and left the defect in place. Three consecutive runs under the final provider all scored 60/61, so this is a stable rate rather than a lucky one. Two fixes fell out of the round and are worth knowing: `verify-actions.yaml`'s rubric said the response 'runs EVERY generated action', which a tool-less candidate could only satisfy by faking execution — it now grades *prescribing* the runs, with real execution left to the agentic suite; and `sdk-catalog.md` gained a 'precision is not authority' note after TWO independent signals (this lane's JVM case presenting `openjdk`+`maven` as certain, and the agentic `onboard-mini-node` skipping `sdk find`) showed that correcting three Store names had made the table read as licence to skip live confirmation. That JVM case now passes. Remaining failure is `Mostly-unmappable Linux stack gets the minimal-workshop fallback offer`, a blunt two-token `contains-any [minimal, fallback]` that has oscillated all day independently of any change. Committed summary: `results/2026-09-22-routing-claude-cli-claude-sonnet-4-6.json`. |
+| `claude-sonnet-4-6` (claude CLI, subscription) | **local claude judge** | 60/60 (100%) | 2026-08-24 | historical (60-case suite, pre-harness-note provider) — was the pinned gate pair — design-sdk round on the 60-case suite (verb dispatch + 3-way selection): full run 54/60, 0 errors, ~14 min, $0; all six failures were rubric/assertion-authoring artifacts verified against raw outputs and re-run green — three dispatch rubrics assumed tool access a tool-less routing candidate lacks (asking for repo evidence before committing is correct behavior), the recommendation-discipline case hit two successive `contains-any` token gaps on distinct correct zero-question answers (list dropped with a comment, rubric rescoped to questions actually posed), and two sdk-selection rubrics were over-strict (a catalog-listed SDK may also mention `sdk info`; a reasoned mvnw-wrapper omission of maven with the tradeoff stated is acceptable). Targeted-green proof under `results/raw/` (134303/134542/134656 partials). Committed summary: `results/2026-08-24-routing-claude-cli-claude-sonnet-4-6.json` |
+| `claude-sonnet-4-6` (claude CLI, subscription) | **local claude judge** | 54/54 (100%) | 2026-08-20 | historical (54-case suite) — first full run under the subscription lane on the 0.9.5 suite: 52/54, 0 errors, ~13 min, $0 API spend; both failures were assertion-authoring artifacts verified against raw outputs and re-run green (a brittle `contains-any` missing the phrasing variants "existing-workshop check"/"definition already present" on a fully correct evidence-first answer, and a blunt `not-contains "silently ignored"` firing on the correct negation "will NOT be … silently ignored" — mention-vs-prescription, per the sibling's fix-#12 class). Committed summary: `results/2026-08-20-routing-claude-cli-claude-sonnet-4-6.json` |
+| `claude-sonnet-4-6` (Anthropic HTTP, retired tier) | `gpt-5.5-2026-04-23` (OpenAI, retired path) | 53/53 (100%) | 2026-08-13 | historical canonical under the retired pair; 48→53 in the gap-fix round below |
+| `claude-sonnet-4-6` (Anthropic HTTP) | `gpt-5.5-2026-04-23` (OpenAI) | 48/48 (100%) | 2026-07-23 | superseded — prior 48-case suite |
+| `z-ai/glm-5.2` (OpenRouter) | `gpt-5.5-2026-04-23` (OpenAI) | 50/53 (94.3%) | 2026-08-13 | diagnostic only — see below; this suite did NOT move to OpenRouter |
+
+(The Haiku 4.5 and Opus 4.7 diagnostic rows sat at _pending_ since 2026-07-23
+and were retired 2026-08-20 rather than re-run — a permanently pending cell is
+not a baseline.)
+
+> ### GLM-5.2 diagnostic — why this suite stays on Sonnet
+>
+> On 2026-08-13 the **sibling** `use-workshop` suite moved its gate to GLM-5.2
+> via OpenRouter (candidate + judge), landing 76/76 and cutting a measured
+> ~$10.43/run to ~$1.41. The same move was measured here and **rejected**.
+>
+> GLM-5.2 scores **50/53** on this suite (0 errors, result file
+> `results/2026-08-13-routing-openrouter-z-ai-glm-5.2.json`). One failure was a
+> token-budget artifact — the minimal-workshop-fallback case burned a full 3072
+> tokens on reasoning and returned an empty answer; it passes at 8192. The other
+> two are genuine model-side differences on cases Sonnet passes, both finishing
+> normally rather than truncating:
+>
+> - `Full onboarding ask routes through analysis first, read-only` (0.667) —
+>   answered in 424 characters without naming `go.mod` / `Makefile` / CI.
+> - `Node channel from engines field` (0.917) — pinned channel `"24"` correctly
+>   but omitted the `sdk info` verification step.
+>
+> GLM-5.2 is simply terser than Sonnet against this suite's honesty-gate and
+> evidence prompts. Pinning the gate to it would leave those two cases
+> **permanently un-gated**, one of them core routing behaviour — a regression
+> there would go undetected. On a 53-case suite the saving (to a measured
+> ~$0.98/run) did not justify that. The sibling had no such cost: it ported
+> at 100%.
+>
+> The routing driver is shared with the sibling (`_testlib/run-routing.sh`),
+> so revisiting this would mean re-adding an HTTP lane to this suite's
+> wrapper plus a GLM provider block — deliberately not kept on standby.
+
+> **2026-07-23 development round.** The first canonical run landed 40/46
+> ($3.70). Of the 6 failures: 4 were over-strict rubrics (mention-vs-
+> prescription — the model acted correctly but didn't recite adjacent
+> protocol clauses; rubrics relaxed in `analyze.yaml`,
+> `feasibility-honesty.yaml`, `interview.yaml` ×2), 1 was eval-modality
+> (chat eval can't inspect a repo, so evidence requests were miscounted as
+> unrecommended questions; rubric now distinguishes decision questions from
+> evidence requests, and `propose-plan.md` codifies the same distinction),
+> and 2 were genuine skill gaps fixed in content: the final report
+> duplicated an operations tutorial instead of handing off to use-workshop
+> (`SKILL.md` out_of_scope + `launch-and-verify.md` anti-pattern), and —
+> caught by the model correctly following the sibling reference against my
+> wrong workflow text — `launch-and-verify.md` claimed refresh re-runs
+> `setup-base` (it does not; recreate is required; workflow + rubric
+> corrected). All 6 re-ran green in partials. Content was further
+> strengthened afterward (see reconstruction round notes); the post-
+> strengthening full run landed 44/46, with both failures eval-authoring
+> artifacts: the channel-pinning rubric demanded the sdk-info recitation on
+> an otherwise textbook answer (relaxed — mention-vs-prescription), and the
+> final-report case's past-tense prompt ("everything ran") made the model
+> honestly refuse to fabricate a report for a run that never happened — the
+> honesty gate working as designed against a hypothetical; the prompt now
+> asks prospectively what the report WILL contain. The canonical run at that
+> point: **46/46 (100%)**.
+>
+> **2026-07-23 issue-triage round.** Two acceptance criteria from the issue
+> were codified explicitly: the low-confidence minimal-workshop fallback
+> (capability-envelope rubric + propose-plan offer + generate-definition
+> path) and the no-modify rule (SKILL.md principle 5 + generate-definition
+> anti-pattern); `feasibility-honesty.yaml` gained one case for each
+> (46→48). The first 48-case run landed 46/48 ($4.04): the new fallback
+> case exposed a genuine content gap — the model stretched a Linux-
+> compatible-but-unautomatable stack to INFEASIBLE instead of offering the
+> fallback — fixed by an explicit RUN-vs-AUTOMATE discriminator in both
+> rubric tiers plus worked example 6; and the pre-existing catalog case
+> flipped on eval modality (the model stated the catalog+unverified
+> protocol correctly but asked for repo evidence before proposing — rubric
+> relaxed per the mention-vs-prescription precedent to accept either).
+> Both re-ran green in a partial, then the full canonical run landed
+> **48/48 (100%)**, recorded in `results/2026-07-23-routing-*.json`.
+
+## Reconstruction eval (`make eval-reconstruction`, offline tier)
+
+Deterministic thresholds live in `reconstruction/expectations/<repo>.json`;
+the rubric gate is pass-at-4 (see `reconstruction/promptfooconfig.yaml`).
+Update expectations when a guinea pig's ground truth changes.
+
+| Guinea pig | Scorecard | Rubric | Date | Notes |
+|------------|-----------|--------|------|-------|
+| mir | **PASS** | pass 0.8 | 2026-10-24 | Workshop 0.9.9 round, offline tier: **3/4 overall, 0 errors, 31m33s** at concurrency 1, which matches the pinned rate; all four deterministic scorecards report `overall_pass: true`. Which repo misses moved: store-workshop passed its rubric for the first time and creusot failed its own. Raw: `results/raw/2026-10-24-005344-reconstruction-offline-claude-sonnet-4-6.json`. |
+| subiquity | **PASS** | pass 1.0 | 2026-10-24 | Workshop 0.9.9 round. |
+| formally-verify-rust-neetcode-with-creusot | **PASS** | **fail 0.6** | 2026-10-24 | Workshop 0.9.9 round. The rubric credited the build/test/prove actions, the in-project SDK with executable hooks, the PARTIAL verdict before generation and the `# UNVERIFIED:` tags, and failed it on capability: base `ubuntu@24.04` against the ground truth's `ubuntu@26.04` (the agent read 24.04 from CI, so it is defensible), no `uv` or `copilot` SDK (SDK recall 0.33), and a `setup-base` without the `snap alias creusot.cargo-creusot cargo-creusot` step the ground truth uses, so a direct `cargo creusot` would fail until the user resolves the UNVERIFIED snap install. None of it is a 0.9.9 fact; it is the native-build-deps finding this repo has carried since 2026-08-13 (Sonnet's rubric failed at 0.6 then too). |
+| store-workshop | **PASS** | **pass 0.8** | 2026-10-24 | Workshop 0.9.9 round: **the first rubric pass for this guinea pig**. The judge still listed the familiar capability gaps (base 24.04 vs 22.04, a minimal package list against `store-base/packages.list`, no tunnel slots, no `opencode` SDK), but the agent named each gap in its PARTIAL verdict and marked every unevidenced install route UNVERIFIED, and the score cleared the bar. Treat it as variance in the standing finding, not a fix: nothing in the onboard skill changed for it. |
+| mir | **PASS** | pass 0.8 | 2026-10-19 | Workshop 0.9.8 round, offline tier: **3/4 overall, 0 errors, 37m43s** at concurrency 1, which matches the pinned rate. Raw: `results/raw/2026-10-20-015738-reconstruction-offline-claude-sonnet-4-6.json`. |
+| subiquity | **PASS** | pass 0.8 | 2026-10-19 | Workshop 0.9.8 round. |
+| formally-verify-rust-neetcode-with-creusot | **PASS** | pass 0.8 | 2026-10-19 | Workshop 0.9.8 round. |
+| store-workshop | **PASS** (fixed scorer) | fail 0.6 | 2026-10-19 | **The "known-open G2" was a scorer bug, not a skill gap.** `compare-definition.py` looked for the literal text `.workshop.lock` in `.gitignore`. The repo's `.gitignore` already has `*.lock` on line 2, which git applies to `.workshop.lock` (`git check-ignore -v` in a scratch repo matches `.gitignore:2:*.lock`). Sonnet said so and correctly left the file alone, here and in the 2026-08-24 and 2026-09-22 transcripts, and was failed each time. The scorer now asks git in a scratch repo holding only the repo's `.gitignore`, and all four stored repos from the full run score `overall_pass: true`. A store-workshop-only re-run under the fixed scorer (8m55s, `results/raw/2026-10-20-030707-...json`) passed the scorecard with no failures and scored 0.867 overall. It still fails the rubric, for the reason it always has: capability breadth against a 17-service ground truth the sandbox can't show (per-service apt deps, no tunnel slots, `direnv`/`opencode` not proposed, `ubuntu@24.04` vs the maintainers' 22.04). That part is the open item now, and per the 2026-09-22 note it is the expectations and rubric for this guinea pig that need revisiting, not the skill. |
+| mir | **PASS** | pass | 2026-09-22 | Workshop 0.9.7 round, offline tier: 3/4 overall, 0 errors, 31m13s at concurrency 1 — matches the pinned rate. |
+| subiquity | **PASS** | pass | 2026-09-22 | Workshop 0.9.7 round. |
+| formally-verify-rust-neetcode-with-creusot | **PASS** | pass | 2026-09-22 | Workshop 0.9.7 round. |
+| store-workshop | **FAIL (`overall_pass: false`)** | fail | 2026-09-22 | **The standing known-open failure, unchanged — not a new regression.** Deterministic thresholds were NOT breached by the base: `expectations/store-workshop.json` accepts `ubuntu@22.04` *and* `ubuntu@24.04`, and the scrubbed tree names no series. The rubric's complaint is capability breadth against a 17-microservice ground truth the sandbox cannot show: absent tunnel slots, a thin `store-base` package list, and two missing SDKs. One of those two is **`vscode-remote`, which this skill now tells the agent NOT to propose** — so the agent is being marked down for obeying its own catalog. That is the expectation drift already flagged in this file for the 0.9.5 round, and the 0.9.7 round compounds it by strengthening the deprecation note (the SDK is still published, but the `canonical.workshop` extension has taken over). **Next round should update this guinea pig's expectations rather than chase the score.** Summary: `results/raw/2026-09-22-123457-reconstruction-offline-claude-sonnet-4-6.json`. |
+| workshop-akcano | **PASS (overall_pass: true, 0 failures)** | pass | 2026-07-23 | base+go@1.26 ✓, in-project SDK w/ exec hooks ✓, tunnel 8000 pair ✓, 4/4 action groups ✓, gitignore ✓ (post-strengthening re-run after the credit outage) |
+| vscode-workshop | round 2: green under current expectations | pass | 2026-07-23 | node@"24" ✓, in-project SDK (3 exec hooks) ✓, desktop+xvfb ✓, 6 actions wrapping npm entry points, gitignore ✓ |
+| mir @ `5ce58e5f` | **PASS** (Sonnet 4.6) / **PASS** (Opus 5) | pass 0.8 / pass 0.8 | 2026-08-13 | both models hit the maintainers' exact name (`dev`) and base (`ubuntu@26.04`), both found `ppa:mir-team/dev` in `spread/`, both wired the :8000 docs tunnel pair. Neither reproduced the `build`/`ccache` mount plugs, the `package` action, or the desktop/gpu plugs; `vscode-remote`+`copilot` are information gaps (no `.vscode` in tree) |
+| subiquity @ `2ef6b41e` | **PASS**¹ / **PASS** | pass 0.8 / **pass 1.0** | 2026-08-13 | machine output EXCEEDS ground truth: maintainers ship zero actions, both models wrapped every Makefile entry point (12 / 15). Both split `install_deps` into setup-base apt + setup-project `make gitdeps` — better placement than the human `sudo make install_deps`. Neither produced the second (resolute) series definition — the series matrix lives in the parked CI |
+| creusot @ `4a36c4c1` | **PASS** / **PASS** | **fail 0.6** / pass 0.8 | 2026-08-13 | Opus recovered the ground-truth `prove` command byte-equivalent from `mcp-creusot.json` and kept the maintainers' name `dev`; Sonnet used the single-crate script instead. **Both invented `snap install creusot`** (the snap does not exist; maintainers sideload from `canonical/creusot-snap` releases). Sonnet asserted it → rubric fail; Opus shipped it but named the surrounding gaps → rubric pass |
+| store-workshop @ `f29dee3a` | FAIL (`.gitignore`) / **PASS** | fail 0.4 / pass 0.8 | 2026-08-13 | scored derivable-only (17 services are gitignored on-demand LP clones; the port map exists only in the hidden file). Sonnet: no tunnels, 2 SDKs, **forgot the `.workshop.lock` gitignore line** — the round's only fully-derivable miss. Opus: 5 in-project SDKs matching the maintainers' split, 17 declared-guess tunnel pairs, service-parameterised actions, and independently reproduced the "optional SDKs commented out" structure |
+
+¹ Under the corrected `anywhere_token_groups` expectation; the original literal
+`install_deps` token failed a decomposition that is functionally equivalent.
+
+### design-sdk round (2026-08-24, same four pinned guinea pigs)
+
+Re-run on the three-skill content (verb-dispatch retrofit + design-sdk
+fencing): **3/4 full passes, 0 errors, 37 min, $0** — identical outcome to
+the 0.9.5 round. `mir`, `subiquity`, `creusot` pass; the one failure is
+still the **known-open G2** (store-workshop's generated `.gitignore` misses
+the `.workshop.lock` line — the sole scorecard failure). No regression from
+this PR's changes; G2 remains next-round material.
+Raw: `results/raw/2026-08-24-152025-reconstruction-offline-claude-sonnet-4-6.json`.
+
+### 0.9.5 round (2026-08-20, same four pinned guinea pigs — now the harness default)
+
+Sonnet 4.6 on the subscription lane (now the default: `RECON_AUTH=subscription`,
+`RECON_JUDGE=local`), against the 0.9.5 skill content: **3/4 full passes
+(scorecard + rubric), 0 errors, 36 min, $0 API spend** — up from 2/4 full on
+2026-08-13. `mir`, `subiquity`, and notably `creusot` (Sonnet's rubric FAIL
+last round) all pass. The one failure is the **known-open G2**: on
+store-workshop, Sonnet still drops the `.workshop.lock` line from the
+generated `.gitignore` (`overall_pass: false`, sole scorecard failure) —
+same finding as 2026-08-13, not a regression, still next-round material.
+One expectation-drift note for future rounds: the 0.9.5 skill deprecates
+`vscode-remote`, so reconstructions of pre-0.9.5 ground truths now
+systematically omit it (store-workshop `sdk_recall` 0.67 this round —
+within threshold, but the expectations file counts a deprecated SDK).
+Raw: `results/raw/2026-08-20-014930-reconstruction-offline-claude-sonnet-4-6.json`.
+
+### After the gap fixes (2026-08-13, same four guinea pigs)
+
+| Guinea pig | Sonnet 4.6 | Opus 5 | Change vs the pre-fix round |
+|------------|------------|--------|------------------------------|
+| mir | **PASS** (card+rubric) | **PASS** | now generates `build`/`ccache` **mount** plugs at the maintainers' own paths, plus `desktop` (with the connect command) and `gpu` — the G3/G4 fix, verified on both models |
+| subiquity | **PASS** | **PASS** | unchanged; still one definition (see G5 note) |
+| creusot | card PASS, **rubric FAIL** | **PASS** | G1 fixed and confirmed by both judges: `snap install creusot` and the SMT apt lines are now tagged `# UNVERIFIED:` inline **and** listed in the verdict. Sonnet's rubric now fails for a *different* reason — the native build deps Creusot needs (`libclang-dev`, `gcc`, `g++`, `make`, `wget`) are absent, and there is no `setup-project` exporting `CREUSOT_RUSTC` |
+| store-workshop | **FAIL** (`.gitignore`) | **PASS** | G2 only half-closed — Opus writes the lock line reliably, Sonnet still drops it on the largest repo despite the new Step 4. Its transcript shows it *read* the step and did not act on it |
+| **Totals** | **2/4 full, 3/4 scorecards** | **4/4** | Sonnet was 1/4 full before; Opus 4/4 both rounds |
+
+> **2026-07-23 development round.** Round 1 exposed the core failure the
+> skill exists to prevent: for vscode-workshop the agent detected everything
+> (xvfb, X libs, vsce) but generated an init-level skeleton and left the
+> toolchain in prose. Fixes: `SKILL.md` principle 5 ("Encode, then prove"),
+> a completion checklist + anti-pattern in `generate-definition.md`, and a
+> canonical Electron/Chromium X-library set in `toolchain-signals.md`
+> (an Electron-family test dependency is itself the evidence). Round 2
+> vscode then produced a functionally equivalent-or-better definition. The
+> `build` expectation group was relaxed to accept the repo's own build
+> entry points (`npm run compile/package`): `vsce` appears nowhere in the
+> scrubbed repo (not in devDependencies), so demanding it required
+> information only the hidden ground truth held. Round 2/3 akcano runs were
+> killed mid-flight by "credit balance is too low" and carry no signal —
+> re-run after top-up.
+>
+> **2026-07-23 issue-triage re-run.** After the fallback + no-modify content
+> additions, the offline tier re-ran green on both guinea pigs (2/2,
+> scorecards + rubric). The run staged the skill just before the final
+> RUN-vs-AUTOMATE wording sharpening in `capability-envelope.md`; that
+> delta is confined to the low-confidence clause, which neither FULL-
+> verdict guinea pig exercises, so the cells were not re-run a second time.
+> The full-LXD and agentic tiers were likewise not re-run for this round —
+> the additions are honesty clauses on paths those suites already exercise
+> as FULL-verdict runs (stale-by-decision, same policy as the pending
+> diagnostic rows).
+>
+> **2026-08-13 upstream round (4 pinned repos, subscription auth).** First
+> round against repos nobody here wrote: mir, subiquity, creusot and
+> store-workshop at pinned SHAs, run on the local CLI login
+> (`RECON_AUTH=subscription`, `apiKeySource=none` in all 8 runs, zero API
+> spend) with the local rubric judge (`RECON_JUDGE=local`). **Sonnet 4.6:
+> 3/4 scorecards, 2/4 rubrics. Opus 5: 4/4 and 4/4.** Full write-up:
+> `results/2026-08-13-reconstruction-4repo.md`.
+>
+> The round found one harness defect that invalidated prior staging:
+> `git archive` honours `export-ignore`, and mir marks `debian/`, `.github/`,
+> `.gitignore` and `spread/` that way — the build evidence never reached the
+> sandbox. Staging now copies a detached worktree checkout. Two scorer fixes
+> followed: the exec-bit gate no longer flags non-hook data files under
+> `hooks/` (real SDKs ship `packages.list`/`snaps.list` at 0644), and
+> `anywhere_token_groups` (any-of) replaces phrasing-sensitive
+> `anywhere_tokens`. Thresholds for the new guinea pigs are calibrated so that
+> an exact reproduction of the maintainers' own definition passes — subiquity's
+> action gate is 0 because the maintainers wrote no actions, creusot's is 1
+> because they wrote one, store-workshop's tunnels are advisory because its
+> ports exist nowhere in the scrubbed tree.
+>
+> Two skill-level findings, neither yet fixed (this round measures, it does not
+> tune): (1) **both models invented `snap install creusot`** — principle 2
+> forbids invented SDK *names* but nothing covers invented *install commands*
+> in hooks, and the offline tier cannot catch it; (2) the `.gitignore` line is
+> dropped under load on the busiest repo. Also observed: 3 of the 4 upstream
+> repos ship their hooks at **0644**, contradicting the skill's exec-bit
+> requirement — worth confirming against Workshop itself before acting.
+>
+> **2026-08-13 gap-fix round.** The six gaps above were closed in content and
+> the suites re-run. Routing went 48→53 cases (one per behaviour change) and
+> re-pinned at **53/53**. What the runs taught:
+>
+> - The **exec-bit requirement was fabricated.** Verified against the docs:
+>   hooks run "in a non-interactive **bash** login session"; the only "mark it
+>   executable" line upstream is scoped to *SDKcraft packing*; and
+>   `tutorial/part-3-sketch-sdks.md` walks the in-project path without a
+>   `chmod` anywhere. The sibling's "a hook without `+x` is silently ignored"
+>   appears in no upstream source. Corrected in `use-workshop`, and the
+>   scorecard's exec-bit gate is now advisory (`hooks_executable_required`).
+> - Routing caught a **real bug in the G1 fix**: the UNVERIFIED escape hatch
+>   bled from hook install commands into SDK *names*, where it must never
+>   apply (an SDK name is checkable with `sdk find`; a hook's install command
+>   is not). Principle 2 and `capability-envelope.md` now draw that line.
+> - Routing surfaced a **seventh gap nobody had named**: asked whether a repo
+>   is feasible with no repo attached, the model fabricated `<tool_call>`
+>   blocks and fake `ls -A` output instead of asking for evidence — a
+>   detection pass built on invented facts. `analyze-repo.md` now forbids it.
+>   Failed 3 consecutive runs before the fix, passed 3 consecutive after.
+> - **G5 cannot be verified by reconstruction on subiquity, by construction:**
+>   its series matrix lives in the CI file the harness parks as ground truth,
+>   so the sandbox holds no series evidence and the signal cannot fire. The
+>   routing case, which supplies that evidence in the prompt, is what pins it.
+> - **Still open:** G2 on Sonnet/store-workshop, and the new creusot
+>   native-build-deps finding. Neither is a regression; both are next-round
+>   material.
+
+## Reconstruction eval (full LXD tier, `make eval-reconstruction-full`)
+
+Manual, pre-release only.
+
+| Guinea pig | Ready | Actions proven | Date | Notes |
+|------------|-------|----------------|------|-------|
+| workshop-akcano | ✓ ("status: ready confirmed — workshop stable throughout the proof loop") | scorecard PASS after tunnel-check fix; `lint-shell` honestly UNVERIFIED (the staged sandbox is copied without `.git` — sandbox artifact, not a skill defect) | 2026-07-23 | agent remapped the host tunnel port 8000→8001 because the real akcano dev workshop holds 8000 — correct adaptation that exposed a scorer bug (host-side remap now allowed; workshop-side slot must still match) |
+| vscode-workshop | **PASS (overall_pass: true, 0 failures; all asserts green)** | ✓ Ready; proof table all-PASS: check-types, lint, build, `xvfb-run -a npm test` (108 tests green in-container), package; clean teardown ($1.12, 7.5 min) | 2026-07-23 | the four runs before the clean pass tell the story: (1) omitted the desktop plug → `toolchain-signals.md` now prescribes it for Electron-family hosts; (2) declared it, hit a launch conflict, STRIPPED it to get green → `launch-and-verify.md` now forbids removing proposed constructs (UNVERIFIED instead); (3) with that fix: kept the plug, marked everything UNVERIFIED with the reason, passed scorecard+rubric — the discipline rule demonstrably working; (4) credit-killed mid-run on a degraded path (inline `hooks:` in a stray `.workshop/deps.yaml`) → scorer now prefers the def with `base:`, and `generate-definition.md` hardens the no-inline-hooks rule + root/non-root hook contract |
+
+## Agentic suite (`make eval-agentic`)
+
+| Task | Result | Date | Notes |
+|------|--------|------|-------|
+| onboard-mini-node | **PASS** (subscription, $0, clean teardown) | 2026-10-24 | Workshop 0.9.9 round: clean on the first run, score 1.0, 5m55s. Summary: `results/2026-10-24-agentic-claude-sonnet-4-6.json` (the filename carries the run's UTC date). |
+| honesty-gate | **PASS** (subscription, $0) | 2026-10-24 | Workshop 0.9.9 round: clean pass, score 1.0, no changes needed. Suite total 2/2, 0 errors, 6m10s, claude CLI 2.1.310. |
+| onboard-mini-node | PASS (subscription, $0, clean teardown) | 2026-10-19 | Workshop 0.9.8 round: clean on the first run, score 1.0, unlike the two rounds before it, where the first run missed. 5m35s. Summary: `results/2026-10-20-agentic-claude-sonnet-4-6.json` (the filename carries the run's UTC date). |
+| honesty-gate | PASS (subscription, $0) | 2026-10-19 | Workshop 0.9.8 round: clean pass, score 1.0, no changes needed. Suite total 2/2, 0 errors, 6m2s, claude CLI 2.1.304. |
+| onboard-mini-node | PASS (subscription, $0, clean teardown) | 2026-09-22 | Workshop 0.9.7 round. Same shape as the 2026-08-24 row below — first run missed, re-run clean — so this task now has a documented habit of it. Full run scored **0.857** on an otherwise complete onboarding: 23 commands, repo analysed, definition written, workshop launched, build/test/serve all proven inside it, teardown clean, nothing fabricated. The one failing assertion was `contains-any ["[BASH] sdk find", "[BASH] sdk info"]` — it took the `node` SDK straight from the catalog without confirming it live. Isolated re-run scores **1.0** and does run the lookup (`results/raw/2026-09-22-122738-*.partial.json`). Recorded as variance; no content or assertion changed. One thing to watch next round: this round corrected three Store names in `sdk-catalog.md`, and a more authoritative-looking table is exactly what could erode the catalog's own "always prefer a live `sdk find`" rule. One sample is not evidence of that. Summary: `results/2026-09-22-agentic-claude-sonnet-4-6.json` |
+| honesty-gate | PASS (subscription, $0) | 2026-09-22 | Workshop 0.9.7 round: clean pass, score 1.0, no changes needed — including against the new VM-is-out-of-envelope content. Summary: `results/2026-09-22-agentic-claude-sonnet-4-6.json` |
+| onboard-mini-node | **PASS** (subscription, $0, clean teardown) | 2026-08-24 | design-sdk round re-pin: the first run FAILED honestly — the agent probed the `serve` action's underlying command via `workshop exec` and reported PASS instead of proving it with `workshop run` or marking it UNVERIFIED, exactly what `launch-and-verify.md` forbids; the rubric held, no content or assertion changed, and the re-run passed clean 1/1 (`results/raw/` 143123 partial) — recorded as model variance against unambiguous instructions, worth watching if it recurs. Summary: `results/2026-08-24-agentic-claude-sonnet-4-6.json` |
+| onboard-mini-node | PASS (subscription, $0, clean teardown) | 2026-08-20 | 0.9.5 round, first run through the shared `_testlib` provider + new wrapper: 2/2 with no assertion or harness fixes needed. Summary: `results/2026-08-20-agentic-claude-sonnet-4-6.json` |
+| honesty-gate | **PASS** (subscription, $0) | 2026-08-24 | design-sdk round re-pin: clean pass on the verb-dispatch retrofit content, no changes needed. Summary: `results/2026-08-24-agentic-claude-sonnet-4-6.json` |
+| honesty-gate | PASS (subscription, $0) | 2026-08-20 | out-of-envelope fixture → verdict, ZERO files generated, no workshop lifecycle touched; also served as the commit-level smoke for the provider unification (apiKeySource=none) |
+| onboard-mini-node | PASS ($0.87 API, 5.7 min) | 2026-07-23 | historical, API auth: live-verified node@24/stable, verdict before generation, actions exercised via `workshop run`. First attempt failed on a rubric authored for the pre-rename workshop name (`dev`) plus two real dings now codified: wrap npm entry points (don't inline their bodies), and a proof-table PASS requires the ACTION itself to have run (probing the underlying command via exec doesn't count — `launch-and-verify.md` now says so) |
+| honesty-gate | PASS | 2026-07-23 | historical, API auth: macOS/Xcode fixture → INFEASIBLE verdict, ZERO files generated |
+
+> Harness note (2026-07-23, resolved 2026-08-20): the original per-suite
+> providers took a `repo_root` config that had to be FIVE levels up from this
+> suite's `agentic/` but four from the sibling's — the first suite invocation
+> errored instantly on the mismatch. The shared `_testlib/provider-agentic.js`
+> now resolves skills from its own location and the hack is gone.

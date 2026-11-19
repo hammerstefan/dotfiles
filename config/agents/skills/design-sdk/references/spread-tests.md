@@ -1,0 +1,159 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Copyright 2026 Canonical Ltd. -->
+
+<overview>
+How SDK repos structure spread tests and what `sdkcraft test` adds over bare
+spread: it packs the SDK for every platform matching the current
+architecture, copies the artifacts into the test environment via the try
+area, installs Workshop there, and skips spread variants whose base wasn't
+packed. Smoke tests encode the manual checks from the try loop so they run on
+every PR.
+</overview>
+
+<layout>
+Fixed layout, required by `sdkcraft test` (it refuses to run without
+`tests/spread.yaml`):
+
+```
+tests/
+├── spread.yaml                # project, backend, suites, base variants
+└── main/
+    └── <job>/
+        ├── task.yaml          # summary, prepare, execute, restore, debug
+        └── workshop.yaml.in   # test workshop consuming try-<name>
+```
+
+```yaml
+# tests/spread.yaml
+project: <name>
+path: /home/ubuntu/project
+backends:
+  lxd:
+    systems:
+      - ubuntu-24.04:
+          username: ubuntu
+          vm: true
+suites:
+  main/:
+    summary: Test the <name> SDK inside workshops
+    environment:
+      BASE/noble: ubuntu@24.04
+```
+
+`vm: true` here is *spread's* backend setting — run the job in a full LXD VM on
+the test runner. It has nothing to do with Workshop's `runtime:` key
+(`confinement:` in 0.9.7); a workshop under test stays a container, since a VM
+workshop cannot carry SDKs on LXD `6/stable`.
+
+Variant names under `environment:` (`BASE/jammy`, `BASE/noble`,
+`BASE/resolute`) are how one job runs against several bases — `sdkcraft
+test` drops the variants whose base wasn't packed. Host-side values can be
+captured at parse time:
+
+```yaml
+# tests/spread.yaml
+      EXPECTED_VERSION: '$(HOST: cat "`git rev-parse --show-toplevel`/VERSION")'
+```
+</layout>
+
+<task_shape>
+```yaml
+# tests/main/launch/task.yaml
+summary: Launch a workshop with the <name> SDK and verify setup
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+restore: |
+  workshop remove || true
+execute: |
+  workshop exec -- bash -lc '<name> --version' | MATCH "<version-regex>"
+debug: |
+  workshop exec -- bash -lc 'echo PATH=$PATH' || true
+```
+
+```yaml
+# tests/main/launch/workshop.yaml.in
+name: test-<name>
+base: ${BASE}
+sdks:
+  - name: try-<name>
+```
+
+Conventions: `envsubst` renders the base variant into the definition;
+`restore:` always tears down with `|| true`; assertions go through spread's
+`MATCH`; a `debug:` block dumps environment state on failure. Commands run
+inside the workshop via `workshop exec -- bash -lc '...'` — the login shell
+is what picks up profile.d.
+</task_shape>
+
+<smoke_test_menu>
+Always ship the `launch` job; add one job per advertised capability:
+- Binary on PATH + version: `workshop exec -- bash -lc '<tool> --version' | MATCH ...`
+  (escape dots when matching an exact `$EXPECTED_VERSION`).
+- Service responds: probe through the tunnel slot's port or via the tool's
+  own client command; health already gates Ready, so probe the feature.
+- Persistence round-trip: write into the mount-backed path, `workshop
+  refresh`, assert the data survived.
+- State round-trip (SDKs with save/restore-state): change the tool setting,
+  refresh, assert it stuck.
+- Health honesty: `workshop info | MATCH 'status:\s+ready'` — `ready` is
+  the workshop status that every SDK's `check-health` rolls up into.
+  `okay` is only what the hook reports through `workshopctl set-health`;
+  `workshop info` never prints it, and there is no per-SDK health line.
+- Secret plug (0.9.8+): a runner has no desktop keyring, so never make a
+  job depend on a connected secret. Assert what holds without it — the
+  wrapper is what resolves on `PATH`
+  (`readlink -f "$(type -P <tool>)" | MATCH "/wrapper/<tool>$"`), the tool
+  starts, and an unconnected plug yields the tool's own "no credential"
+  message rather than a crash. Test the connected path by hand in the try
+  loop (`secrets.md` `<testing>`).
+- Slot for consumers (a mount slot other SDKs plug into): give the job a
+  throwaway in-project consumer SDK and wire it explicitly — a regular-SDK
+  mount slot never auto-connects. The task directory holds the rendered
+  `workshop.yaml`, so it is the project root: the consumer lives at
+  `tests/main/<job>/.workshop/<name>-consumer/`, not at the repo root.
+  `try-`/`project-` go in `sdks:` only; `connections:` names both SDKs bare
+  (a prefixed reference fails as a reserved SDK name). Probe the plug's
+  target, e.g. `workshop exec -- ls /opt/<name>`.
+
+```yaml
+# tests/main/<job>/.workshop/<name>-consumer/sdk.yaml
+name: <name>-consumer
+plugs:
+  <name>:
+    interface: mount
+    workshop-target: /opt/<name>
+```
+
+```yaml
+# tests/main/<job>/workshop.yaml.in
+name: test-<name>
+base: ${BASE}
+sdks:
+  - name: try-<name>
+  - name: project-<name>-consumer
+connections:
+  - plug: <name>-consumer:<name>
+    slot: <name>:<slot>
+```
+
+Keep the suite small and fast — these run in CI on every PR via the shared
+build workflow.
+</smoke_test_menu>
+
+<running>
+- `sdkcraft test` — full suite (packs, tries, provisions an LXD container
+  per job).
+- `sdkcraft test --list` — enumerate jobs without running.
+- `sdkcraft test <spread-expression>` — one suite/job/variant.
+- `--shell` / `--shell-after` / `--debug` — drop into the test container
+  (before, after, or on failure).
+Report results per job, quoting the failing job's output verbatim.
+</running>
+
+<source_docs>
+- `how-to/develop-sdks/build-an-sdk.md` (test layout, starter job, smoke example)
+- `reference/cli/sdkcraft.md` (`sdkcraft test` behavior and flags)
+- `explanation/sdks/concepts.md` (try area mechanics the harness relies on)
+- `how-to/develop-sdks/share-content-between-sdks.md` (wiring a slot to a consumer; prefixes in `sdks:` only)
+</source_docs>

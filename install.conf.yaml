@@ -16,6 +16,9 @@
     ~/.config/opencode:
       path: config/opencode
       force: true
+    ~/.agents:
+      path: config/agents
+      force: true
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]

@@ -1,0 +1,429 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright 2026 Canonical Ltd.
+
+- description: Refresh failed, user asks what to do
+  vars:
+    user: |
+      My workshop refresh just failed with an error about a setup-base hook. What do I do?
+  assert:
+    - type: contains-all
+      value:
+        - workshop changes
+        - workshop tasks
+    - type: contains-any
+      value:
+        - --wait-on-error
+        - --verbose
+    - type: not-contains
+      value: snap remove
+    - type: llm-rubric
+      value: |
+        The response leads with the `workshop changes` / `workshop tasks <ID>`
+        diagnostic flow and offers `--wait-on-error` (with `--continue` /
+        `--abort`) for interactive recovery. It does NOT reach for `workshop
+        remove` + `workshop launch` as a BLANKET fix for a failed refresh from
+        a Ready workshop, nor recommend `sudo snap remove --purge workshop`.
+        Mentioning remove/launch only to warn against it is fine. ALLOWED
+        exception: because `setup-base` is a creation-only hook that `workshop
+        refresh` cannot re-run, the response MAY correctly state that if the
+        user edited their own in-project `setup-base` SCRIPT, recreating the
+        workshop (`workshop remove` + `workshop launch`) is the right way to
+        re-run it — that is accurate, scoped guidance, not the forbidden
+        blanket remove+launch.
+
+- description: Refresh failed (paraphrase 1, SDK install error)
+  vars:
+    user: |
+      I ran `workshop refresh` and it bombed out partway through with an SDK install error. What now?
+  assert:
+    - type: contains-all
+      value:
+        - workshop changes
+        - workshop tasks
+    - type: contains-any
+      value:
+        - --wait-on-error
+        - --verbose
+    - type: llm-rubric
+      value: |
+        The response prescribes the `workshop changes` / `workshop tasks`
+        diagnostic flow (and `--wait-on-error` for interactive recovery) as
+        the first step. It does NOT recommend `workshop remove` + `workshop
+        launch` as the fix for a failed refresh from a Ready workshop, and
+        it does NOT recommend `sudo snap remove --purge workshop`. (Mentioning
+        either as something explicitly to avoid is fine — what's forbidden is
+        prescribing them as the fix.)
+
+- description: Refresh failed (paraphrase 2, repeated failure with Status Error)
+  vars:
+    user: |
+      Refresh keeps failing on me — the change shows Status: Error in the changes list. How do I figure out what's actually wrong?
+  assert:
+    - type: contains
+      value: workshop tasks
+    - type: contains-any
+      value:
+        - --wait-on-error
+        - --verbose
+        - "shell"
+    - type: llm-rubric
+      value: |
+        The response treats the Error status as a diagnostic starting point (drilling
+        into `workshop tasks <ID>` for the failed task's logs, optionally retrying with
+        `--wait-on-error` to inspect interactively). It leads with diagnosis rather than
+        reflexively prescribing `workshop remove` + `workshop launch` as the FIRST move.
+        It IS acceptable for the response to note — as a conditional, scoped fallback —
+        that a workshop genuinely stuck in `Error` status (one that did NOT auto-revert
+        to `Ready`) can only be recovered with `workshop remove` + `workshop launch`,
+        since `states-and-transitions` says `remove` is the only command that works from
+        `Error`. What's forbidden is presenting remove+launch as the first response
+        before any diagnosis.
+
+- description: User wants to inspect a paused workshop interactively
+  vars:
+    user: |
+      I ran workshop refresh --wait-on-error and now my workshop is in Waiting. How do I poke around inside before deciding what to do?
+  assert:
+    - type: contains
+      value: workshop shell
+    - type: contains-any
+      value:
+        - --continue
+        - --abort
+
+- description: User asks how to resume after fixing the issue
+  vars:
+    user: |
+      I shelled in, manually fixed what was broken, and the workshop is still Waiting. How do I tell it to keep going?
+  assert:
+    - type: contains
+      value: --continue
+    - type: contains-any
+      value:
+        - workshop refresh --continue
+        - workshop launch --continue
+    - type: not-contains
+      value: workshop remove
+
+- description: User asks about warnings vs errors
+  vars:
+    user: |
+      workshop info says my workshop is Ready but workshop warnings shows something. How worried should I be?
+  assert:
+    - type: contains-any
+      value:
+        - non-blocking
+        - "not blocking"
+        - "doesn't block"
+        - "don't block"
+        - "do not block"
+        - transient
+        - cosmetic
+    - type: contains
+      value: workshop okay
+
+- description: User reaches for snap purge prematurely
+  vars:
+    user: |
+      Things are weird. Should I just do sudo snap remove workshop --purge and start over?
+  assert:
+    - type: contains-any
+      value:
+        - last resort
+        - last-resort
+        - "do not"
+        - "don't"
+        - destructive
+        - all users
+        - "every user"
+        - "every workshop"
+        - nuclear
+        - nuke
+    - type: contains-any
+      value:
+        - workshop changes
+        - workshop tasks
+        - lxc list
+    - type: llm-rubric
+      value: |
+        The response discourages using `snap remove --purge` as a first step,
+        recommends starting with workshop diagnostic commands (at minimum
+        `workshop changes`; `workshop tasks` and/or `lxc list` are bonus,
+        not required), and warns that purge is destructive at system scope
+        (affects all users / every workshop on the system).
+
+- description: Snap purge prematurely (paraphrase 1, hopeful framing)
+  vars:
+    user: |
+      Honest question — would `sudo snap remove --purge workshop` solve a flaky workshop?
+  assert:
+    - type: contains-any
+      value:
+        - last resort
+        - last-resort
+        - "do not"
+        - "don't"
+        - destructive
+        - all users
+        - "every user"
+        - "every workshop"
+        - nuclear
+        - nuke
+    - type: contains-any
+      value:
+        - workshop changes
+        - workshop tasks
+        - lxc list
+    - type: llm-rubric
+      value: |
+        The response discourages `snap remove --purge` as a first step,
+        points the user at workshop diagnostics first (at minimum `workshop
+        changes`), and warns that purge is system-wide (affects every
+        workshop for every user on the system).
+
+- description: Snap purge prematurely (paraphrase 2, "nuke option" framing)
+  vars:
+    user: |
+      I've heard people call `snap remove --purge workshop` the nuke option. Should I use it now or save it for later?
+  assert:
+    - type: contains-any
+      value:
+        - last resort
+        - last-resort
+        - save it for later
+        - "later"
+        - destructive
+        - all users
+        - "every user"
+        - "every workshop"
+        - nuclear
+        - nuke
+    - type: contains-any
+      value:
+        - workshop changes
+        - workshop tasks
+        - lxc list
+    - type: llm-rubric
+      value: |
+        The response treats `snap remove --purge` as a true last resort
+        (save it for later, not now) and points the user to workshop
+        diagnostics first (at minimum `workshop changes`; `workshop tasks`
+        and/or `lxc list` are bonus, not required). It warns that purge
+        affects every workshop for every user on the system.
+
+- description: No space left on device with free host disk (full storage pool)
+  vars:
+    user: |
+      My `workshop launch` failed with "No space left on device", but `df -h` shows my host disk has 2 TB free. What's wrong and how do I fix it?
+  assert:
+    - type: icontains-any
+      value:
+        - storage pool
+        - lxc storage
+    - type: icontains-any
+      value:
+        - resize
+        - grow
+        - "size="
+    - type: llm-rubric
+      value: |
+        The response identifies the real limit as the LXD storage pool backing
+        the workshop (named `workshop`, sized to a fraction of disk, and NOT the
+        host disk, and NOT auto-grown by Workshop) — not a code/hook bug and not
+        the host filesystem. It tells the user to inspect the pool
+        (`lxc storage info`/`list`) and to grow it (e.g.
+        `sudo lxc storage set workshop size=…`), and conveys that Workshop does
+        not manage the pool size automatically. It does NOT misdiagnose the
+        error as a transient hook failure to just retry, and does NOT prescribe
+        `sudo snap remove --purge` as the fix.
+
+- description: Change stuck in Doing, every command fails with other changes in progress
+  vars:
+    user: |
+      Every workshop command I run now fails with "other changes in progress". `workshop changes` shows change 31 has been Doing for two hours and `workshop tasks 31` shows a task that never finishes. The container looks dead — I think LXD killed it mid-refresh. How do I get unstuck?
+  assert:
+    - type: icontains
+      value: snap restart workshop
+    - type: llm-rubric
+      value: |
+        The response identifies this as a daemon-level stall that workshopd
+        will never clear on its own (no change timeout; no CLI command can
+        abandon a change stuck in `Doing`), and prescribes restarting the
+        daemon with `snap restart workshop` as the unblocking step (mentioning
+        the systemctl equivalent is fine, but the snap restart must be the
+        lead recommendation). After the restart, it treats the workshop's
+        state as untrustworthy — because the workshop went Off outside
+        workshopd's control — and recommends recreating it (`workshop remove`
+        then `workshop launch`) rather than resuming work on it. It does NOT
+        prescribe `sudo snap remove --purge`.
+
+- description: Post-uncontrolled-Off, can the reported Ready state be trusted
+  vars:
+    user: |
+      Someone ran `lxc stop` on my workshop's container in the middle of a refresh. I restarted the workshop daemon and `workshop info` now says Ready, but exec behaves oddly. Can I trust the Ready status?
+  assert:
+    - type: contains
+      value: workshop remove
+    - type: contains
+      value: workshop launch
+    - type: llm-rubric
+      value: |
+        The response says NO: after a transition to Off that workshopd did not
+        itself initiate (an LXD-side stop/kill, as opposed to a controlled
+        `workshop stop`), the daemon's recorded state can diverge from reality,
+        so a reported `Ready` is not trustworthy. It recommends recreating the
+        workshop from scratch (`workshop remove` then `workshop launch`)
+        rather than continuing to work in it.
+
+- description: Negative guard — ordinary refresh failure must not get a daemon restart
+  vars:
+    user: |
+      My `workshop refresh` failed with a hook error and the change shows Error. Should I run `snap restart workshop` to clear it and try again?
+  assert:
+    - type: contains-all
+      value:
+        - workshop changes
+        - workshop tasks
+    - type: llm-rubric
+      value: |
+        The response declines the daemon restart: a change that reached
+        `Error` while other commands still work is an ordinary failed change,
+        already handled by the normal flow — diagnose with `workshop changes`
+        / `workshop tasks <ID>`, optionally retry with `--wait-on-error` to
+        investigate interactively. It conveys that restarting the daemon is
+        reserved for a different situation (a change stuck in `Doing` with
+        every command failing on "other changes in progress"), which this is
+        not. (The response may repeat the words `snap restart workshop` while
+        rejecting it — what's forbidden is endorsing the restart as the fix
+        here.)
+
+- description: SDK YAML rejected by strict validation (unknown SDK YAML fields)
+  vars:
+    user: |
+      `workshop refresh` fails with `invalid "tools" SDK: SDK definition YAML contains unknown fields: "descripton" at line 4, column 13` for my `.workshop/tools/sdk.yaml`. The file looks fine to me. What's going on?
+  assert:
+    - type: contains-any
+      value:
+        - "unknown"
+        - typo
+        - misspelled
+        - misspelling
+    - type: not-contains
+      value: snap restart
+    - type: llm-rubric
+      value: |
+        The response explains that SDK YAML (an in-project `sdk.yaml`, or a
+        sketch SDK) is validated strictly — an unknown or misspelled key
+        (here `descripton`, a typo for `description`) is rejected up front
+        with the line and column named in the error. The fix is to correct
+        the offending key (consult the definition reference); retrying the
+        same file unchanged won't help. A response that also notes
+        `workshop.yaml` is strictly validated too since 0.9.9 earns extra
+        credit but it is not required; claiming `workshop.yaml` silently
+        ignores unknown keys on 0.9.9 is wrong. It does NOT treat this as a
+        daemon stall or prescribe a daemon restart or remove+launch.
+
+- description: A connections entry with an interface key is rejected (0.9.9)
+  vars:
+    user: |
+      My workshop.yaml has a connections entry with `plug: go:mod-cache`, `slot: tools:cache` and `interface: mount`. Since upgrading to 0.9.9, `workshop refresh` fails with `workshop definition YAML: connections entry contains unknown fields: "interface" at line 9, column 16`. The interface really is mount — what's wrong?
+  assert:
+    - type: not-contains
+      value: snap restart
+    - type: llm-rubric
+      value: |
+        The response explains that a `connections:` entry takes only `plug`
+        and `slot` — the interface is implied by the two endpoints, which
+        must share it — and that Workshop 0.9.9 validates `workshop.yaml`
+        strictly, so the extra `interface:` key, which earlier releases
+        silently ignored, is now rejected. The fix is to delete the
+        `interface:` line and run `workshop refresh` again. It does NOT tell
+        the user to move `interface:` elsewhere in the entry, to restart the
+        daemon, or to remove and relaunch the workshop.
+
+- description: Restore refused right after a Workshop snap update
+  vars:
+    user: |
+      I updated the workshop snap this morning and now `workshop restore` refuses to run on my workshop. It worked last week. What gives?
+  assert:
+    - type: contains
+      value: workshop refresh
+    - type: llm-rubric
+      value: |
+        The response identifies the backward-compatibility guard: after a
+        Workshop snap update, `restore` (and `launch/refresh --continue`)
+        are refused on a workshop that has not yet been refreshed under the
+        new version, because the new daemon cannot reproduce the old
+        version's exact behavior. The fix is one `workshop refresh <name>`,
+        after which restore works again. The response MUST NOT prescribe
+        downgrading the snap (Workshop has no forward compatibility — a
+        downgrade requires snap remove + reinstall, which deletes every
+        workshop and SDK) and MUST NOT prescribe a daemon restart or
+        remove+launch as the fix. Explicitly WARNING against those moves
+        ("do not restart the daemon — this isn't a stall") is correct and
+        must not be penalized.
+
+- description: Refresh rejected because another change is already running
+  vars:
+    user: |
+      Every `workshop refresh myapp` returns `myapp: launch change is in progress`. Should I run `snap restart workshop` to clear it?
+  assert:
+    - type: contains-any
+      value:
+        - "in progress"
+        - wait
+        - "another change"
+        - "still running"
+        - workshop changes
+    - type: llm-rubric
+      value: |
+        The response does NOT immediately prescribe a daemon restart. It reads
+        "launch change is in progress" as an ordinary change-conflict — a launch
+        change is still running for that workshop — and first checks whether that
+        launch is genuinely progressing (`workshop changes` / `workshop tasks
+        <ID>`), advising the user to wait for it to finish. It reserves `snap
+        restart workshop` for the distinct case of a change genuinely stuck in
+        `Doing` (never progressing, "other changes in progress" on every
+        command), not as the default response to this message.
+
+- description: GPU device inaccessible on a pre-0.9.2 workshop (device-group fix)
+  vars:
+    user: |
+      My workshop on ubuntu@26.04 can't open /dev/kfd for ROCm — permission denied — even though the gpu plug is connected. A workshop I launched today on another machine works fine. How do I fix the older one?
+  assert:
+    - type: contains
+      value: workshop refresh
+    - type: contains-any
+      value:
+        - render
+        - "device group"
+        - "device-group"
+        - "0.9.2"
+        - group
+    - type: llm-rubric
+      value: |
+        The response attributes this to the 0.9.2 device-group fix (Workshop adds
+        the `workshop` user to device groups such as `render`) and tells the user
+        to run `workshop refresh` to apply it to the pre-0.9.2 workshop. It does
+        NOT misdiagnose it as a missing `gpu` plug, a broken driver install, or a
+        storage/daemon problem.
+
+- description: "`workshop start` refused — workshop too old (0.9.6 format guard)"
+  vars:
+    user: |
+      `workshop start dev` fails with: cannot start "dev": workshop too old: use "workshop remove dev" and "workshop launch dev" to update it. I already ran `workshop refresh` after the snap updated and it didn't help. What now?
+  assert:
+    - type: contains
+      value: workshop remove
+    - type: contains
+      value: workshop launch
+    - type: llm-rubric
+      value: |
+        The response follows the error message verbatim: remove the workshop
+        and launch it again. It makes clear that, unlike the post-snap-update
+        refusal of `workshop restore` / `launch --continue` / `refresh
+        --continue` — which one `workshop refresh` clears — this format guard
+        is NOT cleared by a refresh, which is why the user's refresh changed
+        nothing. It does NOT recommend another refresh, a daemon restart, or a
+        snap downgrade.
+

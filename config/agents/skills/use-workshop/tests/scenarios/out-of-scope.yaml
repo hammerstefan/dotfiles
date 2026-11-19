@@ -1,0 +1,98 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright 2026 Canonical Ltd.
+
+- description: User asks about publishing an SDK to the Store
+  vars:
+    user: |
+      I want to publish my own SDK to the SDK Store so others can use it. How do I do that?
+  assert:
+    - type: contains
+      value: design-sdk
+    - type: llm-rubric
+      value: |
+        The response hands SDK authoring/publishing to the design-sdk
+        sibling skill (which owns sdkcraft.yaml design, packed-SDK hooks,
+        and Store publishing) and does not improvise concrete `sdkcraft`
+        invocations here. The response MAY also offer help on legitimately
+        in-scope adjacent topics (e.g., authoring an in-project SDK at
+        `.workshop/<name>/` for tooling that doesn't need to live in the
+        Store) as long as such offers are clearly distinct from the
+        handed-off publishing topic.
+
+- description: User asks about workshopctl (0.9.8 — set-health and get-secret)
+  vars:
+    user: |
+      What is workshopctl and when do I use it?
+  assert:
+    - type: contains
+      value: workshopctl
+    - type: contains-any
+      value:
+        - set-health
+        - get-secret
+    - type: llm-rubric
+      value: |
+        The response identifies `workshopctl` as the CLI that runs INSIDE a
+        workshop and talks to the Workshop daemon, and names its two
+        documented uses: `workshopctl set-health` from an SDK's
+        `check-health` hook, and (Workshop 0.9.8+) `workshopctl get-secret
+        <SDK>.<PLUG>`, which reads a credential through a connected `secret`
+        plug — typically called by an SDK's wrapper or service, and by the
+        user via `workshop exec` to check a lookup. Naming both is ideal;
+        naming one with a pointer to the docs for the rest passes. It does
+        NOT present workshopctl as a general-purpose host CLI with other
+        invented subcommands, and if it shows `get-secret` it does not print
+        the value to "check" it (counting bytes or discarding output is the
+        right pattern).
+
+- description: User asks about sdkcraft pack vs workshop launch
+  vars:
+    user: |
+      What's the difference between sdkcraft pack and workshop launch?
+  assert:
+    - type: contains-any
+      value:
+        - "out of scope"
+        - "this skill does not"
+        - "not covered"
+        - "doesn't cover"
+        - sdkcraft is for
+        - "publishing"
+        - "authoring"
+        - design-sdk
+    - type: contains
+      value: workshop launch
+    - type: not-contains
+      value: sdkcraft pack <
+
+- description: User asks the agent to drive a workshop sketch-sdk session
+  vars:
+    user: |
+      Walk me through using `workshop sketch-sdk` on my workshop — open the editor, drop in a few package installs, and save it.
+  assert:
+    - type: contains
+      value: sketch-sdk
+    - type: contains-any
+      value:
+        - "interactive"
+        - "$EDITOR"
+        - "out of scope"
+        - "this skill does not"
+        - "not covered"
+        - "doesn't cover"
+        - "vocabulary"
+    - type: contains-any
+      value:
+        - in-project SDK
+        - author-in-project-sdk
+        - ".workshop/"
+    - type: llm-rubric
+      value: |
+        The response acknowledges `workshop sketch-sdk` as Workshop
+        vocabulary but explains that this skill does not drive the
+        interactive sketch flow (it requires an `$EDITOR` session). It
+        redirects the user to authoring an in-project SDK directly under
+        `.workshop/<name>/` (sdk.yaml + executable hook scripts) as the
+        committable, agent-drivable path to ship a custom SDK. It does
+        NOT improvise a concrete sequence of `workshop sketch-sdk`
+        invocations.

@@ -1,0 +1,267 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright 2026 Canonical Ltd.
+
+- description: Expose a workshop service on the host (auto-connect tunnel)
+  vars:
+    user: |
+      I have a service running on port 8080 inside my workshop. How do I make it reachable at localhost:8080 on my host?
+  assert:
+    - type: contains
+      value: tunnel
+    - type: contains-any
+      value:
+        - "system"
+        - "system:"
+    - type: contains-any
+      value:
+        - plugs
+        - slots
+    - type: contains
+      value: workshop refresh
+    - type: contains
+      value: localhost:8080
+
+- description: Reach a host service from inside the workshop (manual connect)
+  vars:
+    user: |
+      I want code inside the workshop to connect to a Postgres server running on the host at localhost:5432. How do I wire that up?
+  assert:
+    - type: contains
+      value: tunnel
+    - type: contains
+      value: workshop connect
+    - type: contains
+      value: workshop refresh
+    - type: contains-any
+      value:
+        - manual
+        - "system:"
+
+- description: Plug conflict between two SDKs wanting the same mount target
+  vars:
+    user: |
+      Two SDKs in my workshop both declare a plug for ~/.cache/foo and the launch fails with a conflict. How do I fix that?
+  assert:
+    - type: contains
+      value: bind
+    - type: contains-any
+      value:
+        - workshop launch
+        - workshop refresh
+    - type: contains-any
+      value:
+        - workshop connections
+        - bind.
+
+- description: Reassign a mount source to a different host directory
+  vars:
+    user: |
+      How do I point an existing mount plug at a different host directory after the workshop is already launched?
+  assert:
+    - type: contains
+      value: workshop remount
+    # No blunt `not-contains: workshop launch`: a correct answer often warns
+    # that the remount does NOT survive a remove+launch (which resets mounts to
+    # definition defaults). The rubric enforces mention-vs-prescription.
+    - type: llm-rubric
+      value: |
+        The response reassigns the mount source in place with `workshop
+        remount` (no relaunch needed). It does NOT prescribe `workshop
+        remove` + `workshop launch` as the way to change the mount source.
+        Mentioning launch only to WARN that a remove+launch would reset the
+        mount to its definition default is fine (mention-vs-prescription).
+
+- description: User asks about ssh-agent forwarding
+  vars:
+    user: |
+      I want my workshop to use the SSH keys from my host's ssh-agent so I can clone private repos. How?
+  assert:
+    - type: contains
+      value: ssh-agent
+    - type: contains
+      value: workshop connect
+    - type: contains-any
+      value:
+        - manual
+        - explicit
+        - "not auto"
+        - "never auto"
+        - "doesn't auto"
+        - "does not auto"
+
+- description: Expose host serial adapters via the custom-device interface
+  vars:
+    user: |
+      I'm flashing an embedded board and need the workshop to see the host's serial adapters under /dev/ttyUSB*. Which interface covers that and how do I wire it?
+  assert:
+    - type: contains
+      value: custom-device
+    - type: contains
+      value: subsystem
+    - type: contains
+      value: workshop connect
+    - type: llm-rubric
+      value: |
+        The response picks the custom-device interface: a plug on the SDK with
+        `interface: custom-device` and a `subsystem` attribute (tty or a
+        similarly plausible subsystem for serial adapters), refreshed in, then
+        connected manually with `workshop connect` — noting the interface
+        never auto-connects (security). It does NOT misroute the request to
+        the mount, tunnel, or GPU interface as the mechanism for device
+        access.
+
+- description: Set ownership and permissions on a mount target
+  vars:
+    user: |
+      My SDK declares a mount plug whose target is /var/lib/mycache, and Workshop creates it owned by root. I need it owned by the workshop user and group-writable so my tools can write there. How do I set that on the mount plug?
+  assert:
+    - type: contains-any
+      value:
+        - uid
+        - gid
+        - mode
+    - type: llm-rubric
+      value: |
+        The response sets ownership/permissions via the mount plug's `uid`/`gid`
+        (1000 for the workshop user) and/or `mode` attributes. It conveys that
+        these apply only when Workshop CREATES the target (an existing path
+        keeps its ownership) — and because the target is under /var/lib (not
+        /home/workshop, /project, or /run/user/1000), uid/gid would otherwise
+        default to 0 (root), so they must be set explicitly. It does NOT claim
+        a `chown` inside a hook is the only/primary way, and does NOT invent a
+        non-existent attribute.
+
+- description: Read a mount from another regular SDK's slot, not the system default
+  vars:
+    user: |
+      I have a provider SDK that exposes a mount slot, and a consumer SDK with a mount plug. The plug keeps landing on the system mount instead of the provider's slot. How do I make the consumer read from the provider?
+  assert:
+    - type: contains
+      value: connections
+    - type: llm-rubric
+      value: |
+        The response explains that a regular-SDK mount slot is NOT auto-connected
+        (mount auto-connect targets the system SDK's slot only), so the user must
+        name the pairing explicitly with a top-level `connections:` entry pairing
+        `consumer:<plug>` with `provider:<slot>`. It does NOT claim auto-connect
+        will pick the regular-SDK slot, and does NOT misuse `bind:` (plug-to-plug)
+        as the mechanism for pairing a plug to a slot.
+
+- description: Connections name try and in-project SDKs by their bare names
+  vars:
+    user: |
+      My workshop.yaml lists `try-foo` and `project-bar` under sdks:. bar has a mount plug called `data` and foo has a mount slot called `data`. What connections: entry wires bar's plug to foo's slot?
+  assert:
+    - type: contains
+      value: "bar:data"
+    - type: contains
+      value: "foo:data"
+    # A prefixed reference is a reserved-name launch error (issue #25).
+    # Anchored on the YAML key, so prose naming the wrong form still passes.
+    - type: javascript
+      value: >-
+        !/^\s*(?:-\s*)?(?:plug|slot|bind):\s*['"]?(?:try|project)-/m.test(output)
+    - type: llm-rubric
+      value: |
+        The response's connections: entry is `plug: bar:data` with
+        `slot: foo:data` — bare SDK names. The try-/project- prefixes
+        appear only in the sdks: list; a prefixed reference
+        (`try-foo:data`, `project-bar:data`) fails at launch/refresh as a
+        reserved SDK name. It keeps the sdks: entries prefixed (it does
+        NOT tell the user to drop try-/project- from sdks:). Mentioning
+        the reserved-name error, or that `workshop connect` also takes the
+        bare name, is a plus, NOT required.
+
+- description: Narrow a custom-device plug to one USB adapter by vendor/product ID
+  vars:
+    user: |
+      My custom-device plug uses `subsystem: tty`, but that exposes every serial adapter on the host. I only want the workshop to see my FTDI adapter, vendor 0403 product 6001. How do I restrict it?
+  assert:
+    - type: contains
+      value: vendorid
+    - type: contains
+      value: productid
+    - type: llm-rubric
+      value: |
+        The response narrows the custom-device plug with the `vendorid` and
+        `productid` attributes (0.9.3+), keeping the values quoted as strings
+        (`"0403"` / `"6001"`) so YAML doesn't mangle them, and notes that
+        `productid` requires `vendorid`. It applies the change with
+        `workshop refresh` and (since custom-device never auto-connects)
+        `workshop connect`. It does NOT invent attributes like `vendor`,
+        `product`, or `serial`, and does NOT route the request to a different
+        interface. (Reciting the schema rules is optional, not required: the
+        "at least one of subsystem/vendorid/productid" rule isn't at issue —
+        the plug already has `subsystem` — and the "productid requires
+        vendorid" dependency is satisfied by construction since the answer
+        sets both; do not penalize an otherwise-correct answer for not
+        restating either rule.)
+
+- description: Sticky disconnect — keep an auto-connected plug off across refreshes
+  vars:
+    user: |
+      I disconnected the auto-connected mod-cache mount plug on my go SDK. Will the next `workshop refresh` reconnect it? I want it to STAY off — and separately, how would I turn it off only until the next refresh?
+  assert:
+    - type: contains
+      value: "--forget"
+    - type: llm-rubric
+      value: |
+        The response gets the 0.9.5 semantics the right way around: a plain
+        `workshop disconnect` (WITHOUT --forget) is sticky — the plug stays
+        disconnected across `workshop refresh`; adding `--forget` makes the
+        disconnect temporary — auto-connect re-establishes the plug at the
+        next refresh. A response that inverts this (claiming --forget is
+        what PREVENTS reconnection) FAILS. Noting that `workshop restore`
+        reconnects the plug in either case is a plus, not a requirement.
+
+- description: Sticky manual connection — does refresh drop workshop connect wiring
+  vars:
+    user: |
+      Yesterday I ran `workshop connect dev/tools:ssh-agent`. If I `workshop refresh` today after editing the definition, do I have to run the connect again afterwards?
+  assert:
+    - type: contains-any
+      value:
+        - preserved
+        - persists
+        - persist
+        - survives
+        - keeps
+        - "no"
+        - "No"
+    - type: llm-rubric
+      value: |
+        The response says NO re-connect is needed (Workshop 0.9.5+):
+        manual `workshop connect` connections are preserved across
+        `workshop refresh`, as long as the plug and slot still exist in the
+        new definition. It correctly identifies something that DOES reset the
+        wiring — `workshop restore`, or `workshop remove` + `launch`; naming
+        either one suffices — rather than refresh. A response prescribing a routine post-refresh re-connect
+        ritual FAILS; mentioning the pre-0.9.5 behavior as historical
+        context is acceptable. Mentioning the 0.9.8 exception — a refresh
+        that changes a tunnel endpoint, a custom-device filter, or a secret
+        slot's lookup drops THAT connection with a warning — is fine and
+        correct, as long as it does not claim the ssh-agent connection is
+        dropped (ssh-agent connections are always kept).
+
+- description: Editing a tunnel endpoint drops its manual connection (0.9.8)
+  vars:
+    user: |
+      I had `workshop connect dev/app:db dev/system:db` working (a tunnel to Postgres on my host). I changed both endpoints from 5432 to 5433 in the definition and ran `workshop refresh dev`. It said "refreshed" plus `WARNING: There is 1 new warning`, and now the app can't reach the database. Is the refresh broken?
+  assert:
+    - type: contains
+      value: workshop connect
+    - type: contains
+      value: workshop warnings
+    - type: llm-rubric
+      value: |
+        The response explains that this is expected Workshop 0.9.8
+        connection maintenance, not a broken refresh: a preserved manual
+        connection is dropped when the refresh changes a definition it
+        depends on — here the tunnel `endpoint` — and the warning (shown by
+        `workshop warnings`) names the dropped connection ("disconnected …
+        because its definition changed"). The fix is to run the same
+        `workshop connect dev/app:db dev/system:db` again; acknowledging the
+        warning with `workshop okay` is a plus. It does NOT prescribe
+        `workshop restore`, `workshop remove` + `launch`, or a daemon
+        restart, and does NOT claim manual connections never survive a
+        refresh.

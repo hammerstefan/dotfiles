@@ -1,0 +1,127 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright 2026 Canonical Ltd.
+
+- description: Standard workshop removal
+  vars:
+    user: |
+      I'm done with my workshop. How do I remove it?
+  assert:
+    - type: contains
+      value: workshop remove
+    - type: contains-any
+      value:
+        - workshop list
+        - confirm
+    # No blunt `not-contains: snap remove`: a correct answer often names the
+    # snap purge precisely to warn it is NOT for removing one workshop
+    # (mention-vs-prescription, cf. BASELINE assertion fixes 2/3/7/12). The
+    # rubric below carries the real guard.
+    - type: llm-rubric
+      value: |
+        The response prescribes `workshop remove` as the way to remove the
+        workshop, and suggests confirming it is gone (e.g. `workshop list`).
+        It does NOT prescribe `snap remove workshop` (with or without
+        `--purge`) for this; naming the snap purge only to warn that it is a
+        last resort that wipes every workshop on the machine is fine.
+
+- description: Project deleted before workshop was removed (orphan)
+  vars:
+    user: |
+      I deleted my project directory without removing the workshop first. workshop list --global still shows the workshop. How do I clean up?
+  assert:
+    - type: contains-any
+      value:
+        - mkdir
+        - recreate
+    - type: contains
+      value: workshop remove
+    - type: contains-any
+      value:
+        - "--project"
+        - missing-project
+    - type: not-contains
+      value: snap remove --purge
+    # No blunt `not-contains: lxc`: a good answer may mention manual LXD
+    # cleanup as the fallback (mention-vs-prescription, cf. BASELINE
+    # assertion fixes 2/3/7). The rubric enforces the ordering.
+    - type: llm-rubric
+      value: |
+        The PRIMARY recovery path is: recreate the project directory at the
+        SAME absolute path (`mkdir -p`; it may stay empty), then run
+        `workshop remove --project <path> <workshop>`, verify with
+        `workshop list --global`, and delete the recreated directory. The
+        daemon still tracks the original path, so this works without
+        touching LXD. Manual `lxc list` / `lxc delete` may be MENTIONED
+        only as a fallback for when the recreate-directory recovery fails —
+        it must not be presented as the first or primary step.
+
+- description: User asks about workshop restore vs remove
+  vars:
+    user: |
+      My workshop has gotten weird with stale mounts and connections from earlier experiments. I don't want to lose the container though. What's the cleanest way to reset it?
+  assert:
+    - type: contains
+      value: workshop restore
+    - type: contains-any
+      value:
+        - last
+        - "launch or refresh"
+        - default
+    - type: llm-rubric
+      value: |
+        The PRIMARY recommendation is `workshop restore`, which preserves the
+        container. The response does NOT recommend `workshop remove` as the fix
+        for this situation. (The response MAY mention `workshop remove` in
+        contrast — to clarify what restore is *not* — or as a conditional
+        fallback for an `Error` state, which is fine. It must not be the
+        primary recommended action.)
+
+- description: After manual lxc cleanup, what to verify
+  vars:
+    user: |
+      I just used lxc delete to remove an orphan container. How do I verify nothing's left behind?
+  assert:
+    - type: contains-any
+      value:
+        - workshop list --global
+        - lxc list --all-projects
+    - type: contains-any
+      value:
+        - profile list
+        - lxc profile
+    - type: contains-any
+      value:
+        - /var/snap/workshop
+        - .local/share/workshop
+        - leftover
+
+- description: Orphaned workshop the user wants to keep
+  vars:
+    user: |
+      I accidentally deleted my project folder. workshop list --global shows the workshop as Error with a missing-project note. The container has state I care about — can I get the workshop back instead of deleting it?
+  assert:
+    # icontains + "recreat"/"exact path": a correct 2026-10-19 answer said
+    # "recreating the directory at that exact path" and missed every token.
+    - type: icontains-any
+      value:
+        - same absolute path
+        - same path
+        - original path
+        - exact path
+        - recreat
+    - type: contains-any
+      value:
+        - git clone
+        - restore the project
+        - restore its content
+        - mkdir
+    - type: llm-rubric
+      value: |
+        The response tells the user to restore the project directory at the
+        SAME absolute path — recreating the directory and restoring its
+        content (e.g. from a git remote or backup) — after which workshop
+        commands re-associate the directory with the original project (the
+        `.workshop.lock` file is recreated) and the workshop is usable
+        again. It does NOT prescribe `lxc delete` or `workshop remove` as
+        the way to recover a workshop the user wants to KEEP (mentioning
+        removal as the alternative for when they don't want it is fine).

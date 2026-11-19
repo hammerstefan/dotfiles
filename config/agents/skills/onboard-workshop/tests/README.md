@@ -1,0 +1,36 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Copyright 2026 Canonical Ltd. -->
+
+# Eval suite for `onboard-workshop`
+
+Four layers, mirroring the sibling suite's philosophy (free static gates in
+CI; model evals manual with pinned baselines — see `TESTING.md` at the repo
+root for the lane doctrine; everything below Lane 0 here runs on the $0
+subscription lane, no API keys, except the cross-vendor Copilot routing run,
+`make eval-routing-copilot`, which spends Copilot premium allowance and uses
+the same judge):
+
+1. **Static checks** (`make check`, free, CI-gated): source-doc paths against
+   the SHARED `../use-workshop/tests/docs-manifest.txt`; YAML snippet keys
+   against the SHARED `allowed-keys.json` (templates globbed recursively;
+   `sdk.yaml` templates classified under the sdk allowlist); shellcheck;
+   bundle regen; sdk-catalog markers/stamp; template hook executable bits.
+   One `make update-docs-manifest` run in the sibling's tests dir refreshes
+   both skills' ground truth.
+2. **Routing eval** (`make eval-routing`, $0 — claude CLI Sonnet candidate +
+   local judge): 62 promptfoo cases. The
+   bundle appends the borrowed sibling references (see
+   `scripts/bundle-extras.txt`) so the eval simulates required reading being
+   satisfied. `scenarios/skill-selection.yaml` overrides `vars.skill` with
+   `skill-selection-context.md` (both skills' frontmatter only) — the
+   automated guard on the two skills' description boundary.
+3. **Reconstruction eval** (`make eval-reconstruction[-full]`, $0 on the
+   subscription login, local-only): the guinea-pig harness — see
+   `reconstruction/README.md`.
+4. **Agentic E2E** (`make eval-agentic`, $0 on the subscription login, real
+   LXD): full onboarding of a fixture repo + the honesty gate (an
+   out-of-envelope repo must produce a verdict and NO files).
+
+Baselines: `BASELINE.md`. Raw outputs land in `results/raw/` (gitignored);
+commit only slim summaries under `results/` (routing runs do this via
+`scripts/run-routing.sh`, unchanged from the sibling).
