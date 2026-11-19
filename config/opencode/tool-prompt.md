@@ -1,2 +1,2 @@
 Always use the <tool_code> block for tool execution. Do not wrap tool calls in markdown backticks unless specifically asked.
-Always pass repo directory or url as `repo="/path/to/project"` to semble_search. Never use `repo=null`.
+Code search uses the `semble` MCP server: `semble.search(query, repo)` and, to find code like a known location, `semble.find_related(file_path, line, repo)`. Always pass an explicit repo, e.g. `repo="/path/to/project"` — a local path, a git URL, or a list of them. Never omit `repo`.
