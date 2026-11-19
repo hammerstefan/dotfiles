@@ -1,10 +1,14 @@
 {
   "enabled": true,
+  "cascade": true,
   "chains": [
     [
       "minimax-coding-plan/MiniMax-M3.1-Flash",
-      "zai-coding-plan/glm-5.3-flash",
       "opencode-go/deepseek-v4.1-flash"
+    ],
+    [
+      "zai-coding-plan/glm-5.3-flash",
+      "opencode-go/glm-5.3-flash"
     ]
   ],
   "cooldownMinutes": 30,

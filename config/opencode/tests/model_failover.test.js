@@ -20,6 +20,7 @@ const {
   parseRef,
   refKey,
   classify,
+  route,
   plan,
   createState,
   configDirectory,
@@ -134,6 +135,7 @@ describe("normalizeConfig", () => {
   test("falls back to defaults for missing or unusable values", () => {
     expect(normalizeConfig(undefined)).toEqual({
       enabled: true,
+      cascade: true,
       chains: [],
       cooldownMinutes: 30,
       rateLimitAttempts: 4,
@@ -145,6 +147,7 @@ describe("normalizeConfig", () => {
       switchDelayMs: 250,
     })
     expect(normalizeConfig({ enabled: false }).enabled).toBe(false)
+    expect(normalizeConfig({ cascade: false }).cascade).toBe(false)
   })
 
   test("reads the chain file from the active config directory and tolerates a missing file", async () => {
@@ -265,6 +268,93 @@ describe("plan", () => {
   })
 })
 
+describe("plan across cascading chains", () => {
+  // A->B, C->D, E->F->G: three chains, one route.
+  const A = { providerID: "plan-a", id: "a" }
+  const B = { providerID: "plan-b", id: "b" }
+  const C = { providerID: "plan-c", id: "c" }
+  const D = { providerID: "plan-d", id: "d" }
+  const E = { providerID: "plan-e", id: "e" }
+  const F = { providerID: "plan-f", id: "f" }
+  const G = { providerID: "plan-g", id: "g" }
+
+  const cascade = ({
+    chains,
+    model,
+    switches = 0,
+    providers = new Map(),
+    models = new Map(),
+    overrides = {},
+  }) => {
+    const config = { ...normalizeConfig({ chains: chains.map((chain) => chain.map(refKey)) }), ...overrides }
+    return plan({
+      config,
+      model,
+      verdict: "exhausted",
+      available: new Set(chains.flat().map(refKey)),
+      cooling: { providers, models },
+      switches,
+      now: 1_000,
+    })
+  }
+
+  const split = [[A, B], [C, D], [E, F, G]]
+
+  test("joins the chains into one route in config order", () => {
+    expect(route(split)).toEqual([A, B, C, D, E, F, G])
+    // A link named again at the start of the next chain keeps its first place.
+    expect(route([[A, B], [B, C, D]])).toEqual([A, B, C, D])
+  })
+
+  test("continues a spent chain into the next one", () => {
+    expect(cascade({ chains: split, model: A })).toEqual({ model: B, reason: "exhausted" })
+    expect(cascade({ chains: split, model: B, switches: 1 })).toEqual({ model: C, reason: "exhausted" })
+    expect(cascade({ chains: split, model: C, switches: 2 })).toEqual({ model: D, reason: "exhausted" })
+    expect(cascade({ chains: split, model: D, switches: 3 })).toEqual({ model: E, reason: "exhausted" })
+    expect(cascade({ chains: split, model: E, switches: 4 })).toEqual({ model: F, reason: "exhausted" })
+    expect(cascade({ chains: split, model: F, switches: 5 })).toEqual({ model: G, reason: "exhausted" })
+    expect(cascade({ chains: split, model: G, switches: 6 })).toBeUndefined()
+  })
+
+  test("does not repeat a link the previous chain already ended on", () => {
+    const chains = [[A, B], [B, C]]
+    expect(cascade({ chains, model: A })).toEqual({ model: B, reason: "exhausted" })
+    expect(cascade({ chains, model: B, switches: 1 })).toEqual({ model: C, reason: "exhausted" })
+  })
+
+  test("applies the per-turn budget to the whole route", () => {
+    expect(cascade({ chains: split, model: A, switches: 5 })).toEqual({ model: B, reason: "exhausted" })
+    expect(cascade({ chains: split, model: A, switches: 6 })).toBeUndefined()
+  })
+
+  test("skips a cooling link across a chain boundary", () => {
+    const providers = new Map([["plan-c", 2_000]])
+    expect(cascade({ chains: split, model: B, switches: 1, providers })).toEqual({
+      model: D,
+      reason: "exhausted",
+    })
+  })
+
+  test("keeps each chain isolated when cascade is off", () => {
+    const isolated = { overrides: { cascade: false } }
+    expect(cascade({ chains: split, model: A, ...isolated })).toEqual({ model: B, reason: "exhausted" })
+    // B ends the first chain, so the second chain's links are not its fallback.
+    expect(cascade({ chains: split, model: B, switches: 1, ...isolated })).toBeUndefined()
+    expect(cascade({ chains: split, model: C, ...isolated })).toEqual({
+      model: D,
+      reason: "exhausted",
+    })
+    expect(cascade({ chains: split, model: E, ...isolated })).toEqual({
+      model: F,
+      reason: "exhausted",
+    })
+  })
+
+  test("still leaves models outside every chain alone", () => {
+    expect(cascade({ chains: split, model: OTHER })).toBeUndefined()
+  })
+})
+
 describe("state", () => {
   test("counts switches per session and cools providers and models separately", () => {
     const state = createState()
@@ -346,6 +436,28 @@ describe("setup", () => {
     expect(event.decision).toEqual({ retry: true, delay: 250 })
   })
 
+  test("carries a session from the last link of one chain into the next chain", async () => {
+    await configure({
+      chains: [
+        [refKey(MINIMAX), refKey(GLM)],
+        [refKey(DEEPSEEK), refKey(OTHER)],
+      ],
+    })
+    const { context, hooks, switches } = createContext({ models: [MINIMAX, GLM, DEEPSEEK, OTHER] })
+    await failover.setup(context)
+
+    const fail = (model) => {
+      const event = { sessionID: "ses_a", model, error: error("provider.quota"), attempt: 2, decision: { retry: false } }
+      return hooks.get("retry")(event).then(() => event)
+    }
+
+    // Each link fails over to the next one, and the chain boundary changes nothing.
+    for (const model of [MINIMAX, GLM, DEEPSEEK]) {
+      expect((await fail(model)).decision).toEqual({ retry: true, delay: 250 })
+    }
+    expect((await fail(OTHER)).decision).toEqual({ retry: false })
+    expect(switches.map((entry) => refKey(entry.model))).toEqual([refKey(GLM), refKey(DEEPSEEK), refKey(OTHER)])
+  })
 
   test("leaves the retry decision alone when the switch itself fails", async () => {
     await configure({ chains: [[refKey(MINIMAX), refKey(GLM), refKey(DEEPSEEK)]] })

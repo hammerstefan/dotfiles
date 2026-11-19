@@ -29,10 +29,12 @@ measurement. A step is measurable only when its message carries a
 the average.
 
 `model_failover.test.js` covers the retry hook of `plugins/model-failover.js`.
-The decision is a pure function of the failure, the chain, the model list, the
+The decision is a pure function of the failure, the route, the model list, the
 provider cooldowns and the session's switch budget; the hook wiring is checked
 through a stubbed plugin context that records `session.hook` registrations and
-`session.switchModel` calls. The chain file is read from
+`session.switchModel` calls. Chains cascade by default (`cascade: true`), so the
+route is the chains joined in config order and a spent chain continues into the
+next one; `cascade: false` keeps each chain isolated. The chain file is read from
 `OPENCODE_CONFIG_DIR`, so the tests point that at a temporary directory and
 never touch the installed configuration.
 

@@ -3,6 +3,8 @@
 // When a provider cannot serve a request, move the session to the next model
 // in a configured chain instead of stopping the turn. Built for coding-plan
 // quotas: minimax-coding-plan -> zai-coding-plan -> opencode-go deepseek flash.
+// Chains are listed in `chains` and, by default, continue into each other, so a
+// route may be written in groups: A->B, C->D, E->F->G.
 //
 // Why the `retry` hook and not `experimental.model.resolve`:
 // - `experimental.model.resolve` runs before every request and is the natural
@@ -47,7 +49,10 @@
 //   only the model that answered, leaving a lighter model on the same plan
 //   usable. A model with no cooldown entry is never assumed healthy without
 //   asking `ctx.model.list()`.
-// - A session may switch at most `chain.length - 1` times per turn. The budget
+// - Chains form one ordered route by default (`cascade: true`): `A->B`, `C->D`,
+//   `E->F->G` is tried as `A->B->C->D->E->F->G`, so a chain with no healthy link
+//   left continues into the next one. `cascade: false` keeps each chain isolated.
+// - A session may switch at most one step per link on its route. The budget
 //   resets on the next prompt, so a recovered plan is retried next turn.
 // - Nothing here can break the turn: every failure inside the plugin is caught
 //   and logged, and the failure is rethrown only to the caller's own effect.
@@ -71,6 +76,7 @@ const LONG_RETRY_AFTER_MS = 60_000
 
 const DEFAULTS = {
   enabled: true,
+  cascade: true,
   chains: [],
   cooldownMinutes: 30,
   rateLimitAttempts: 4,
@@ -151,6 +157,7 @@ const normalizeConfig = (raw) => {
     typeof candidate === "number" && Number.isFinite(candidate) && candidate >= 0 ? candidate : fallback
   return {
     enabled: value.enabled !== false,
+    cascade: value.cascade !== false,
     chains,
     cooldownMinutes: finite(value.cooldownMinutes, DEFAULTS.cooldownMinutes),
     rateLimitAttempts: finite(value.rateLimitAttempts, DEFAULTS.rateLimitAttempts),
@@ -186,6 +193,21 @@ const classify = ({ error, attempt, rateLimitAttempts }) => {
 }
 
 /**
+ * Flatten every chain into one forward route, in config order. A model repeated
+ * across chains keeps its first position, so a chain that names the link the
+ * previous one ended on continues from there instead of looping back.
+ */
+const route = (chains) => {
+  const ordered = []
+  for (const chain of chains) {
+    for (const ref of chain) {
+      if (!ordered.some((seen) => sameRef(seen, ref))) ordered.push(ref)
+    }
+  }
+  return ordered
+}
+
+/**
  * Pick the next model for a failed one, or return undefined to leave the
  * built-in retry decision alone.
  *
@@ -200,14 +222,18 @@ const classify = ({ error, attempt, rateLimitAttempts }) => {
  */
 const plan = ({ config, model, verdict, available, cooling, switches, now }) => {
   if (!config.enabled) return undefined
-  const chain = config.chains.find((candidate) => candidate.some((ref) => sameRef(ref, model)))
-  if (!chain) return undefined
-  const index = chain.findIndex((ref) => sameRef(ref, model))
-  // The last model in a chain has nowhere to go, and the turn may not exceed
-  // one switch per remaining link.
-  if (index < 0 || index >= chain.length - 1) return undefined
-  if (switches >= chain.length - 1) return undefined
-  const candidate = chain
+  // With cascade on, the chains are one route and a spent chain continues into
+  // the next; with it off, a model is served only by the chain that lists it.
+  const path = config.cascade
+    ? route(config.chains)
+    : config.chains.find((candidate) => candidate.some((ref) => sameRef(ref, model)))
+  if (!path) return undefined
+  const index = path.findIndex((ref) => sameRef(ref, model))
+  // The last link on the route has nowhere to go, and the turn may not exceed
+  // one switch per link on the route.
+  if (index < 0 || index >= path.length - 1) return undefined
+  if (switches >= path.length - 1) return undefined
+  const candidate = path
     .slice(index + 1)
     .find(
       (ref) =>
@@ -266,7 +292,10 @@ export default {
     // files change, so this is the cheap way to confirm what is armed.
     await log({
       action: "ready",
+      cascade: config.cascade,
       chains: config.chains.map((chain) => chain.map(refKey).join(" -> ")),
+      // The order the plugin will actually follow when chains cascade.
+      route: config.cascade ? route(config.chains).map(refKey).join(" -> ") : undefined,
       cooldownMinutes: config.cooldownMinutes,
       rateLimitAttempts: config.rateLimitAttempts,
     })
@@ -354,6 +383,7 @@ export const internals = {
   parseRef,
   refKey,
   classify,
+  route,
   plan,
   createState,
   createLog,
