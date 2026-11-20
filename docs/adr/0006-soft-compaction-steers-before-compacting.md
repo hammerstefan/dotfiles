@@ -21,7 +21,9 @@ threshold is an absolute token count rather than a share of the model window.
 ## Consequences
 
 The mode waits without a timeout. A session that never stops stays in
-`wrapping-up`, and the native automatic compaction is what ends it.
+`wrapping-up`, and the native automatic compaction is what ends it. ADR 0007
+replaces this wait with the checkpoint of the agent, because a session that
+another plugin keeps busy never goes idle.
 
 A compaction leaves the context at the size of the checkpoint and the kept
 tail, so the mode measures that size as the floor the session starts from and

@@ -20,9 +20,12 @@
 //    what it is doing, record its state and next steps with the
 //    `soft_compact_checkpoint` tool, and stop. The agent may take a few more
 //    steps when that completes an operation cleanly.
-// 3. `compacting`. The plugin requests the compaction. The `compaction` hook
-//    adds the focus instruction to the summary request, so the summary keeps
-//    the work that is left.
+// 3. `compacting`. The plugin requests the compaction when the agent stops.
+//    The agent stops in one of two ways: the session goes idle, or the agent
+//    records its checkpoint. The checkpoint is the better signal, because a
+//    session that another plugin keeps busy never goes idle. The
+//    `compaction` hook adds the focus instruction to the summary request, so
+//    the summary keeps the work that is left.
 // 4. `armed` again. After the compaction the plugin sends a continue prompt, so
 //    the agent resumes from the checkpoint, and it keeps watching.
 //
@@ -51,6 +54,11 @@
 // compaction, or its compaction is over, and a session that was wrapping up
 // waits for its agent to stop.
 //
+// The server loads this plugin once per app, so several instances share the
+// storage, the events and the sessions. A lock directory in the state
+// directory keeps one flow at a time per session across all of them, so a
+// session gets one wrap-up prompt and one compaction request.
+//
 // Verified against OpenCode 2.3.2:
 // - `ctx.command.transform` adds the command; the TUI and the app route
 //   `/soft-compact <text>` to `session.command` with the text in
@@ -58,7 +66,8 @@
 // - `ctx.session.prompt({ sessionID, text, delivery })` admits a message.
 //   `delivery: "steer"` delivers it into the running turn.
 // - `ctx.session.compact({ sessionID })` admits the same compaction item as
-//   `/compact`.
+//   `/compact`. The compaction runs at the next step boundary, so the plugin
+//   can request it while the session is busy.
 // - `ctx.session.hook("compaction", event)` receives the outgoing summary
 //   request with a mutable `system` array; OpenCode appends its summary prompt
 //   after the hook runs.
@@ -79,9 +88,10 @@
 // Native provider compaction also runs the hook, but the provider chooses the
 // replacement window, so the instruction is advisory there.
 
-import { appendFile, mkdir, readFile } from "node:fs/promises"
+import { appendFile, mkdir, readFile, rm, stat } from "node:fs/promises"
 import { homedir } from "node:os"
 import { dirname, join } from "node:path"
+import { setTimeout as delay } from "node:timers/promises"
 
 const CONFIG_FILENAME = "soft-compact.json"
 const LOG_FILENAME = "soft-compact.log"
@@ -122,6 +132,13 @@ const DEFAULTS = {
   focus: DEFAULT_FOCUS,
 }
 
+/** How long a waiter waits between two tries for the lock of a session. */
+const LOCK_WAIT_MS = 25
+/** How long a waiter waits for the lock of a session before it gives up. */
+const LOCK_TIMEOUT_MS = 30_000
+/** How old a lock has to be before another instance takes it over. */
+const LOCK_STALE_MS = 30_000
+
 const isRecord = (value) => typeof value === "object" && value !== null
 
 /** Unwrap a plugin-context payload that may or may not carry a `data` envelope. */
@@ -139,6 +156,53 @@ const createLog = (path = join(stateDirectory(), LOG_FILENAME)) => async (record
     await appendFile(path, `${JSON.stringify({ time: new Date().toISOString(), ...record })}\n`, "utf8")
   } catch {
     // A missing state directory must not affect a turn.
+  }
+}
+
+/** The lock directory of a session, in the state directory. */
+const lockDirectory = (sessionID) =>
+  join(stateDirectory(), "locks", `soft-compact-${sessionID}.lock`)
+
+/** The age of a lock in milliseconds, or undefined when the lock is gone. */
+const lockAge = async (path) => {
+  try {
+    const info = await stat(path)
+    return Date.now() - info.mtimeMs
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Run the work of a session while no other plugin instance works on it.
+ *
+ * The lock is a directory, because `mkdir` is the only atomic operation the
+ * file system offers: it fails when the directory exists. A lock that is older
+ * than `LOCK_STALE_MS` belongs to an instance that died, and is taken over.
+ */
+const withLock = async (sessionID, work) => {
+  const path = lockDirectory(sessionID)
+  await mkdir(dirname(path), { recursive: true })
+  const deadline = Date.now() + LOCK_TIMEOUT_MS
+  for (;;) {
+    try {
+      await mkdir(path)
+      break
+    } catch (error) {
+      if (error?.code !== "EEXIST") throw error
+      const age = await lockAge(path)
+      if (age !== undefined && age > LOCK_STALE_MS) {
+        await rm(path, { recursive: true, force: true })
+        continue
+      }
+      if (Date.now() >= deadline) throw new Error(`the lock of session ${sessionID} is held`)
+      await delay(LOCK_WAIT_MS)
+    }
+  }
+  try {
+    return await work()
+  } finally {
+    await rm(path, { recursive: true, force: true }).catch(() => {})
   }
 }
 
@@ -250,20 +314,27 @@ export default {
     const config = await loadConfig()
     const log = createLog()
 
-    /** The focus instruction waiting for the summary request of each session. */
-    const pending = new Map()
-    /** One flow at a time per session. */
-    const locks = new Map()
-
     const readState = async () => (await ctx.storage.get(STATE_KEY)) ?? {}
     const writeState = (state) => ctx.storage.set(STATE_KEY, state)
 
-    /** Runs the work of a session after the work that is already running for it. */
+    /**
+     * Runs the work of a session after the work that is already running for it.
+     *
+     * The lock is a directory in the state directory, so it also covers the
+     * other instances of the plugin that the server loaded for the same
+     * storage.
+     */
     const withSession = async (sessionID, work) => {
-      const previous = locks.get(sessionID) ?? Promise.resolve()
-      const current = previous.then(() => work())
-      locks.set(sessionID, current.catch(() => {}))
-      return current
+      try {
+        return await withLock(sessionID, work)
+      } catch (error) {
+        await log({
+          sessionID,
+          level: "error",
+          message: `the work of the session did not run: ${describeError(error)}`,
+        })
+        return undefined
+      }
     }
 
     /** Reads the state of a session, applies a patch, and writes it back. */
@@ -337,6 +408,15 @@ export default {
       }
     }
 
+    /** Remove the checkpoint of a session, and report why it did not go. */
+    const removeCheckpoint = async (sessionID) => {
+      try {
+        await ctx.session.instructions.entry.remove({ sessionID, key: CHECKPOINT_KEY })
+      } catch (error) {
+        await log({ sessionID, level: "error", message: `the checkpoint was not removed: ${describeError(error)}` })
+      }
+    }
+
     const armSession = async (sessionID, { threshold, instruction }) => {
       const state = await readState()
       const entry = {
@@ -349,6 +429,9 @@ export default {
       else if (config.instruction) entry.instruction = config.instruction
       state[sessionID] = entry
       await writeState(state)
+      // A checkpoint of an earlier round must not be read as the checkpoint of
+      // this one.
+      await removeCheckpoint(sessionID)
       await announce(sessionID, {
         status: "armed",
         message: `Soft compaction armed at ${entry.threshold} tokens.`,
@@ -359,12 +442,7 @@ export default {
       const state = await readState()
       if (state[sessionID]) delete state[sessionID]
       await writeState(state)
-      pending.delete(sessionID)
-      try {
-        await ctx.session.instructions.entry.remove({ sessionID, key: CHECKPOINT_KEY })
-      } catch (error) {
-        await log({ sessionID, level: "error", message: `the checkpoint was not removed: ${describeError(error)}` })
-      }
+      await removeCheckpoint(sessionID)
       await announce(sessionID, { status: "off", message: "Soft compaction disarmed." })
     }
 
@@ -381,7 +459,12 @@ export default {
 
     /** Ask the agent to wrap up, and wait for it to stop. */
     const startWrapUp = async (sessionID, entry, tokens) => {
-      await patchState(sessionID, { phase: "wrapping-up", contextTokens: tokens, agentWorked: false })
+      await patchState(sessionID, {
+        phase: "wrapping-up",
+        contextTokens: tokens,
+        agentWorked: false,
+        checkpointAt: undefined,
+      })
       await announce(sessionID, {
         status: "wrapping-up",
         message: `Soft compaction: the context is at ${tokens} tokens. Wrapping up.`,
@@ -402,15 +485,21 @@ export default {
       }
     }
 
-    /** Request the compaction, with the focus instruction waiting for it. */
+    /**
+     * Request the compaction, with the focus instruction waiting for it.
+     *
+     * The focus instruction lives in the shared state, so every instance of the
+     * plugin can find it and only one of them gives it to the summary request.
+     */
     const startCompaction = async (sessionID) => {
-      pending.set(sessionID, focusGuidance(config.focus))
-      await patchState(sessionID, { phase: "compacting" })
+      const state = await readState()
+      const entry = state[sessionID]
+      if (!entry || entry.phase !== "wrapping-up") return
+      await patchState(sessionID, { phase: "compacting", focusPending: true })
       try {
         await ctx.session.compact({ sessionID })
       } catch (error) {
-        pending.delete(sessionID)
-        await patchState(sessionID, { phase: "armed" })
+        await patchState(sessionID, { phase: "armed", focusPending: false })
         await log({ sessionID, level: "error", message: `the compaction was not admitted: ${describeError(error)}` })
         return
       }
@@ -435,7 +524,6 @@ export default {
 
     /** The compaction is over. Let the agent continue from the checkpoint. */
     const onCompactionEndedSession = async (sessionID) => {
-      pending.delete(sessionID)
       const state = await readState()
       const entry = state[sessionID]
       if (!entry) return
@@ -445,7 +533,12 @@ export default {
         await patchState(sessionID, { phase: "armed", floorPending: true })
         return
       }
-      await patchState(sessionID, { phase: "armed", contextTokens: undefined, floorPending: true })
+      await patchState(sessionID, {
+        phase: "armed",
+        contextTokens: undefined,
+        focusPending: false,
+        floorPending: true,
+      })
       await announce(sessionID, {
         status: "armed",
         message: "Soft compaction: the session is compacted. Continuing.",
@@ -458,11 +551,10 @@ export default {
     }
 
     const onCompactionFailedSession = async (sessionID) => {
-      pending.delete(sessionID)
       const state = await readState()
       const entry = state[sessionID]
       if (!entry) return
-      await patchState(sessionID, { phase: "armed", contextTokens: undefined })
+      await patchState(sessionID, { phase: "armed", contextTokens: undefined, focusPending: false })
       await announce(sessionID, {
         status: "armed",
         variant: "error",
@@ -496,6 +588,7 @@ export default {
     const report = (sessionID) => withSession(sessionID, () => reportSession(sessionID))
     const trigger = (sessionID) => withSession(sessionID, () => triggerSession(sessionID))
     const onIdle = (sessionID) => withSession(sessionID, () => onIdleSession(sessionID))
+    const compact = (sessionID) => withSession(sessionID, () => startCompaction(sessionID))
     const onCompactionEnded = (sessionID) => withSession(sessionID, () => onCompactionEndedSession(sessionID))
     const onCompactionFailed = (sessionID) => withSession(sessionID, () => onCompactionFailedSession(sessionID))
 
@@ -528,6 +621,59 @@ export default {
       })
     })
 
+    /**
+     * Store the checkpoint of a session, and ask for the compaction.
+     *
+     * The checkpoint is the agent's own signal that it stopped, so the
+     * compaction does not wait for the session to go idle. A session that
+     * another plugin keeps busy never goes idle, and the compaction would
+     * never come.
+     */
+    const recordCheckpoint = async (sessionID, value) => {
+      const state = await readState()
+      if (!state[sessionID]) {
+        return "The soft compaction mode is not armed for this session, so there is nothing to record."
+      }
+      try {
+        await ctx.session.instructions.entry.put({
+          sessionID,
+          key: CHECKPOINT_KEY,
+          value,
+        })
+      } catch (error) {
+        await log({
+          sessionID,
+          level: "error",
+          message: `the checkpoint was not stored: ${describeError(error)}`,
+        })
+        return `The checkpoint was not stored: ${describeError(error)}`
+      }
+      // The session may have been disarmed while the write was running.
+      const after = await readState()
+      if (!after[sessionID]) {
+        await removeCheckpoint(sessionID)
+        return "The soft compaction mode was disarmed, so the checkpoint was dropped."
+      }
+      await patchState(sessionID, { checkpointAt: Date.now() })
+      await startCompaction(sessionID)
+      return "The checkpoint is recorded. The session is compacted now."
+    }
+
+    /**
+     * Take the focus instruction of a compaction.
+     *
+     * The instruction lives in the shared state, so every instance of the
+     * plugin finds it, and only the first one to come gives it to the summary
+     * request.
+     */
+    const claimFocus = async (sessionID) => {
+      const state = await readState()
+      const entry = state[sessionID]
+      if (!entry?.focusPending) return undefined
+      await patchState(sessionID, { focusPending: false })
+      return focusGuidance(config.focus)
+    }
+
     await ctx.tool.transform((editor) => {
       editor.add({
         name: "soft_compact_checkpoint",
@@ -548,43 +694,23 @@ export default {
         // Mode instead of wrapping it in an object.
         freeform: { type: "text" },
         async execute(input, context) {
-          const state = await readState()
-          if (!state[context.sessionID]) {
-            return { content: "The soft compaction mode is not armed for this session, so there is nothing to record." }
-          }
+          const sessionID = context.sessionID
           // Code Mode hands the text over as it stands; a normal call wraps it.
           const text = typeof input === "string" ? input : String(input.checkpoint ?? "")
           const value = text.trim()
           if (!value) {
             return { content: "The checkpoint was empty. Write the state and the next steps before stopping." }
           }
-          try {
-            await ctx.session.instructions.entry.put({
-              sessionID: context.sessionID,
-              key: CHECKPOINT_KEY,
-              value,
-            })
-          } catch (error) {
-            await log({
-              sessionID: context.sessionID,
-              level: "error",
-              message: `the checkpoint was not stored: ${describeError(error)}`,
-            })
-            return { content: `The checkpoint was not stored: ${describeError(error)}` }
-          }
-          // The session may have been disarmed while the write was running.
-          const after = await readState()
-          if (!after[context.sessionID]) {
-            await ctx.session.instructions.entry.remove({ sessionID: context.sessionID, key: CHECKPOINT_KEY })
-            return { content: "The soft compaction mode was disarmed, so the checkpoint was dropped." }
-          }
-          return { content: "The checkpoint is recorded. The session can be compacted now." }
+          const content = await withSession(sessionID, () => recordCheckpoint(sessionID, value))
+          return { content: content ?? "The checkpoint was not recorded." }
         },
       })
     })
 
-    await ctx.session.hook("compaction", (event) => {
-      const guidance = pending.get(event.sessionID)
+    await ctx.session.hook("compaction", async (event) => {
+      const sessionID = event.sessionID
+      if (!sessionID) return
+      const guidance = await withSession(sessionID, () => claimFocus(sessionID))
       if (!guidance) return
       event.system.push({ type: "text", text: guidance })
     })
@@ -605,24 +731,27 @@ export default {
         if (!sessionID) continue
         try {
           if (event.type === "session.step.ended") {
-            const entry = (await readState())[sessionID]
-            const wasWrapping = entry?.phase === "wrapping-up"
-            await trigger(sessionID)
-            if (wasWrapping) {
-              // The agent did a step of its own after the wrap-up prompt, so the
-              // next idle event is the one that follows it.
-              await patchState(sessionID, { agentWorked: true })
-            }
+            await withSession(sessionID, async () => {
+              const entry = (await readState())[sessionID]
+              const wasWrapping = entry?.phase === "wrapping-up"
+              await triggerSession(sessionID)
+              if (wasWrapping) {
+                // The agent did a step of its own after the wrap-up prompt, so the
+                // next idle event is the one that follows it.
+                await patchState(sessionID, { agentWorked: true })
+              }
+            })
           } else if (event.type === "session.idle") await onIdle(sessionID)
           else if (event.type === "session.compaction.ended") await onCompactionEnded(sessionID)
           else if (event.type === "session.compaction.failed") await onCompactionFailed(sessionID)
           else if (event.type === "session.deleted") {
-            const state = await readState()
-            if (state[sessionID]) {
-              delete state[sessionID]
-              await writeState(state)
-            }
-            pending.delete(sessionID)
+            await withSession(sessionID, async () => {
+              const state = await readState()
+              if (state[sessionID]) {
+                delete state[sessionID]
+                await writeState(state)
+              }
+            })
           }
         } catch (error) {
           await log({ sessionID, level: "error", message: `${event.type} failed: ${describeError(error)}` })
@@ -647,7 +776,14 @@ export default {
           else await onCompactionFailed(sessionID)
           continue
         }
-        if (entry.phase === "wrapping-up" && entry.agentWorked && (await isIdle(sessionID))) {
+        if (entry.phase !== "wrapping-up") continue
+        if (entry.checkpointAt) {
+          // The agent recorded its state, but the plugin went away before the
+          // compaction started.
+          await compact(sessionID)
+          continue
+        }
+        if (entry.agentWorked && (await isIdle(sessionID))) {
           await onIdle(sessionID)
         }
       }
@@ -661,7 +797,13 @@ export default {
             await trigger(sessionID)
             continue
           }
-          if (entry.phase === "wrapping-up" && entry.agentWorked && (await isIdle(sessionID))) {
+          if (entry.phase !== "wrapping-up") continue
+          if (entry.checkpointAt) {
+            // The agent recorded its state, but the compaction did not start.
+            await compact(sessionID)
+            continue
+          }
+          if (entry.agentWorked && (await isIdle(sessionID))) {
             await onIdle(sessionID)
           }
         }
@@ -687,9 +829,11 @@ export const internals = {
   describeError,
   focusGuidance,
   loadConfig,
+  lockDirectory,
   normalizeConfig,
   parseCommand,
   parseThreshold,
+  withLock,
   wrapUpInstruction,
   DEFAULT_FOCUS,
   DEFAULT_INSTRUCTION,

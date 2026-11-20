@@ -32,7 +32,9 @@ _Avoid_: checkpoint, pause, shutdown
 
 **Checkpoint**:
 The record the agent keeps of its state and next steps. It is stored as a
-session instruction, so it outlives a compaction.
+session instruction, so it outlives a compaction. The plugin compacts the
+session when the checkpoint is recorded, because a session that another plugin
+keeps busy never goes idle.
 _Avoid_: summary, handoff, notes
 
 **Focused compaction**:

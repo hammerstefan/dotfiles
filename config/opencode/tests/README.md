@@ -50,7 +50,19 @@ after the last completed compaction. The command line is `/soft-compact
 the mode waits for the context to grow past that floor before it compacts
 again. The plugin reads `soft-compact.json` from `OPENCODE_CONFIG_DIR`, so the
 tests point that at a temporary directory and never touch the installed
-configuration.
+configuration. The tests point `XDG_STATE_HOME` at the same directory, so the
+lock of a session and the log of the plugin stay there too.
+
+The plugin compacts the session when the agent records its checkpoint, not when
+the session goes idle. A session that another plugin keeps busy, such as a
+session with a running goal, never goes idle, and the compaction would never
+come. The idle event stays the second signal, for a session that stops without
+a checkpoint.
+
+The server loads the plugin once per app, so several instances share the
+storage, the events and the sessions. The tests cover that: two instances that
+share one storage admit one wrap-up prompt and one compaction, because a lock
+directory in the state directory keeps one flow at a time per session.
 
 The same file covers the label and the tone of the indicator that the TUI part
 shows in the prompt footer. The rule lives in `plugins/soft-compact/indicator.js`,

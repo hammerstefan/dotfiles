@@ -15,7 +15,7 @@ import { join } from "node:path"
 import plugin, { internals } from "../plugins/soft-compact/index.js"
 import { formatTokens, indicator } from "../plugins/soft-compact/indicator.js"
 
-const { contextTokens, normalizeConfig, parseCommand, parseThreshold } = internals
+const { contextTokens, lockDirectory, normalizeConfig, parseCommand, parseThreshold, withLock } = internals
 
 const SESSION = "ses_soft_compact"
 
@@ -74,7 +74,7 @@ const createEventStream = () => {
 }
 
 /** A plugin context shaped like the one OpenCode hands a V2 promise plugin. */
-const createContext = ({ messages = [], stored } = {}) => {
+const createContext = ({ messages = [], stored, storage: shared } = {}) => {
   const calls = {
     prompts: [],
     compactions: [],
@@ -85,7 +85,7 @@ const createContext = ({ messages = [], stored } = {}) => {
     entries: [],
     removed: [],
   }
-  const storage = new Map(stored ? Object.entries(stored) : [])
+  const storage = shared ?? new Map(stored ? Object.entries(stored) : [])
   const events = createEventStream()
   const state = { messages, failContext: false, session: { id: SESSION, time: { idle: 2, busy: 1 }, metadata: {} } }
   const context = {
@@ -231,6 +231,7 @@ describe("the sequence", () => {
   beforeEach(async () => {
     directory = await mkdtemp(join(tmpdir(), "opencode-soft-compact-"))
     process.env.OPENCODE_CONFIG_DIR = directory
+    process.env.XDG_STATE_HOME = directory
     harness = createContext()
     cleanup = await plugin.setup(harness.context)
   })
@@ -238,6 +239,7 @@ describe("the sequence", () => {
   afterEach(async () => {
     cleanup?.()
     delete process.env.OPENCODE_CONFIG_DIR
+    delete process.env.XDG_STATE_HOME
     await rm(directory, { recursive: true, force: true })
   })
 
@@ -289,6 +291,34 @@ describe("the sequence", () => {
     await agentTurn(harness)
     expect(harness.calls.compactions).toEqual([{ sessionID: SESSION }])
     expect(harness.storage.get("sessions")[SESSION].phase).toBe("compacting")
+  })
+
+  test("the session is compacted when the checkpoint is recorded", async () => {
+    await runCommand(harness.calls, "300k")
+    harness.state.messages = [assistant({ input: 310_000 })]
+    harness.events.push({ type: "session.step.ended", data: { sessionID: SESSION } })
+    await flush()
+    expect(harness.calls.compactions).toHaveLength(0)
+
+    // The agent records its state and stops. The session never goes idle,
+    // because another plugin keeps it busy.
+    const tool = harness.calls.tools.get("soft_compact_checkpoint")
+    const result = await tool.execute(
+      { checkpoint: "## State\nWritten\n\n## Next Steps\nTested" },
+      { sessionID: SESSION },
+    )
+    expect(result.content).toContain("recorded")
+    expect(harness.calls.compactions).toEqual([{ sessionID: SESSION }])
+    expect(harness.storage.get("sessions")[SESSION].phase).toBe("compacting")
+  })
+
+  test("a checkpoint outside a wrap-up records the state and compacts nothing", async () => {
+    await runCommand(harness.calls, "300k")
+    const tool = harness.calls.tools.get("soft_compact_checkpoint")
+    await tool.execute({ checkpoint: "## State\nWritten" }, { sessionID: SESSION })
+    expect(harness.calls.entries).toHaveLength(1)
+    expect(harness.calls.compactions).toHaveLength(0)
+    expect(harness.storage.get("sessions")[SESSION].phase).toBe("armed")
   })
 
   test("the summary request is told what to keep", async () => {
@@ -374,11 +404,13 @@ describe("the recovery", () => {
   beforeEach(async () => {
     directory = await mkdtemp(join(tmpdir(), "opencode-soft-compact-"))
     process.env.OPENCODE_CONFIG_DIR = directory
+    process.env.XDG_STATE_HOME = directory
   })
 
   afterEach(async () => {
     cleanup?.()
     delete process.env.OPENCODE_CONFIG_DIR
+    delete process.env.XDG_STATE_HOME
     await rm(directory, { recursive: true, force: true })
   })
 
@@ -391,6 +423,49 @@ describe("the recovery", () => {
     harness.events.push({ type: "session.step.ended", data: { sessionID: SESSION } })
     await flush()
     expect(harness.calls.prompts).toHaveLength(1)
+  })
+
+  test("two instances that share the storage admit one wrap-up prompt", async () => {
+    const storage = new Map()
+    const first = createContext({ storage })
+    const second = createContext({ storage })
+    const firstCleanup = await plugin.setup(first.context)
+    const secondCleanup = await plugin.setup(second.context)
+    cleanup = () => {
+      firstCleanup?.()
+      secondCleanup?.()
+    }
+    await runCommand(first.calls, "300k")
+    first.state.messages = [assistant({ input: 310_000 })]
+    second.state.messages = [assistant({ input: 310_000 })]
+    first.events.push({ type: "session.step.ended", data: { sessionID: SESSION } })
+    second.events.push({ type: "session.step.ended", data: { sessionID: SESSION } })
+    await flush()
+    const prompts = first.calls.prompts.length + second.calls.prompts.length
+    expect(prompts).toBe(1)
+  })
+
+  test("two instances that share the storage admit one compaction", async () => {
+    const storage = new Map()
+    const first = createContext({ storage })
+    const second = createContext({ storage })
+    const firstCleanup = await plugin.setup(first.context)
+    const secondCleanup = await plugin.setup(second.context)
+    cleanup = () => {
+      firstCleanup?.()
+      secondCleanup?.()
+    }
+    await runCommand(first.calls, "300k")
+    first.state.messages = [assistant({ input: 310_000 })]
+    second.state.messages = [assistant({ input: 310_000 })]
+    first.events.push({ type: "session.step.ended", data: { sessionID: SESSION } })
+    second.events.push({ type: "session.step.ended", data: { sessionID: SESSION } })
+    await flush()
+    const tool = first.calls.tools.get("soft_compact_checkpoint")
+    await tool.execute({ checkpoint: "## State\nWritten" }, { sessionID: SESSION })
+    await flush()
+    const compactions = first.calls.compactions.length + second.calls.compactions.length
+    expect(compactions).toBe(1)
   })
 
   test("a context that cannot be read does not become a floor", async () => {
@@ -426,6 +501,41 @@ describe("the recovery", () => {
     expect(harness.calls.prompts).toHaveLength(1)
     expect(harness.calls.prompts[0].text).toContain("Continue the remaining work")
     expect(harness.storage.get("sessions")[SESSION].phase).toBe("armed")
+  })
+})
+
+describe("the lock of a session", () => {
+  let directory
+
+  beforeEach(async () => {
+    directory = await mkdtemp(join(tmpdir(), "opencode-soft-compact-"))
+    process.env.XDG_STATE_HOME = directory
+  })
+
+  afterEach(async () => {
+    delete process.env.XDG_STATE_HOME
+    await rm(directory, { recursive: true, force: true })
+  })
+
+  test("two instances do not work on a session at the same time", async () => {
+    const order = []
+    const first = withLock(SESSION, async () => {
+      order.push("first in")
+      await new Promise((resolve) => setTimeout(resolve, 50))
+      order.push("first out")
+    })
+    const second = withLock(SESSION, async () => {
+      order.push("second in")
+      order.push("second out")
+    })
+    await Promise.all([first, second])
+    expect(order).toEqual(["first in", "first out", "second in", "second out"])
+  })
+
+  test("the lock of a session is a directory in the state directory", async () => {
+    expect(lockDirectory(SESSION)).toBe(
+      join(directory, "opencode", "locks", `soft-compact-${SESSION}.lock`),
+    )
   })
 })
 
@@ -476,11 +586,13 @@ describe("the configuration file", () => {
   beforeEach(async () => {
     directory = await mkdtemp(join(tmpdir(), "opencode-soft-compact-"))
     process.env.OPENCODE_CONFIG_DIR = directory
+    process.env.XDG_STATE_HOME = directory
   })
 
   afterEach(async () => {
     cleanup?.()
     delete process.env.OPENCODE_CONFIG_DIR
+    delete process.env.XDG_STATE_HOME
     await rm(directory, { recursive: true, force: true })
   })
 
@@ -508,6 +620,7 @@ describe("the checkpoint tool", () => {
   beforeEach(async () => {
     directory = await mkdtemp(join(tmpdir(), "opencode-soft-compact-"))
     process.env.OPENCODE_CONFIG_DIR = directory
+    process.env.XDG_STATE_HOME = directory
     harness = createContext()
     cleanup = await plugin.setup(harness.context)
   })
@@ -515,6 +628,7 @@ describe("the checkpoint tool", () => {
   afterEach(async () => {
     cleanup?.()
     delete process.env.OPENCODE_CONFIG_DIR
+    delete process.env.XDG_STATE_HOME
     await rm(directory, { recursive: true, force: true })
   })
 
