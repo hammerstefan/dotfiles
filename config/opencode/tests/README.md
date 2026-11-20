@@ -38,6 +38,25 @@ next one; `cascade: false` keeps each chain isolated. The chain file is read fro
 `OPENCODE_CONFIG_DIR`, so the tests point that at a temporary directory and
 never touch the installed configuration.
 
+`soft_compact.test.js` covers the server plugin in `plugins/soft-compact/`. The
+plugin arms a session for a soft compaction: it measures the context, asks the
+agent to wrap up, waits for it to stop, compacts the session with the summary
+focused on the remaining work, and lets the agent continue. The tests stub the
+plugin context and drive the server events the plugin listens for. The context
+usage is measured like the TUI measures it, from the last assistant message
+after the last completed compaction. The command line is `/soft-compact
+[threshold|off|status] [instruction]`, and the threshold accepts `400k` and
+`1m`. After a compaction the size it leaves is the floor of the session, and
+the mode waits for the context to grow past that floor before it compacts
+again. The plugin reads `soft-compact.json` from `OPENCODE_CONFIG_DIR`, so the
+tests point that at a temporary directory and never touch the installed
+configuration.
+
+The same file covers the label and the tone of the indicator that the TUI part
+shows in the prompt footer. The rule lives in `plugins/soft-compact/indicator.js`,
+because the footer part is TypeScript with JSX and the tests run on plain
+JavaScript.
+
 `new_prompt.test.js` covers the `/new-prompt` TUI plugin in `new-prompt/tui.js`.
 The plugin registers a slash command that keeps the text typed after it,
 creates a session, runs the named command in that session, and focuses the
